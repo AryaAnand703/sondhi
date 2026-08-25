@@ -5,7 +5,16 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
-$app = Application::configure(basePath: dirname(__DIR__))
+// Prepare writable /tmp/storage directory structure for Vercel
+if (!is_dir('/tmp/storage')) {
+    @mkdir('/tmp/storage/framework/views', 0755, true);
+    @mkdir('/tmp/storage/framework/cache/data', 0755, true);
+    @mkdir('/tmp/storage/framework/sessions', 0755, true);
+    @mkdir('/tmp/storage/logs', 0755, true);
+}
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->useStoragePath('/tmp/storage')
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
@@ -19,10 +28,3 @@ $app = Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();
-
-// Direct Laravel storage path to /tmp for Vercel read-only serverless execution
-if (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || getenv('VERCEL') || is_dir('/tmp')) {
-    $app->useStoragePath('/tmp/storage');
-}
-
-return $app;
