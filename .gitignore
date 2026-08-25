@@ -6,7 +6,6 @@
 .env.*.local
 .env.production
 .phpunit.cache
-composer.lock
 
 *.pyc
 *__pycache__*
