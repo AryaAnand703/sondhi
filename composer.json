@@ -6,26 +6,9 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
-        "laravel/framework": "^13.0",
-        "laravel/tinker": "^3.0"
-    },
-    "conflict": {
-        "symfony/console": ">=8.0",
-        "symfony/css-selector": ">=8.0",
-        "symfony/error-handler": ">=8.0",
-        "symfony/event-dispatcher": ">=8.0",
-        "symfony/finder": ">=8.0",
-        "symfony/http-foundation": ">=8.0",
-        "symfony/http-kernel": ">=8.0",
-        "symfony/mailer": ">=8.0",
-        "symfony/mime": ">=8.0",
-        "symfony/process": ">=8.0",
-        "symfony/routing": ">=8.0",
-        "symfony/string": ">=8.0",
-        "symfony/translation": ">=8.0",
-        "symfony/uid": ">=8.0",
-        "symfony/var-dumper": ">=8.0"
+        "php": "^8.2",
+        "laravel/framework": "^11.0",
+        "laravel/tinker": "^2.9"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -47,39 +30,9 @@
         }
     },
     "scripts": {
-        "setup": [
-            "composer install",
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
-            "npm install --ignore-scripts",
-            "npm run build"
-        ],
-        "dev": [
-            "Composer\\Config::disableProcessTimeout",
-            "@php artisan dev"
-        ],
-        "test": [
-            "@php artisan config:clear --ansi @no_additional_args",
-            "@php artisan test"
-        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
-        ],
-        "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
-        ],
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
-        ],
-        "pre-package-uninstall": [
-            "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ]
     },
     "extra": {
@@ -89,7 +42,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.3.0"
+            "php": "8.2.0"
         },
         "optimize-autoloader": true,
         "preferred-install": "dist",
