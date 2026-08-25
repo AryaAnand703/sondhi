@@ -4,3 +4,4 @@
 .git
 .phpunit.result.cache
 *.sqlite3
+composer.lock
