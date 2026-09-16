@@ -1,8 +1,8 @@
 const products = [
     { id: 1, name: 'Lavender & Amber', category: 'Floral', fragrance: 'Lavender, amber, cedar', price: 899, rating: 4.9, image: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=800&q=85' },
-    { id: 2, name: 'Rose Petal', category: 'Floral', fragrance: 'Damask rose, musk', price: 849, rating: 4.8, image: 'https://images.unsplash.com/photo-1602607207252-4c2b2f07a5d3?auto=format&fit=crop&w=800&q=85' },
-    { id: 3, name: 'Vanilla Cloud', category: 'Warm', fragrance: 'Vanilla, tonka, sandalwood', price: 799, rating: 4.9, image: 'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=800&q=85' },
-    { id: 4, name: 'Premium Oud', category: 'Woody', fragrance: 'Oud, saffron, dark wood', price: 1299, rating: 5, image: 'https://images.unsplash.com/photo-1608181831718-c9e7d8a2a3a5?auto=format&fit=crop&w=800&q=85' },
+    { id: 2, name: 'Rose Noir', category: 'Floral', fragrance: 'Damask rose, musk', price: 849, rating: 4.8, image: 'https://images.unsplash.com/photo-1602607207252-4c2b2f07a5d3?auto=format&fit=crop&w=800&q=85' },
+    { id: 3, name: 'Vanilla Oud', category: 'Warm', fragrance: 'Vanilla, tonka, sandalwood', price: 799, rating: 4.9, image: 'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=800&q=85' },
+    { id: 4, name: 'Sandalwood', category: 'Woody', fragrance: 'Oud, saffron, dark wood', price: 1299, rating: 5, image: 'https://images.unsplash.com/photo-1608181831718-c9e7d8a2a3a5?auto=format&fit=crop&w=800&q=85' },
     { id: 5, name: 'Rain on Earth', category: 'Fresh', fragrance: 'Vetiver, green leaf, rain', price: 749, rating: 4.8, image: 'https://images.unsplash.com/photo-1602874801006-e26d6e8f0b15?auto=format&fit=crop&w=800&q=85' },
     { id: 6, name: 'Neroli Bloom', category: 'Floral', fragrance: 'Neroli, orange blossom', price: 949, rating: 4.7, image: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=800&q=85' },
     { id: 7, name: 'Cedar Smoke', category: 'Woody', fragrance: 'Cedar, cardamom, smoke', price: 1199, rating: 4.9, image: 'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=800&q=85' },
