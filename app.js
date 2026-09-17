@@ -63,7 +63,6 @@ document.querySelector('#cart-close').addEventListener('click', () => setCartOpe
 cartBackdrop.addEventListener('click', () => setCartOpen(false));
 document.querySelector('#menu-toggle').addEventListener('click', (event) => { const nav = document.querySelector('#mobile-nav'); const open = nav.classList.toggle('hidden') === false; event.currentTarget.textContent = open ? 'Close' : 'Menu'; event.currentTarget.setAttribute('aria-expanded', String(open)); });
 document.querySelectorAll('#mobile-nav a').forEach((link) => link.addEventListener('click', () => { document.querySelector('#mobile-nav').classList.add('hidden'); document.querySelector('#menu-toggle').textContent = 'Menu'; }));
-document.querySelector('#personalized-form').addEventListener('submit', (event) => { event.preventDefault(); event.target.reset(); showToast('Your personalized candle request is ready'); });
 document.querySelector('#newsletter-form').addEventListener('submit', (event) => { event.preventDefault(); event.target.reset(); document.querySelector('#newsletter-message').classList.remove('hidden'); });
 document.querySelector('#checkout-button').addEventListener('click', () => showToast(state.cart.length ? 'Checkout is ready to connect' : 'Add a candle before checking out'));
 
