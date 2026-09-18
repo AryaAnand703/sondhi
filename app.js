@@ -13,6 +13,7 @@ const state = { category: 'All', query: '' };
 const productGrid = document.querySelector('#product-grid');
 const categoryFilter = document.querySelector('#category-filter');
 const catalogSearch = document.querySelector('#catalog-search');
+const moodFilters = document.querySelectorAll('.mood-filter');
 const money = (value) => `₹${value.toLocaleString('en-IN')}`;
 
 function renderProducts() {
@@ -21,13 +22,14 @@ function renderProducts() {
         return matchesCategory && `${product.name} ${product.fragrance}`.toLowerCase().includes(state.query.toLowerCase());
     });
     productGrid.innerHTML = visible.length ? visible.map((product) => `
-        <article class="group"><div class="relative overflow-hidden bg-white"><img class="aspect-[4/5] w-full object-cover transition duration-700 group-hover:scale-105" src="${product.image}" alt="${product.name} candle"><span class="absolute left-3 top-3 bg-linen px-3 py-1 text-[10px] font-bold uppercase tracking-widest">${product.category}</span></div><div class="flex items-start justify-between gap-3 border-b border-ink/10 pb-5 pt-4"><div><p class="text-[10px] font-bold uppercase tracking-widest text-ember">${product.fragrance}</p><h3 class="mt-1 font-display text-2xl">${product.name}</h3><p class="mt-2 text-xs text-gold">${'★'.repeat(Math.floor(product.rating))} <span class="text-ink/45">${product.rating}</span></p></div><span class="pt-1 text-sm font-bold">${money(product.price)}</span></div></article>
+        <article class="group grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(150px,.65fr)]"><div class="relative overflow-hidden bg-white"><img class="aspect-[4/5] w-full object-cover transition duration-700 group-hover:scale-105" src="${product.image}" alt="${product.name} candle"><span class="absolute left-3 top-3 bg-linen px-3 py-1 text-[10px] font-bold uppercase tracking-widest">${product.category}</span></div><div class="flex flex-col justify-between border-b border-ink/10 pb-5 pt-1 sm:border-b-0 sm:border-l sm:pl-4"><div><p class="text-[10px] font-bold uppercase tracking-widest text-ember">${product.fragrance}</p><h3 class="mt-2 font-display text-3xl leading-none">${product.name}</h3><p class="mt-3 text-xs text-gold">${'★'.repeat(Math.floor(product.rating))} <span class="text-ink/45">${product.rating}</span></p></div><span class="mt-6 text-sm font-bold">${money(product.price)}</span></div></article>
     `).join('') : '<p class="col-span-full py-16 text-center text-sm text-ink/55">No candles match your search.</p>';
 }
 
 function showToast(message) { const toast = document.querySelector('#toast'); toast.textContent = message; toast.classList.remove('hidden'); window.setTimeout(() => toast.classList.add('hidden'), 2400); }
 
 categoryFilter.addEventListener('change', () => { state.category = categoryFilter.value; renderProducts(); });
+ moodFilters.forEach((filter) => filter.addEventListener('click', () => { state.category = filter.dataset.category; categoryFilter.value = state.category; moodFilters.forEach((item) => item.setAttribute('aria-pressed', String(item === filter))); renderProducts(); }));
 catalogSearch.addEventListener('input', () => { state.query = catalogSearch.value; renderProducts(); });
 document.querySelector('#search-input').addEventListener('input', (event) => { catalogSearch.value = event.target.value; state.query = event.target.value; renderProducts(); document.querySelector('#collection').scrollIntoView({ behavior: 'smooth' }); });
 document.querySelector('#search-toggle').addEventListener('click', () => document.querySelector('#search-panel').classList.toggle('hidden'));
