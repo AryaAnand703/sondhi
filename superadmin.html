@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Governance & Global Billing | Sondhi Atelier</title>
+    <meta name="description" content="Super administrative command center, role-based access control, security audit logs, and global billing architecture for Sondhi Atelier.">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        atelier: {
+                            base: '#0D0B0A',
+                            surface: '#151210',
+                            card: '#1C1815',
+                            hover: '#26211D',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            cream: '#FAF7F2',
+                            muted: '#A69C8F',
+                            dim: '#6E655B'
+                        },
+                        flame: {
+                            glow: '#F59E0B',
+                            amber: '#D97706',
+                            soft: 'rgba(245, 158, 11, 0.12)'
+                        },
+                        luxe: {
+                            gold: '#E5C378',
+                            rose: '#D89797',
+                            sage: '#8FA189'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #0D0B0A;
+            color: #FAF7F2;
+            overflow-x: hidden;
+        }
+        .glass-header {
+            background: rgba(13, 11, 10, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(28, 24, 21, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(229, 195, 120, 0.35);
+        }
+        .tab-btn.active {
+            color: #E5C378;
+            border-bottom-color: #E5C378;
+            background: rgba(229, 195, 120, 0.05);
+        }
+        .portal-pill {
+            transition: all 0.2s ease;
+        }
+        .portal-pill:hover {
+            transform: translateY(-1px);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D0B0A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #26211D;
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-atelier-cream bg-atelier-base min-h-screen flex flex-col">
+
+    <!-- Universal Portal Switcher Banner -->
+    <div class="bg-atelier-card/95 border-b border-white/10 px-4 py-2 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-atelier-muted">
+                <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-red-400">Governance Clearance:</span>
+                <span class="text-[11px] text-atelier-cream">Active Mode — <strong class="text-white">Super Administrator (Tier 0)</strong></span>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span class="text-[10px] uppercase tracking-widest text-atelier-dim hidden sm:inline">Switch Workspace:</span>
+                <a href="index.html" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-white/30">
+                    <i class="fa-solid fa-store text-[9px]"></i> Storefront
+                </a>
+                <a href="profile.html" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-luxe-gold/50">
+                    <i class="fa-solid fa-user text-[9px]"></i> Client Profile
+                </a>
+                <a href="admin.html" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-flame-amber">
+                    <i class="fa-solid fa-shield-halved text-[9px]"></i> Atelier Admin
+                </a>
+                <a href="superadmin.html" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-red-500/50 bg-red-500/10 text-red-400">
+                    <i class="fa-solid fa-crown text-[9px]"></i> Super Admin
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="glass-header sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="index.html" class="group flex items-center gap-3">
+                <span class="text-flame-glow text-xl">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                </span>
+                <div class="flex flex-col">
+                    <span class="font-display text-2xl font-bold tracking-[0.25em] text-atelier-cream group-hover:text-luxe-gold transition">
+                        SONDHI
+                    </span>
+                    <span class="text-[9px] tracking-[0.3em] uppercase text-red-400 flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[8px]"></i> Platform Governance
+                    </span>
+                </div>
+            </a>
+
+            <!-- Admin Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openNewUserModal()" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                    <i class="fa-solid fa-user-plus"></i> Grant Access
+                </button>
+                <button onclick="switchSuperAdminTab('billing')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-atelier-card border border-white/15 text-xs font-semibold text-luxe-gold hover:border-luxe-gold transition">
+                    <i class="fa-solid fa-vault"></i> Platform GMV: ₹28.4L
+                </button>
+                <div class="h-10 w-10 rounded-full border border-red-500/50 bg-red-500/10 flex items-center justify-center text-red-400 font-bold text-sm">
+                    <i class="fa-solid fa-crown text-xs"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Executive Metrics -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="flex items-center justify-between text-xs text-atelier-muted">
+                    <span class="uppercase tracking-wider font-semibold">Total Platform GMV</span>
+                    <i class="fa-solid fa-chart-pie text-luxe-gold"></i>
+                </div>
+                <div class="font-display text-2xl sm:text-3xl font-bold text-atelier-cream mt-2" id="kpi-super-gmv">₹28,42,910</div>
+                <div class="text-[11px] text-luxe-sage mt-1 flex items-center gap-1">
+                    <i class="fa-solid fa-shield-halved"></i> 100% Reconciled
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="flex items-center justify-between text-xs text-atelier-muted">
+                    <span class="uppercase tracking-wider font-semibold">Registered Accounts</span>
+                    <i class="fa-solid fa-users text-blue-400"></i>
+                </div>
+                <div class="font-display text-2xl sm:text-3xl font-bold text-atelier-cream mt-2" id="kpi-super-users">2,846</div>
+                <div class="text-[11px] text-atelier-dim mt-1">12 Admins · 4 Super Admins</div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="flex items-center justify-between text-xs text-atelier-muted">
+                    <span class="uppercase tracking-wider font-semibold">System SLA Uptime</span>
+                    <i class="fa-solid fa-server text-emerald-400"></i>
+                </div>
+                <div class="font-display text-2xl sm:text-3xl font-bold text-emerald-400 mt-2">99.98%</div>
+                <div class="text-[11px] text-atelier-dim mt-1">Zero downtime incidents (30d)</div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="flex items-center justify-between text-xs text-atelier-muted">
+                    <span class="uppercase tracking-wider font-semibold">Security Threat Status</span>
+                    <i class="fa-solid fa-shield-virus text-luxe-sage"></i>
+                </div>
+                <div class="font-display text-2xl sm:text-3xl font-bold text-luxe-sage mt-2">Nominal</div>
+                <div class="text-[11px] text-atelier-dim mt-1">Firewall & 2FA active</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex overflow-x-auto border-b border-white/10 gap-1 sm:gap-2 mb-8 no-scrollbar">
+            <button onclick="switchSuperAdminTab('users')" id="tab-super-users" class="tab-btn active px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-user-shield text-xs"></i> User & Role Governance
+            </button>
+            <button onclick="switchSuperAdminTab('billing')" id="tab-super-billing" class="tab-btn px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2 text-luxe-gold">
+                <i class="fa-solid fa-vault text-xs"></i> Global Billing & Gateways
+            </button>
+            <button onclick="switchSuperAdminTab('audit')" id="tab-super-audit" class="tab-btn px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-xs"></i> Security & Audit Logs
+            </button>
+            <button onclick="switchSuperAdminTab('settings')" id="tab-super-settings" class="tab-btn px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-xs"></i> Platform Settings
+            </button>
+        </div>
+
+        <!-- TAB 1: USER & ROLE GOVERNANCE -->
+        <section id="section-super-users" class="tab-content space-y-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Role-Based Access Control (RBAC)</h2>
+                        <p class="text-xs text-atelier-muted">Manage system clearances, assign administrative roles, or suspend unauthorized accounts</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="text" id="user-search-input" placeholder="Search by name, email, or role" onkeyup="filterUsers()" class="bg-atelier-surface border border-white/10 rounded-lg px-3 py-1.5 text-xs text-atelier-cream focus:border-luxe-gold outline-none">
+                        <button onclick="openNewUserModal()" class="px-3.5 py-1.5 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition whitespace-nowrap">
+                            + New User
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-white/10 text-atelier-muted uppercase tracking-wider text-[10px]">
+                                <th class="pb-3 font-semibold">User Identity</th>
+                                <th class="pb-3 font-semibold">Current Role</th>
+                                <th class="pb-3 font-semibold">Permissions Tier</th>
+                                <th class="pb-3 font-semibold">Status</th>
+                                <th class="pb-3 font-semibold">Last Active</th>
+                                <th class="pb-3 font-semibold text-right">Role Modifier</th>
+                            </tr>
+                        </thead>
+                        <tbody id="super-users-table-body" class="divide-y divide-white/5">
+                            <!-- Populated by superadmin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: GLOBAL BILLING & GATEWAYS (REQUESTED CORE SECTION) -->
+        <section id="section-super-billing" class="tab-content hidden space-y-8">
+            <!-- Gateway Config & Subscription Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-6 border border-luxe-gold/40 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider text-atelier-muted">Flame Circle MRR</span>
+                        <i class="fa-solid fa-arrows-rotate text-luxe-gold"></i>
+                    </div>
+                    <div class="font-display text-3xl font-bold text-luxe-gold">₹4,28,000</div>
+                    <p class="text-xs text-atelier-muted mt-1">Monthly Recurring Revenue from 171 Subscribed Patrons</p>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs">
+                        <span class="text-luxe-sage"><i class="fa-solid fa-arrow-trend-up"></i> +12% MoM</span>
+                        <button onclick="openSubscriptionPlanModal()" class="text-luxe-gold hover:underline font-semibold text-[11px]">Edit Pricing</button>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-atelier-muted">Stripe & Razorpay Integration</span>
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live Mode</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-atelier-muted">
+                            <div>Stripe Public: <code class="text-atelier-cream bg-black/40 px-1 py-0.5 rounded">pk_live_••••8932</code></div>
+                            <div>Razorpay Key: <code class="text-atelier-cream bg-black/40 px-1 py-0.5 rounded">rzp_live_••••1102</code></div>
+                            <div>Webhook Status: <strong class="text-luxe-sage">Listening (HTTP 200)</strong></div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs">
+                        <span class="text-atelier-dim">TLS 1.3 / PCI DSS Level 1</span>
+                        <button onclick="openGatewayModal()" class="text-luxe-gold hover:underline font-semibold text-[11px]">Update Keys</button>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-atelier-muted">Tax & GST Compliance Engine</span>
+                        <div class="mt-2 text-sm font-semibold text-atelier-cream">GSTIN 27AADCS9982Q1Z3</div>
+                        <div class="mt-2 text-xs text-atelier-muted">
+                            Total GST Collected (Q3): <strong class="text-atelier-cream">₹3,41,148.00</strong>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs">
+                        <span class="text-luxe-sage"><i class="fa-solid fa-circle-check mr-1"></i> GSTR-1 Filed</span>
+                        <button onclick="exportGstReport()" class="text-luxe-gold hover:underline flex items-center gap-1 font-semibold text-[11px]">
+                            <i class="fa-solid fa-file-arrow-down"></i> Tax Filing Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Subscription Tiers Architecture -->
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Subscription Plans & Commission Rules</h2>
+                        <p class="text-xs text-atelier-muted">Configure active patron tiers, commission pricing models, and billing intervals</p>
+                    </div>
+                    <button onclick="openSubscriptionPlanModal()" class="px-4 py-2 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                        <i class="fa-solid fa-plus mr-1"></i> New Billing Tier
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="subscription-tiers-grid">
+                    <!-- Injected by superadmin.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: AUDIT & SECURITY LOGS -->
+        <section id="section-super-audit" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Platform Audit & Event Stream</h2>
+                        <p class="text-xs text-atelier-muted">Immutable cryptographic log of role updates, pricing modifications, and system triggers</p>
+                    </div>
+                    <button onclick="clearAuditFilter()" class="text-xs text-luxe-gold hover:underline">Reset Stream</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-white/10 text-atelier-muted uppercase tracking-wider text-[10px]">
+                                <th class="pb-3 font-semibold">Timestamp</th>
+                                <th class="pb-3 font-semibold">Actor / Administrator</th>
+                                <th class="pb-3 font-semibold">Event Classification</th>
+                                <th class="pb-3 font-semibold">Details / Delta</th>
+                                <th class="pb-3 font-semibold">IP Origin</th>
+                                <th class="pb-3 font-semibold text-right">Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="super-audit-table-body" class="divide-y divide-white/5 font-mono">
+                            <!-- Populated by superadmin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: PLATFORM SETTINGS -->
+        <section id="section-super-settings" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="border-b border-white/10 pb-4 mb-6">
+                    <h2 class="font-display text-xl font-semibold text-atelier-cream">Atelier Master Controls</h2>
+                    <p class="text-xs text-atelier-muted">High-impact platform toggles and operational switches</p>
+                </div>
+
+                <div class="space-y-6 text-xs divide-y divide-white/5">
+                    <div class="flex items-center justify-between pt-2">
+                        <div>
+                            <div class="text-sm font-semibold text-atelier-cream">Public Storefront Access</div>
+                            <div class="text-atelier-muted">Allow patrons to browse and commission candles online</div>
+                        </div>
+                        <button onclick="togglePlatformSwitch('storefront')" id="switch-storefront" class="px-4 py-1.5 rounded-full bg-luxe-sage/20 text-luxe-sage border border-luxe-sage/40 font-bold uppercase text-[10px]">
+                            Live / Open
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4">
+                        <div>
+                            <div class="text-sm font-semibold text-atelier-cream">Custom Atelier Studio Engine</div>
+                            <div class="text-atelier-muted">Interactive note pyramid and custom vessel formulator</div>
+                        </div>
+                        <button onclick="togglePlatformSwitch('studio')" id="switch-studio" class="px-4 py-1.5 rounded-full bg-luxe-sage/20 text-luxe-sage border border-luxe-sage/40 font-bold uppercase text-[10px]">
+                            Active
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4">
+                        <div>
+                            <div class="text-sm font-semibold text-atelier-cream">Maintenance Mode Lockdown</div>
+                            <div class="text-atelier-muted">Restrict entire platform to Super Administrators only</div>
+                        </div>
+                        <button onclick="togglePlatformSwitch('maintenance')" id="switch-maintenance" class="px-4 py-1.5 rounded-full bg-white/10 text-atelier-muted border border-white/20 font-bold uppercase text-[10px]">
+                            Disabled
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-white/10 bg-atelier-surface py-6 text-center text-xs text-atelier-muted">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span class="font-display tracking-widest uppercase">Sondhi Botanicals Atelier · Super Administrator Clearance</span>
+            <div class="flex items-center gap-4 text-xs text-atelier-dim">
+                <a href="index.html" class="hover:text-atelier-cream">Storefront</a>
+                <span>•</span>
+                <a href="profile.html" class="hover:text-atelier-cream">Client Profile</a>
+                <span>•</span>
+                <a href="admin.html" class="hover:text-atelier-cream">Atelier Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL: ADD USER / ASSIGN ROLE -->
+    <div id="modal-new-user" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <h3 class="font-display text-xl font-semibold text-atelier-cream">Assign Platform Clearance</h3>
+                <button onclick="closeModal('modal-new-user')" class="text-atelier-muted hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="new-user-form" onsubmit="event.preventDefault(); submitNewUser();" class="space-y-4 text-xs">
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Full Name</label>
+                    <input type="text" id="user-name-input" required placeholder="e.g. Priya Sharma" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                </div>
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Email Address</label>
+                    <input type="email" id="user-email-input" required placeholder="priya@sondhi.co" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                </div>
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Assigned Role</label>
+                    <select id="user-role-select" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                        <option value="Customer">Customer / Patron</option>
+                        <option value="Admin">Atelier Admin / Artisan</option>
+                        <option value="Super Admin">Super Administrator</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('modal-new-user')" class="flex-1 py-2.5 rounded-lg border border-white/10 text-atelier-muted hover:text-white uppercase font-semibold tracking-wider">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-lg bg-luxe-gold text-atelier-base font-bold uppercase tracking-wider hover:bg-white transition">Grant Clearance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: GATEWAY CREDENTIALS -->
+    <div id="modal-gateway" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <h3 class="font-display text-xl font-semibold text-atelier-cream">Payment Gateway Keys</h3>
+                <button onclick="closeModal('modal-gateway')" class="text-atelier-muted hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Stripe Secret Key</label>
+                    <input type="password" value="••••••••••••••••••••••••••••••••••••••••" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream font-mono">
+                </div>
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Razorpay Key Secret</label>
+                    <input type="password" value="••••••••••••••••••••••••" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream font-mono">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('modal-gateway')" class="flex-1 py-2.5 rounded-lg border border-white/10 text-atelier-muted hover:text-white uppercase font-semibold tracking-wider">Cancel</button>
+                    <button type="button" onclick="closeModal('modal-gateway'); showToast('Gateway credentials synchronized and encrypted.');" class="flex-1 py-2.5 rounded-lg bg-luxe-gold text-atelier-base font-bold uppercase tracking-wider hover:bg-white transition">Save Keys</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SUBSCRIPTION TIER -->
+    <div id="modal-plan" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <h3 class="font-display text-xl font-semibold text-atelier-cream">Configure Billing Tier</h3>
+                <button onclick="closeModal('modal-plan')" class="text-atelier-muted hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Tier Name</label>
+                    <input type="text" value="The Flame Circle" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream">
+                </div>
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Quarterly Price (INR)</label>
+                    <input type="number" value="2499" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('modal-plan')" class="flex-1 py-2.5 rounded-lg border border-white/10 text-atelier-muted hover:text-white uppercase font-semibold tracking-wider">Cancel</button>
+                    <button type="button" onclick="closeModal('modal-plan'); showToast('Subscription tier pricing updated.');" class="flex-1 py-2.5 rounded-lg bg-luxe-gold text-atelier-base font-bold uppercase tracking-wider hover:bg-white transition">Save Tier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-atelier-surface border border-luxe-gold px-4 py-3 shadow-2xl text-xs text-atelier-cream opacity-0 pointer-events-none transition-all duration-300">
+        <i class="fa-solid fa-circle-check text-luxe-gold text-sm" id="toast-icon"></i>
+        <span id="toast-message">Clearance validated</span>
+    </div>
+
+    <script src="superadmin.js"></script>
+</body>
+</html>

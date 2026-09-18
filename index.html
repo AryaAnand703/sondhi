@@ -212,11 +212,59 @@
             </nav>
 
             <!-- Actions: Search & Cart Drawer Toggle -->
-            <div class="flex items-center gap-4">
+            <!-- Actions: Search, Account & Cart Drawer Toggle -->
+            <div class="flex items-center gap-3 sm:gap-4">
                 <!-- Search Button -->
                 <button id="search-toggle-btn" class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200" aria-label="Search Fragrances">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </button>
+
+                <!-- Atelier Portals & Account Menu -->
+                <div class="relative group">
+                    <button id="account-dropdown-btn" class="flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-3.5 text-[11px] font-semibold uppercase tracking-wider text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200" aria-label="Atelier Portals & Account">
+                        <i class="fa-regular fa-user text-xs text-luxe-gold"></i>
+                        <span class="hidden md:inline">Portals</span>
+                        <i class="fa-solid fa-chevron-down text-[8px] text-atelier-dim group-hover:text-luxe-gold transition"></i>
+                    </button>
+                    <!-- Dropdown Content -->
+                    <div class="absolute right-0 mt-2 w-64 rounded-2xl bg-atelier-surface border border-white/15 p-2.5 shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition duration-200 z-50">
+                        <div class="px-3 py-1.5 border-b border-white/10 text-[9px] uppercase tracking-widest text-atelier-dim font-bold">
+                            Atelier Workspaces & Billing
+                        </div>
+                        <a href="profile.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-luxe-gold/10 hover:text-luxe-gold transition">
+                            <div class="w-7 h-7 rounded-lg bg-luxe-gold/10 flex items-center justify-center text-luxe-gold">
+                                <i class="fa-solid fa-user text-[11px]"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Client Profile & Billing</div>
+                                <div class="text-[10px] text-atelier-muted">Orders, Formulas & Cards</div>
+                            </div>
+                        </a>
+                        <a href="admin.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-flame-soft hover:text-flame-glow transition">
+                            <div class="w-7 h-7 rounded-lg bg-flame-soft flex items-center justify-center text-flame-glow">
+                                <i class="fa-solid fa-shield-halved text-[11px]"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Atelier Admin</div>
+                                <div class="text-[10px] text-atelier-muted">Orders, Catalog & Payouts</div>
+                            </div>
+                        </a>
+                        <a href="superadmin.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-red-500/10 hover:text-red-400 transition">
+                            <div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-crown text-[11px]"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Super Admin</div>
+                                <div class="text-[10px] text-atelier-muted">RBAC & Global Billing</div>
+                            </div>
+                        </a>
+                        <div class="mt-1 pt-1.5 border-t border-white/10">
+                            <a href="profile.html#billing" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-luxe-gold hover:bg-white/5 transition">
+                                <i class="fa-solid fa-wallet text-[10px]"></i> Open Saved Cards & Invoices
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Cart Drawer Trigger with Badge -->
                 <button id="cart-toggle-btn" class="relative flex items-center gap-2.5 rounded-full border border-luxe-gold/40 bg-flame-soft px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base transition duration-300" aria-label="Open Shopping Bag">
@@ -241,6 +289,18 @@
             <a class="block py-2 hover:text-atelier-cream" href="#rituals">Candle Rituals</a>
             <a class="block py-2 hover:text-atelier-cream" href="#story">Our Atelier</a>
             <a class="block py-2 hover:text-atelier-cream" href="#reviews">Collector Notes</a>
+            <div class="pt-3 border-t border-white/10 space-y-2">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-atelier-dim">Atelier Portals & Billing</div>
+                <a class="block py-1 text-luxe-gold hover:text-white flex items-center gap-2" href="profile.html">
+                    <i class="fa-solid fa-user text-xs"></i> Client Profile & Billing
+                </a>
+                <a class="block py-1 text-flame-glow hover:text-white flex items-center gap-2" href="admin.html">
+                    <i class="fa-solid fa-shield-halved text-xs"></i> Atelier Admin Dashboard
+                </a>
+                <a class="block py-1 text-red-400 hover:text-white flex items-center gap-2" href="superadmin.html">
+                    <i class="fa-solid fa-crown text-xs"></i> Super Admin Governance
+                </a>
+            </div>
         </div>
 
         <!-- Expandable Search Overlay -->
@@ -832,6 +892,17 @@
                         <li><a href="mailto:concierge@sondhi.co" class="hover:text-atelier-cream transition">Shipping & Returns</a></li>
                         <li><a href="mailto:concierge@sondhi.co" class="hover:text-atelier-cream transition">Wholesale Inquiries</a></li>
                         <li><a href="mailto:concierge@sondhi.co" class="hover:text-atelier-cream transition">concierge@sondhi.co</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 5: Governance & Portals -->
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold">Atelier Portals</h4>
+                    <ul class="mt-4 space-y-2.5 text-xs text-atelier-muted">
+                        <li><a href="profile.html" class="hover:text-atelier-cream transition text-luxe-gold">Client Profile & Billing</a></li>
+                        <li><a href="admin.html" class="hover:text-atelier-cream transition">Atelier Operations Admin</a></li>
+                        <li><a href="superadmin.html" class="hover:text-atelier-cream transition">Super Admin Governance</a></li>
+                        <li><a href="profile.html#billing" class="hover:text-atelier-cream transition">Flame Circle Membership</a></li>
                     </ul>
                 </div>
             </div>
