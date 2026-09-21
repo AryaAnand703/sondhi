@@ -304,6 +304,7 @@ function saveCart() {
 
 function updateCartUI() {
     const badge = document.querySelector('#cart-count-badge');
+    const mobileBadge = document.querySelector('#mobile-cart-count');
     const counter = document.querySelector('#cart-items-counter');
     const container = document.querySelector('#cart-items-container');
     const subtotalEl = document.querySelector('#cart-subtotal-display');
@@ -315,6 +316,7 @@ function updateCartUI() {
 
     const totalCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
     if (badge) badge.textContent = totalCount;
+    if (mobileBadge) mobileBadge.textContent = totalCount;
     if (counter) counter.textContent = `(${totalCount} item${totalCount === 1 ? '' : 's'})`;
 
     // Compute Subtotal
@@ -706,6 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Search Header Overlay Toggle
     const searchToggleBtn = document.querySelector('#search-toggle-btn');
+    const mobileSearchBtn = document.querySelector('#mobile-search-btn');
     const searchOverlay = document.querySelector('#search-overlay');
     const searchCloseBtn = document.querySelector('#search-close-btn');
     const headerSearchInput = document.querySelector('#header-search-input');
@@ -716,6 +719,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!searchOverlay.classList.contains('hidden') && headerSearchInput) {
                 headerSearchInput.focus();
             }
+        });
+    }
+
+    if (mobileSearchBtn && searchOverlay) {
+        mobileSearchBtn.addEventListener('click', () => {
+            searchOverlay.classList.remove('hidden');
+            mobileMenu?.classList.add('hidden');
+            headerSearchInput?.focus();
         });
     }
 
@@ -747,6 +758,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 mobileMenu.classList.add('hidden');
             });
         });
+    }
+
+    const mobileCartBtn = document.querySelector('#mobile-cart-btn');
+    if (mobileCartBtn) {
+        mobileCartBtn.addEventListener('click', () => {
+            mobileMenu?.classList.add('hidden');
+            openCart();
+        });
+    }
+
+    const mobileCartCount = document.querySelector('#mobile-cart-count');
+    if (mobileCartCount) {
+        mobileCartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
     }
 
     // Promo Code Coupon Applicator

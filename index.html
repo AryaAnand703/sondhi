@@ -604,7 +604,7 @@
             <div class="flex items-center gap-3 sm:gap-4">
                 <!-- Theme Toggle Button -->
                 <button id="theme-toggle-btn" onclick="toggleAtelierTheme()"
-                    class="theme-toggle-btn flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
+                    class="theme-toggle-btn hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
                     title="Switch to Dark Theme" aria-label="Toggle Theme">
                     <i class="fa-solid fa-moon text-xs theme-moon-icon text-amber-700"></i>
                     <i class="fa-solid fa-sun text-xs theme-sun-icon text-amber-400 hidden"></i>
@@ -612,7 +612,7 @@
 
                 <!-- Search Button -->
                 <button id="search-toggle-btn"
-                    class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
+                    class="hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
                     aria-label="Search Fragrances">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </button>
@@ -677,7 +677,7 @@
 
                 <!-- Cart Drawer Trigger with Badge -->
                 <button id="cart-toggle-btn"
-                    class="relative flex items-center gap-2.5 rounded-full border border-luxe-gold/40 bg-flame-soft px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base transition duration-300"
+                    class="relative hidden lg:flex items-center gap-2.5 rounded-full border border-luxe-gold/40 bg-flame-soft px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base transition duration-300"
                     aria-label="Open Shopping Bag">
                     <i class="fa-solid fa-bag-shopping text-xs"></i>
                     <span class="hidden sm:inline">Bag</span>
@@ -706,6 +706,13 @@
             <a class="block py-2 hover:text-atelier-cream" href="#reviews">Collector Notes</a>
             <div class="pt-3 border-t border-white/10 space-y-2">
                 <div class="text-[10px] font-bold uppercase tracking-wider text-atelier-dim">Account & Sanctuary</div>
+                <button id="mobile-search-btn" type="button" class="w-full text-left py-1 text-atelier-cream hover:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-xs text-luxe-gold"></i> Search Fragrances
+                </button>
+                <button id="mobile-cart-btn" type="button" class="w-full text-left py-1 text-luxe-gold hover:text-white flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-xs"></i> Shopping Bag</span>
+                    <span id="mobile-cart-count" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-flame-glow px-1 text-[10px] font-bold text-atelier-base">0</span>
+                </button>
                 <button onclick="toggleAtelierTheme()" class="w-full text-left py-1 text-atelier-cream hover:text-white flex items-center justify-between">
                     <span class="flex items-center gap-2">
                         <i class="fa-solid fa-circle-half-stroke text-xs text-luxe-gold"></i>
