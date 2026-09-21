@@ -388,8 +388,25 @@
         }
 
         @media (max-width: 639px) {
+            html,
             body {
-                min-width: 0;
+                width: 100%;
+                min-width: 100%;
+                max-width: 100%;
+                margin: 0;
+                overflow-x: hidden;
+            }
+
+            .announcement-banner {
+                display: none;
+            }
+
+            main,
+            header,
+            footer,
+            section {
+                width: 100%;
+                max-width: none;
             }
 
             .announcement-banner {
