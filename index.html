@@ -360,6 +360,32 @@
             background-color: rgba(217, 119, 6, 0.25);
             color: inherit;
         }
+
+        /* Glowing Heart Keyframes & Effects */
+        @keyframes glowingHeartPulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 24px rgba(244, 63, 94, 0.85)) drop-shadow(0 0 55px rgba(251, 113, 133, 0.5));
+            }
+            25% {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 38px rgba(244, 63, 94, 1)) drop-shadow(0 0 80px rgba(251, 113, 133, 0.8));
+            }
+            45% {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 28px rgba(244, 63, 94, 0.9)) drop-shadow(0 0 60px rgba(244, 63, 94, 0.6));
+            }
+            65% {
+                transform: scale(1.18);
+                filter: drop-shadow(0 0 45px rgba(244, 63, 94, 1)) drop-shadow(0 0 95px rgba(251, 113, 133, 0.95));
+            }
+        }
+
+        .glowing-heart-pulse {
+            animation: glowingHeartPulse 2.4s infinite ease-in-out;
+            display: inline-block;
+            transform-origin: center center;
+        }
     </style>
 </head>
 
@@ -367,16 +393,22 @@
     <div class="grain-overlay pointer-events-none fixed inset-0 z-50"></div>
 
     <div id="welcome-overlay"
-        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm"
-        role="dialog" aria-modal="true" aria-label="Welcome message">
-        <button id="welcome-overlay-close" type="button"
-            class="group flex flex-col items-center text-center text-white transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-luxe-gold focus-visible:ring-offset-4 focus-visible:ring-offset-black"
-            aria-label="Close welcome message">
-            <i
-                class="fa-solid fa-heart text-7xl text-luxe-rose drop-shadow-[0_0_28px_rgba(216,151,151,0.95)] animate-pulse sm:text-8xl"></i>
-            <span class="mt-5 font-display text-4xl italic text-white sm:text-5xl">I love you baby</span>
-            <span class="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/70">Tap to enter</span>
-        </button>
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm transition-all duration-700 ease-out select-none"
+        role="dialog" aria-modal="true" aria-label="Welcome love message">
+        <div class="relative z-10 flex flex-col items-center text-center">
+            <button id="welcome-heart-btn" type="button"
+                class="group flex items-center justify-center focus:outline-none transition-transform duration-300 hover:scale-110 active:scale-95 cursor-pointer"
+                aria-label="Glowing Heart">
+                <i class="fa-solid fa-heart text-7xl text-luxe-rose drop-shadow-[0_0_28px_rgba(216,151,151,0.95)] animate-pulse sm:text-8xl"></i>
+            </button>
+            <button id="welcome-overlay-close" type="button"
+                class="mt-5 flex flex-col items-center text-center text-white transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-luxe-gold focus-visible:ring-offset-4 focus-visible:ring-offset-black"
+                aria-label="Close welcome message">
+                <span class="font-display text-4xl italic text-white sm:text-5xl">I love you baby</span>
+                <span class="mt-2 font-display text-2xl italic text-luxe-rose sm:text-3xl">From Arya</span>
+                <span class="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/70">Tap to enter</span>
+            </button>
+        </div>
     </div>
 
     <!-- Announcement Bar -->
@@ -632,6 +664,82 @@
                     <div>
                         <span class="block font-display text-2xl font-bold text-luxe-gold">Numbered</span>
                         <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Artisan Batches</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Romantic Dedication Section: "I Love You Baby" -->
+        <section id="love-sanctuary"
+            class="reveal-node relative overflow-hidden border-b border-white/10 py-20 lg:py-28 px-6 lg:px-10 bg-gradient-to-b from-rose-950/10 via-atelier-surface/30 to-atelier-base">
+            <!-- Ambient Glow Backgrounds -->
+            <div class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[500px] w-[500px] rounded-full bg-rose-500/15 blur-[120px] dark:bg-rose-500/20"></div>
+            <div class="pointer-events-none absolute left-1/3 top-1/4 -z-10 h-[300px] w-[300px] rounded-full bg-amber-500/10 blur-[90px]"></div>
+
+            <div class="mx-auto max-w-4xl text-center">
+                <!-- Top Badge -->
+                <div class="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 backdrop-blur-md px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-rose-500 dark:text-rose-300 mb-8">
+                    <i class="fa-solid fa-heart text-[10px] animate-pulse text-rose-500"></i>
+                    <span>The Heart of Our Atelier · A Love Dedication</span>
+                    <i class="fa-solid fa-sparkles text-[10px] text-amber-400"></i>
+                </div>
+
+                <!-- Glowing Heart Centerpiece -->
+                <div class="relative mx-auto mb-8 flex h-36 w-36 sm:h-44 sm:w-44 items-center justify-center">
+                    <!-- Concentric Glowing Rings -->
+                    <div class="absolute inset-0 rounded-full border border-rose-400/25 animate-ping opacity-30"></div>
+                    <div class="absolute -inset-3 rounded-full border border-rose-400/30 blur-sm animate-pulse"></div>
+                    <div class="absolute -inset-6 rounded-full bg-gradient-to-tr from-rose-500/20 via-pink-500/15 to-amber-500/20 blur-2xl"></div>
+
+                    <!-- Glowing Heart Button / Trigger -->
+                    <button id="main-heart-spark-btn" type="button"
+                        class="group relative flex h-28 w-28 sm:h-32 sm:w-32 items-center justify-center rounded-full bg-gradient-to-br from-rose-500/20 via-rose-500/10 to-transparent border border-rose-400/40 shadow-[0_0_40px_rgba(244,63,94,0.45)] transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer focus:outline-none"
+                        title="Click to spark hearts!" aria-label="Glowing Heart of Love">
+                        <i class="fa-solid fa-heart text-5xl sm:text-6xl text-rose-500 glowing-heart-pulse transition-transform duration-300 group-hover:scale-110"></i>
+                    </button>
+                </div>
+
+                <!-- Grand Serif Headline -->
+                <h2 class="font-display text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-atelier-cream">
+                    I love you <span class="italic font-normal text-rose-500 dark:text-rose-400 drop-shadow-[0_0_30px_rgba(244,63,94,0.4)]">baby</span>
+                </h2>
+
+                <div class="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-luxe-gold">
+                    <span>— Forever & Always, from Arya —</span>
+                </div>
+
+                <!-- Dedication Copy -->
+                <p class="mx-auto mt-6 max-w-2xl text-base sm:text-xl font-display italic leading-relaxed text-atelier-muted">
+                    "Every candle in this atelier is poured with the quiet warmth, tender devotion, and eternal glow you bring into my life. No matter how dark the world outside, your love is my sacred light."
+                </p>
+
+                <!-- Interactive Love Spark Button & Action -->
+                <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+                    <button id="spark-love-btn" type="button"
+                        class="group flex items-center gap-3 rounded-full border border-rose-400/50 bg-rose-500 px-8 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-rose-500/30 transition-all duration-300 hover:bg-rose-600 hover:scale-105 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-heart text-white group-hover:scale-125 transition-transform text-xs"></i>
+                        <span>Send Love Sparks</span>
+                    </button>
+                    <a href="#custom-studio"
+                        class="flex items-center gap-2.5 rounded-full border border-rose-400/30 bg-white/5 backdrop-blur-md px-7 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-atelier-cream transition-all duration-300 hover:border-luxe-gold hover:bg-white/10 hover:scale-105">
+                        <i class="fa-solid fa-wand-magic-sparkles text-luxe-gold"></i>
+                        <span>Pour Bespoke Candle</span>
+                    </a>
+                </div>
+
+                <!-- Romance Feature Attributes -->
+                <div class="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto border-t border-white/10 pt-8 text-center">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-atelier-muted">Fragrance Notes</div>
+                        <div class="mt-1 font-display text-lg font-bold text-rose-500 dark:text-rose-400">Damask Rose & Vanilla</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-atelier-muted">Flame Warmth</div>
+                        <div class="mt-1 font-display text-lg font-bold text-flame-glow">Infinite & Everlasting</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-atelier-muted">Dedication</div>
+                        <div class="mt-1 font-display text-lg font-bold text-luxe-gold">Arya & Baby</div>
                     </div>
                 </div>
             </div>
@@ -1315,9 +1423,18 @@
             <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-atelier-dim">
                 <span>© 2026 SONDHI BOTANICALS ATELIER · HAND-CRAFTED IN INDIA.</span>
                 <span>DESIGNED FOR SANCTUARIES & SLOW EVENINGS.</span>
+                <span class="font-display italic text-sm tracking-wide text-atelier-cream">From Sondhi</span>
             </div>
         </div>
     </footer>
+
+    <!-- Floating Love Note Replay Trigger -->
+    <button id="floating-love-btn" type="button"
+        class="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 rounded-full border border-rose-400/40 bg-atelier-surface/90 px-4 py-2.5 text-xs font-semibold text-rose-500 shadow-xl shadow-rose-950/20 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-rose-400 hover:bg-rose-500/10 active:scale-95 group cursor-pointer"
+        aria-label="Open Love Note For Baby" title="A Love Note For Baby">
+        <i class="fa-solid fa-heart text-sm text-rose-500 animate-pulse group-hover:scale-125 transition-transform duration-300"></i>
+        <span class="font-display italic text-sm tracking-wide text-atelier-cream">I love you baby</span>
+    </button>
 
     <!-- Core Auth & App Logic -->
     <script src="auth.js"></script>

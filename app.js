@@ -636,15 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartUI();
     initCustomCandleStudio();
 
-    const welcomeOverlay = document.querySelector('#welcome-overlay');
-    const welcomeClose = document.querySelector('#welcome-overlay-close');
-    const closeWelcomeOverlay = () => {
-        welcomeOverlay?.classList.add('hidden');
-    };
-
-    welcomeClose?.addEventListener('click', closeWelcomeOverlay);
+    // Close welcome overlay on Escape key
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
+        if (event.key === 'Escape' && typeof closeWelcomeOverlay === 'function') {
             closeWelcomeOverlay();
         }
     });
@@ -860,4 +854,142 @@ document.addEventListener('DOMContentLoaded', () => {
         el.classList.add('reveal-node');
         observer.observe(el);
     });
+
+    // ======================================================================
+    // SONDHI LOVE SANCTUARY — "I LOVE YOU BABY" INTERACTIVE SYSTEM
+    // ======================================================================
+    function spawnHeartBurst(x, y, count = 28) {
+        const container = document.body;
+        const colors = ['#f43f5e', '#fb7185', '#fda4af', '#f59e0b', '#fbbf24', '#f472b6', '#e11d48'];
+        const particleCount = count;
+        const startX = typeof x === 'number' && !isNaN(x) ? x : (window.innerWidth / 2);
+        const startY = typeof y === 'number' && !isNaN(y) ? y : (window.innerHeight / 2);
+
+        for (let i = 0; i < particleCount; i++) {
+            const el = document.createElement('div');
+            el.className = 'fixed pointer-events-none z-[110] select-none text-base sm:text-lg';
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            el.style.color = color;
+            el.style.textShadow = `0 0 14px ${color}`;
+            el.innerHTML = `<i class="fa-solid fa-heart"></i>`;
+            
+            el.style.left = `${startX}px`;
+            el.style.top = `${startY}px`;
+            el.style.opacity = '1';
+            el.style.transform = `translate(-50%, -50%) scale(${0.4 + Math.random() * 0.7})`;
+            el.style.transition = 'transform 1.1s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 1.1s ease-out';
+            
+            container.appendChild(el);
+
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 70 + Math.random() * 180;
+            const destX = Math.cos(angle) * velocity;
+            const destY = Math.sin(angle) * velocity - (60 + Math.random() * 90);
+            const rotation = (Math.random() - 0.5) * 360;
+
+            requestAnimationFrame(() => {
+                el.style.transform = `translate(calc(-50% + ${destX}px), calc(-50% + ${destY}px)) scale(${1.1 + Math.random() * 0.5}) rotate(${rotation}deg)`;
+                el.style.opacity = '0';
+            });
+
+            setTimeout(() => {
+                if (el && el.parentNode) el.remove();
+            }, 1200);
+        }
+    }
+
+    const welcomeOverlay = document.querySelector('#welcome-overlay');
+    const welcomeCloseBtn = document.querySelector('#welcome-overlay-close');
+    const welcomeHeartBtn = document.querySelector('#welcome-heart-btn');
+    const floatingLoveBtn = document.querySelector('#floating-love-btn');
+    const mainHeartSparkBtn = document.querySelector('#main-heart-spark-btn');
+    const sparkLoveBtn = document.querySelector('#spark-love-btn');
+
+    const romanticNotes = [
+        "I love you baby! With all my heart, from Arya ❤️",
+        "You are the most precious flame in my life ✨",
+        "Every day with you is pure magic and warmth 🕯️",
+        "Forever & always yours, my love 💖",
+        "You light up my whole world, baby 🌹"
+    ];
+    let noteIndex = 0;
+
+    function closeWelcomeOverlay(e) {
+        if (!welcomeOverlay) return;
+        const rect = welcomeCloseBtn ? welcomeCloseBtn.getBoundingClientRect() : null;
+        const x = e && e.clientX ? e.clientX : (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
+        const y = e && e.clientY ? e.clientY : (rect ? rect.top + rect.height / 2 : window.innerHeight / 2);
+        
+        spawnHeartBurst(x, y, 32);
+
+        welcomeOverlay.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+        setTimeout(() => {
+            welcomeOverlay.style.display = 'none';
+        }, 700);
+
+        showToast("Welcome to our sanctuary, baby! ❤️");
+    }
+
+    function openWelcomeOverlay() {
+        if (!welcomeOverlay) return;
+        welcomeOverlay.style.display = 'flex';
+        requestAnimationFrame(() => {
+            welcomeOverlay.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+        });
+        spawnHeartBurst(window.innerWidth / 2, window.innerHeight / 2, 24);
+    }
+
+    if (welcomeCloseBtn) {
+        welcomeCloseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeWelcomeOverlay(e);
+        });
+    }
+
+    if (welcomeHeartBtn) {
+        welcomeHeartBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const rect = welcomeHeartBtn.getBoundingClientRect();
+            spawnHeartBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, 35);
+            setTimeout(() => {
+                closeWelcomeOverlay(e);
+            }, 300);
+        });
+    }
+
+    if (welcomeOverlay) {
+        welcomeOverlay.addEventListener('click', (e) => {
+            if (e.target === welcomeOverlay || e.target.closest('#welcome-overlay')) {
+                closeWelcomeOverlay(e);
+            }
+        });
+    }
+
+    if (floatingLoveBtn) {
+        floatingLoveBtn.addEventListener('click', () => {
+            openWelcomeOverlay();
+        });
+    }
+
+    function triggerLoveSparks(e) {
+        const target = e.currentTarget || e.target;
+        const rect = target.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        spawnHeartBurst(x, y, 36);
+
+        // Rotating romantic toasts
+        const note = romanticNotes[noteIndex % romanticNotes.length];
+        noteIndex++;
+        showToast(note);
+    }
+
+    if (mainHeartSparkBtn) {
+        mainHeartSparkBtn.addEventListener('click', triggerLoveSparks);
+    }
+
+    if (sparkLoveBtn) {
+        sparkLoveBtn.addEventListener('click', triggerLoveSparks);
+    }
 });
