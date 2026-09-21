@@ -8,30 +8,46 @@
     <meta name="description"
         content="Hand-poured 100% botanical soy candles, bespoke sensory formulations, and slow fragrances crafted for meaningful spaces.">
 
+    <!-- Theme Early Pre-paint Initializer (Avoids FOUC, defaults to Light Theme) -->
+    <meta name="color-scheme" content="light dark">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('sondhi_theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         atelier: {
-                            base: '#0D0B0A',
-                            surface: '#151210',
-                            card: '#1C1815',
-                            hover: '#26211D',
-                            border: 'rgba(255, 255, 255, 0.08)',
-                            cream: '#FAF7F2',
-                            muted: '#A69C8F',
-                            dim: '#6E655B'
+                            base: 'rgb(var(--atelier-base-rgb) / <alpha-value>)',
+                            surface: 'rgb(var(--atelier-surface-rgb) / <alpha-value>)',
+                            card: 'rgb(var(--atelier-card-rgb) / <alpha-value>)',
+                            hover: 'rgb(var(--atelier-hover-rgb) / <alpha-value>)',
+                            border: 'var(--atelier-border)',
+                            cream: 'rgb(var(--atelier-cream-rgb) / <alpha-value>)',
+                            muted: 'rgb(var(--atelier-muted-rgb) / <alpha-value>)',
+                            dim: 'rgb(var(--atelier-dim-rgb) / <alpha-value>)'
                         },
                         flame: {
-                            glow: '#F59E0B',
-                            amber: '#D97706',
-                            soft: 'rgba(245, 158, 11, 0.12)'
+                            glow: 'rgb(var(--flame-glow-rgb) / <alpha-value>)',
+                            amber: 'rgb(var(--flame-amber-rgb) / <alpha-value>)',
+                            soft: 'var(--flame-soft)'
                         },
                         luxe: {
-                            gold: '#E5C378',
+                            gold: 'rgb(var(--luxe-gold-rgb) / <alpha-value>)',
                             rose: '#D89797',
                             sage: '#8FA189'
                         }
@@ -55,12 +71,81 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <!-- Custom Atelier Styles -->
+    <!-- Custom Atelier Styles & Theme Variables -->
     <style>
+        :root {
+            color-scheme: light;
+            /* Light Theme Palette: Artisanal Warm Alabaster, Porcelain & Burnished Amber */
+            --atelier-base-rgb: 250 247 242;       /* #FAF7F2 Warm Alabaster Linen Base */
+            --atelier-surface-rgb: 255 255 255;    /* #FFFFFF Crisp Porcelain Surface */
+            --atelier-card-rgb: 255 255 255;       /* #FFFFFF Pure Ivory Card */
+            --atelier-hover-rgb: 244 239 232;      /* #F4EFE8 Subtle Warm Parchment Hover */
+            --atelier-cream-rgb: 28 22 19;         /* #1C1613 Deep Warm Charcoal Espresso (Primary Text) */
+            --atelier-muted-rgb: 104 92 81;        /* #685C51 Refined Warm Stone (Secondary Text) */
+            --atelier-dim-rgb: 152 138 124;        /* #988A7C Subtle Warm Mineral (Tertiary Text) */
+
+            --luxe-gold-rgb: 180 120 32;           /* #B47820 Rich Burnished Molten Gold */
+            --flame-glow-rgb: 217 119 6;           /* #D97706 Radiant Amber Flame */
+            --flame-amber-rgb: 180 83 9;           /* #B45309 Warm Terracotta Flame */
+
+            --atelier-border: rgba(44, 34, 26, 0.09);
+            --flame-soft: rgba(217, 119, 6, 0.08);
+
+            --header-bg: rgba(250, 247, 242, 0.88);
+            --header-border: rgba(44, 34, 26, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --card-border: rgba(44, 34, 26, 0.08);
+            --card-hover-bg: #FFFFFF;
+            --card-hover-border: rgba(180, 120, 32, 0.35);
+
+            --scrollbar-track: #FAF7F2;
+            --scrollbar-thumb: #D8CFBF;
+            --scrollbar-thumb-hover: #B47820;
+
+            --announcement-bg: linear-gradient(90deg, #EFE8DE, #FAF5ED, #EFE8DE);
+            --newsletter-bg: linear-gradient(90deg, #F0EAE0, #FDFBF7, #F0EAE0);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
+        }
+
+        html.dark {
+            color-scheme: dark;
+            /* Dark Theme Palette: Twilight Obsidian Atelier */
+            --atelier-base-rgb: 13 11 10;          /* #0D0B0A Twilight Obsidian Base */
+            --atelier-surface-rgb: 21 18 16;       /* #151210 Deep Charcoal Surface */
+            --atelier-card-rgb: 28 24 21;          /* #1C1815 Smoked Card */
+            --atelier-hover-rgb: 38 33 29;         /* #26211D */
+            --atelier-cream-rgb: 250 247 242;      /* #FAF7F2 Cream Light Text */
+            --atelier-muted-rgb: 166 156 143;      /* #A69C8F Soft Sand Muted Text */
+            --atelier-dim-rgb: 110 101 91;         /* #6E655B */
+
+            --luxe-gold-rgb: 229 195 120;          /* #E5C378 Golden Glow */
+            --flame-glow-rgb: 245 158 11;          /* #F59E0B Vibrant Flame Glow */
+            --flame-amber-rgb: 217 119 6;          /* #D97706 Amber */
+
+            --atelier-border: rgba(255, 255, 255, 0.08);
+            --flame-soft: rgba(245, 158, 11, 0.12);
+
+            --header-bg: rgba(13, 11, 10, 0.84);
+            --header-border: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(28, 24, 21, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-bg: rgba(38, 33, 29, 0.85);
+            --card-hover-border: rgba(229, 195, 120, 0.35);
+
+            --scrollbar-track: #0D0B0A;
+            --scrollbar-thumb: #2A2420;
+            --scrollbar-thumb-hover: #D97706;
+
+            --announcement-bg: linear-gradient(90deg, #1C1510, #2A1E14, #1C1510);
+            --newsletter-bg: linear-gradient(90deg, #171310, #241C16, #171310);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+        }
+
         body {
-            background-color: #0D0B0A;
-            color: #FAF7F2;
+            background-color: rgb(var(--atelier-base-rgb));
+            color: rgb(var(--atelier-cream-rgb));
             overflow-x: hidden;
+            transition: background-color 250ms ease, color 250ms ease;
         }
 
         /* Ambient subtle grain overlay */
@@ -70,22 +155,34 @@
 
         /* Glassmorphism utility */
         .glass-header {
-            background: rgba(13, 11, 10, 0.82);
+            background: var(--header-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid var(--header-border);
+            transition: background 250ms ease, border-color 250ms ease;
         }
 
         .glass-card {
-            background: rgba(28, 24, 21, 0.7);
+            background: var(--card-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-atelier-card);
+            transition: all 250ms ease;
         }
 
         .glass-card:hover {
-            border-color: rgba(229, 195, 120, 0.35);
-            background: rgba(38, 33, 29, 0.85);
+            border-color: var(--card-hover-border);
+            background: var(--card-hover-bg);
+        }
+
+        /* Announcement and Newsletter Banners */
+        .announcement-banner {
+            background: var(--announcement-bg);
+        }
+
+        .newsletter-banner {
+            background: var(--newsletter-bg);
         }
 
         /* Nav link hover indicator */
@@ -101,7 +198,7 @@
             left: 50%;
             width: 0;
             height: 1.5px;
-            background: #E5C378;
+            background: rgb(var(--luxe-gold-rgb));
             transition: width 240ms ease, left 240ms ease;
         }
 
@@ -112,23 +209,18 @@
 
         /* Candle flame flicker animation */
         @keyframes flameFlicker {
-
-            0%,
-            100% {
+            0%, 100% {
                 transform: scale(1) rotate(-1.5deg);
                 opacity: 0.95;
             }
-
             25% {
                 transform: scale(1.08, 0.96) rotate(1deg);
                 opacity: 1;
             }
-
             50% {
                 transform: scale(0.96, 1.05) rotate(-0.5deg);
                 opacity: 0.88;
             }
-
             75% {
                 transform: scale(1.04, 1.02) rotate(2deg);
                 opacity: 1;
@@ -142,13 +234,10 @@
 
         /* Ambient glow pulse */
         @keyframes ambientGlow {
-
-            0%,
-            100% {
+            0%, 100% {
                 opacity: 0.45;
                 transform: scale(1);
             }
-
             50% {
                 opacity: 0.7;
                 transform: scale(1.08);
@@ -177,26 +266,109 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #0D0B0A;
+            background: var(--scrollbar-track);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #2A2420;
+            background: var(--scrollbar-thumb);
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #D97706;
+            background: var(--scrollbar-thumb-hover);
+        }
+
+        /* =====================================================================
+           LIGHT THEME ADAPTIVE STYLES (Overrides dark classes when in light mode)
+           ===================================================================== */
+        html:not(.dark) [class*="border-white/5"] {
+            border-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="border-white/10"] {
+            border-color: rgba(44, 34, 26, 0.09) !important;
+        }
+        html:not(.dark) [class*="border-white/15"] {
+            border-color: rgba(44, 34, 26, 0.13) !important;
+        }
+        html:not(.dark) [class*="border-white/20"] {
+            border-color: rgba(44, 34, 26, 0.18) !important;
+        }
+        html:not(.dark) [class*="border-white/30"] {
+            border-color: rgba(44, 34, 26, 0.25) !important;
+        }
+
+        html:not(.dark) [class*="bg-white/5"] {
+            background-color: rgba(44, 34, 26, 0.035) !important;
+        }
+        html:not(.dark) [class*="bg-white/10"] {
+            background-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="bg-white/20"] {
+            background-color: rgba(44, 34, 26, 0.1) !important;
+        }
+        html:not(.dark) [class*="bg-white/[0.02]"] {
+            background-color: rgba(44, 34, 26, 0.02) !important;
+        }
+
+        html:not(.dark) .hover\:text-white:hover {
+            color: #1C1613 !important;
+        }
+        html:not(.dark) .hover\:bg-white:hover {
+            background-color: #1C1613 !important;
+            color: #FAF7F2 !important;
+        }
+        html:not(.dark) .hover\:bg-white\/10:hover {
+            background-color: rgba(44, 34, 26, 0.08) !important;
+        }
+        html:not(.dark) .hover\:border-white\/30:hover {
+            border-color: rgba(44, 34, 26, 0.3) !important;
+        }
+
+        /* Hero Image & Overlay adjustments in Light Mode */
+        html:not(.dark) .hero-bg-img {
+            filter: brightness(0.95) contrast(1.05) !important;
+            opacity: 0.36 !important;
+        }
+        html:not(.dark) .hero-overlay-grad {
+            background: linear-gradient(to top, rgba(250, 247, 242, 1) 0%, rgba(250, 247, 242, 0.85) 55%, rgba(250, 247, 242, 0.45) 100%) !important;
+        }
+
+        /* Mood Filter Active Pills in Light Mode */
+        html:not(.dark) .mood-pill.bg-luxe-gold {
+            background-color: #1C1613 !important;
+            color: #FAF7F2 !important;
+            border-color: #1C1613 !important;
+        }
+        html:not(.dark) .mood-pill:not(.bg-luxe-gold) {
+            background-color: #FFFFFF !important;
+            color: #685C51 !important;
+            border-color: rgba(44, 34, 26, 0.1) !important;
+        }
+        html:not(.dark) .mood-pill:not(.bg-luxe-gold):hover {
+            color: #1C1613 !important;
+            border-color: rgba(44, 34, 26, 0.3) !important;
+            background-color: #F4EFE8 !important;
+        }
+
+        /* Card and Drawer shadow enhancement in Light Mode */
+        html:not(.dark) .bg-atelier-card {
+            box-shadow: 0 4px 18px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
+        }
+
+        /* Selection styling */
+        ::selection {
+            background-color: rgba(217, 119, 6, 0.25);
+            color: inherit;
         }
     </style>
 </head>
 
-<body class="font-sans antialiased selection:bg-amber-500/30 selection:text-white">
+<body class="font-sans antialiased">
     <div class="grain-overlay pointer-events-none fixed inset-0 z-50"></div>
 
     <!-- Announcement Bar -->
     <div
-        class="relative z-40 bg-gradient-to-r from-[#1C1510] via-[#2A1E14] to-[#1C1510] border-b border-white/5 py-2 px-4 text-center text-[11px] font-medium tracking-[0.18em] text-atelier-muted">
+        class="announcement-banner relative z-40 border-b border-white/5 py-2 px-4 text-center text-[11px] font-medium tracking-[0.18em] text-atelier-muted">
         <span class="inline-flex items-center gap-2">
             <span class="h-1.5 w-1.5 rounded-full bg-flame-glow animate-ping"></span>
             <span>COMPLIMENTARY ARTISAN MATCHES & GIFT BOX ON ALL ORDERS OVER ₹999 · HAND-CRAFTED IN INDIA</span>
@@ -230,9 +402,16 @@
                 <a href="#reviews" class="atelier-nav-link hover:text-atelier-cream">Collector Notes</a>
             </nav>
 
-            <!-- Actions: Search & Cart Drawer Toggle -->
-            <!-- Actions: Search, Account & Cart Drawer Toggle -->
+            <!-- Actions: Theme Toggle, Search, Account & Cart Drawer Toggle -->
             <div class="flex items-center gap-3 sm:gap-4">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle-btn" onclick="toggleAtelierTheme()"
+                    class="theme-toggle-btn flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
+                    title="Switch to Dark Theme" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon text-xs theme-moon-icon text-amber-700"></i>
+                    <i class="fa-solid fa-sun text-xs theme-sun-icon text-amber-400 hidden"></i>
+                </button>
+
                 <!-- Search Button -->
                 <button id="search-toggle-btn"
                     class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
@@ -329,6 +508,13 @@
             <a class="block py-2 hover:text-atelier-cream" href="#reviews">Collector Notes</a>
             <div class="pt-3 border-t border-white/10 space-y-2">
                 <div class="text-[10px] font-bold uppercase tracking-wider text-atelier-dim">Account & Sanctuary</div>
+                <button onclick="toggleAtelierTheme()" class="w-full text-left py-1 text-atelier-cream hover:text-white flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-half-stroke text-xs text-luxe-gold"></i>
+                        <span>Theme Mode</span>
+                    </span>
+                    <span id="mobile-theme-label" class="text-[10px] font-bold uppercase tracking-wider text-luxe-gold">Light</span>
+                </button>
                 <button onclick="window.sondhiAuth.openAuthModal('signin')" class="w-full text-left py-1 text-luxe-gold hover:text-white flex items-center gap-2">
                     <i class="fa-solid fa-right-to-bracket text-xs"></i> Sign In / Create Account
                 </button>
@@ -366,10 +552,10 @@
         <section
             class="relative isolate min-h-[85vh] overflow-hidden flex items-center justify-center border-b border-white/10">
             <!-- Background Image with Ambient Glow Overlays -->
-            <img class="absolute inset-0 -z-30 h-full w-full object-cover object-center filter brightness-[0.45] contrast-[1.1] transition-transform duration-1000 scale-105"
+            <img class="hero-bg-img absolute inset-0 -z-30 h-full w-full object-cover object-center filter brightness-[0.45] contrast-[1.1] transition-transform duration-1000 scale-105"
                 src="https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=2200&q=90"
                 alt="Sondhi botanical soy candle glowing in warm twilight">
-            <div class="absolute inset-0 -z-20 bg-gradient-to-t from-atelier-base via-atelier-base/60 to-transparent">
+            <div class="hero-overlay-grad absolute inset-0 -z-20 bg-gradient-to-t from-atelier-base via-atelier-base/60 to-transparent">
             </div>
             <div class="absolute inset-0 -z-10 bg-radial from-amber-500/10 via-transparent to-transparent"></div>
 
@@ -895,7 +1081,7 @@
 
         <!-- Newsletter & Concierge Section -->
         <section
-            class="relative overflow-hidden bg-gradient-to-r from-[#171310] via-[#241C16] to-[#171310] px-6 py-20 text-center border-b border-white/10">
+            class="newsletter-banner relative overflow-hidden px-6 py-20 text-center border-b border-white/10">
             <div class="mx-auto max-w-2xl">
                 <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-luxe-gold">Private Collector
                     Circle</span>

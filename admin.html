@@ -6,30 +6,46 @@
     <title>Atelier Operations & Financial Admin | Sondhi</title>
     <meta name="description" content="Store operations, candle catalog management, order fulfillment, and merchant billing portal for Sondhi Atelier.">
 
+    <!-- Theme Early Pre-paint Initializer (Avoids FOUC, defaults to Light Theme) -->
+    <meta name="color-scheme" content="light dark">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('sondhi_theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         atelier: {
-                            base: '#0D0B0A',
-                            surface: '#151210',
-                            card: '#1C1815',
-                            hover: '#26211D',
-                            border: 'rgba(255, 255, 255, 0.08)',
-                            cream: '#FAF7F2',
-                            muted: '#A69C8F',
-                            dim: '#6E655B'
+                            base: 'rgb(var(--atelier-base-rgb) / <alpha-value>)',
+                            surface: 'rgb(var(--atelier-surface-rgb) / <alpha-value>)',
+                            card: 'rgb(var(--atelier-card-rgb) / <alpha-value>)',
+                            hover: 'rgb(var(--atelier-hover-rgb) / <alpha-value>)',
+                            border: 'var(--atelier-border)',
+                            cream: 'rgb(var(--atelier-cream-rgb) / <alpha-value>)',
+                            muted: 'rgb(var(--atelier-muted-rgb) / <alpha-value>)',
+                            dim: 'rgb(var(--atelier-dim-rgb) / <alpha-value>)'
                         },
                         flame: {
-                            glow: '#F59E0B',
-                            amber: '#D97706',
-                            soft: 'rgba(245, 158, 11, 0.12)'
+                            glow: 'rgb(var(--flame-glow-rgb) / <alpha-value>)',
+                            amber: 'rgb(var(--flame-amber-rgb) / <alpha-value>)',
+                            soft: 'var(--flame-soft)'
                         },
                         luxe: {
-                            gold: '#E5C378',
+                            gold: 'rgb(var(--luxe-gold-rgb) / <alpha-value>)',
                             rose: '#D89797',
                             sage: '#8FA189'
                         }
@@ -51,47 +67,172 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+    <!-- Custom Atelier Styles & Theme Variables -->
     <style>
-        body {
-            background-color: #0D0B0A;
-            color: #FAF7F2;
-            overflow-x: hidden;
+        :root {
+            color-scheme: light;
+            --atelier-base-rgb: 250 247 242;       /* #FAF7F2 Warm Alabaster Linen Base */
+            --atelier-surface-rgb: 255 255 255;    /* #FFFFFF Crisp Porcelain Surface */
+            --atelier-card-rgb: 255 255 255;       /* #FFFFFF Pure Ivory Card */
+            --atelier-hover-rgb: 244 239 232;      /* #F4EFE8 Subtle Warm Parchment Hover */
+            --atelier-cream-rgb: 28 22 19;         /* #1C1613 Deep Warm Charcoal Espresso (Primary Text) */
+            --atelier-muted-rgb: 104 92 81;        /* #685C51 Refined Warm Stone (Secondary Text) */
+            --atelier-dim-rgb: 152 138 124;        /* #988A7C Subtle Warm Mineral (Tertiary Text) */
+
+            --luxe-gold-rgb: 180 120 32;           /* #B47820 Rich Burnished Molten Gold */
+            --flame-glow-rgb: 217 119 6;           /* #D97706 Radiant Amber Flame */
+            --flame-amber-rgb: 180 83 9;           /* #B45309 Warm Terracotta Flame */
+
+            --atelier-border: rgba(44, 34, 26, 0.09);
+            --flame-soft: rgba(217, 119, 6, 0.08);
+
+            --header-bg: rgba(250, 247, 242, 0.88);
+            --header-border: rgba(44, 34, 26, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --card-border: rgba(44, 34, 26, 0.08);
+            --card-hover-border: rgba(180, 120, 32, 0.35);
+
+            --scrollbar-track: #FAF7F2;
+            --scrollbar-thumb: #D8CFBF;
+            --scrollbar-thumb-hover: #B47820;
+
+            --tab-active-color: #B47820;
+            --tab-active-bg: rgba(180, 120, 32, 0.08);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
         }
+
+        html.dark {
+            color-scheme: dark;
+            --atelier-base-rgb: 13 11 10;          /* #0D0B0A */
+            --atelier-surface-rgb: 21 18 16;       /* #151210 */
+            --atelier-card-rgb: 28 24 21;          /* #1C1815 */
+            --atelier-hover-rgb: 38 33 29;         /* #26211D */
+            --atelier-cream-rgb: 250 247 242;      /* #FAF7F2 */
+            --atelier-muted-rgb: 166 156 143;      /* #A69C8F */
+            --atelier-dim-rgb: 110 101 91;         /* #6E655B */
+
+            --luxe-gold-rgb: 229 195 120;          /* #E5C378 */
+            --flame-glow-rgb: 245 158 11;          /* #F59E0B */
+            --flame-amber-rgb: 217 119 6;          /* #D97706 */
+
+            --atelier-border: rgba(255, 255, 255, 0.08);
+            --flame-soft: rgba(245, 158, 11, 0.12);
+
+            --header-bg: rgba(13, 11, 10, 0.9);
+            --header-border: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(28, 24, 21, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-border: rgba(229, 195, 120, 0.3);
+
+            --scrollbar-track: #0D0B0A;
+            --scrollbar-thumb: #26211D;
+            --scrollbar-thumb-hover: #E5C378;
+
+            --tab-active-color: #E5C378;
+            --tab-active-bg: rgba(229, 195, 120, 0.05);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            background-color: rgb(var(--atelier-base-rgb));
+            color: rgb(var(--atelier-cream-rgb));
+            overflow-x: hidden;
+            transition: background-color 250ms ease, color 250ms ease;
+        }
+
         .glass-header {
-            background: rgba(13, 11, 10, 0.9);
+            background: var(--header-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid var(--header-border);
+            transition: background 250ms ease, border-color 250ms ease;
         }
+
         .glass-card {
-            background: rgba(28, 24, 21, 0.75);
+            background: var(--card-bg);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-atelier-card);
+            transition: all 250ms ease;
         }
+
         .glass-card:hover {
-            border-color: rgba(229, 195, 120, 0.3);
+            border-color: var(--card-hover-border);
         }
+
         .tab-btn.active {
-            color: #E5C378;
-            border-bottom-color: #E5C378;
-            background: rgba(229, 195, 120, 0.05);
+            color: var(--tab-active-color);
+            border-bottom-color: var(--tab-active-color);
+            background: var(--tab-active-bg);
         }
+
         .portal-pill {
             transition: all 0.2s ease;
         }
         .portal-pill:hover {
             transform: translateY(-1px);
         }
+
         ::-webkit-scrollbar {
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0D0B0A;
+            background: var(--scrollbar-track);
         }
         ::-webkit-scrollbar-thumb {
-            background: #26211D;
+            background: var(--scrollbar-thumb);
             border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover);
+        }
+
+        /* Light theme adaptive overrides */
+        html:not(.dark) [class*="border-white/5"] {
+            border-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="border-white/10"] {
+            border-color: rgba(44, 34, 26, 0.09) !important;
+        }
+        html:not(.dark) [class*="border-white/15"] {
+            border-color: rgba(44, 34, 26, 0.13) !important;
+        }
+        html:not(.dark) [class*="border-white/20"] {
+            border-color: rgba(44, 34, 26, 0.18) !important;
+        }
+        html:not(.dark) [class*="border-white/30"] {
+            border-color: rgba(44, 34, 26, 0.25) !important;
+        }
+
+        html:not(.dark) [class*="bg-white/5"] {
+            background-color: rgba(44, 34, 26, 0.035) !important;
+        }
+        html:not(.dark) [class*="bg-white/10"] {
+            background-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="bg-white/20"] {
+            background-color: rgba(44, 34, 26, 0.1) !important;
+        }
+        html:not(.dark) [class*="bg-white/[0.02]"] {
+            background-color: rgba(44, 34, 26, 0.02) !important;
+        }
+
+        html:not(.dark) .hover\:text-white:hover {
+            color: #1C1613 !important;
+        }
+        html:not(.dark) .hover\:bg-white:hover {
+            background-color: #1C1613 !important;
+            color: #FAF7F2 !important;
+        }
+        html:not(.dark) .hover\:bg-white\/10:hover {
+            background-color: rgba(44, 34, 26, 0.08) !important;
+        }
+        html:not(.dark) .hover\:border-white\/30:hover {
+            border-color: rgba(44, 34, 26, 0.3) !important;
+        }
+        html:not(.dark) .bg-atelier-card {
+            box-shadow: 0 4px 18px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
         }
     </style>
 </head>
@@ -140,6 +281,10 @@
 
             <!-- Quick Action Shortcuts -->
             <div class="flex items-center gap-3">
+                <button id="theme-toggle-btn" onclick="toggleAtelierTheme()" class="theme-toggle-btn p-2 rounded-lg bg-atelier-card border border-white/15 text-atelier-muted hover:text-luxe-gold text-xs transition" title="Switch to Dark Theme" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon text-xs theme-moon-icon text-amber-700"></i>
+                    <i class="fa-solid fa-sun text-xs theme-sun-icon text-amber-400 hidden"></i>
+                </button>
                 <button onclick="openNewCandleModal()" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition shadow-lg shadow-luxe-gold/10">
                     <i class="fa-solid fa-plus"></i> Add Fragrance
                 </button>

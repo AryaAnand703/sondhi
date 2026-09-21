@@ -1193,14 +1193,70 @@
         }
     };
 
+    // ======================================================================
+    // SONDHI ATELIER — THEME ENGINE (LIGHT / DARK)
+    // ======================================================================
+    const ThemeEngine = {
+        getTheme() {
+            return localStorage.getItem('sondhi_theme') || 'light';
+        },
+        setTheme(theme) {
+            if (theme !== 'dark' && theme !== 'light') theme = 'light';
+            localStorage.setItem('sondhi_theme', theme);
+            this.applyTheme(theme);
+        },
+        toggleTheme() {
+            const current = this.getTheme();
+            const next = current === 'dark' ? 'light' : 'dark';
+            this.setTheme(next);
+            return next;
+        },
+        applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.documentElement.classList.toggle('dark', isDark);
+            document.documentElement.setAttribute('data-theme', theme);
+
+            // Update all toggle buttons on page
+            document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+                btn.setAttribute('title', isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme');
+                btn.setAttribute('aria-label', isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme');
+            });
+
+            // Update icons: in light mode, show moon (to switch to dark); in dark mode, show sun
+            document.querySelectorAll('.theme-moon-icon').forEach(el => {
+                el.classList.toggle('hidden', isDark);
+            });
+            document.querySelectorAll('.theme-sun-icon').forEach(el => {
+                el.classList.toggle('hidden', !isDark);
+            });
+
+            const mobileLabel = document.querySelector('#mobile-theme-label');
+            if (mobileLabel) {
+                mobileLabel.textContent = isDark ? 'Dark' : 'Light';
+            }
+        },
+        init() {
+            this.applyTheme(this.getTheme());
+        }
+    };
+
+    // Expose globally
+    window.sondhiTheme = ThemeEngine;
+    window.toggleAtelierTheme = () => ThemeEngine.toggleTheme();
+    window.updateThemeUI = () => ThemeEngine.applyTheme(ThemeEngine.getTheme());
+
     // Auto initialize on load
+    ThemeEngine.init();
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => Auth.init());
+        document.addEventListener('DOMContentLoaded', () => {
+            ThemeEngine.init();
+            Auth.init();
+        });
     } else {
         Auth.init();
     }
 
-    // Expose globally
     window.sondhiAuth = Auth;
 
 })(window);
+
