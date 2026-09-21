@@ -636,6 +636,19 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartUI();
     initCustomCandleStudio();
 
+    const welcomeOverlay = document.querySelector('#welcome-overlay');
+    const welcomeClose = document.querySelector('#welcome-overlay-close');
+    const closeWelcomeOverlay = () => {
+        welcomeOverlay?.classList.add('hidden');
+    };
+
+    welcomeClose?.addEventListener('click', closeWelcomeOverlay);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeWelcomeOverlay();
+        }
+    });
+
     // Mood Filters
     const moodPills = document.querySelectorAll('.mood-pill');
     moodPills.forEach(pill => {
