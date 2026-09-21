@@ -100,7 +100,7 @@
     <!-- Universal Portal Switcher Banner -->
     <div class="bg-atelier-card/90 border-b border-white/10 px-4 py-2 text-xs">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-atelier-muted">
+            <div class="flex items-center gap-2 text-atelier-muted" id="portal-user-badge">
                 <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-flame-amber animate-pulse"></span>
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-flame-glow">Atelier Operations:</span>
                 <span class="text-[11px] text-atelier-cream">Active Role — <strong class="text-white">Store Admin / Master Artisan</strong></span>
@@ -489,6 +489,8 @@
         <span id="toast-message">Operation successful</span>
     </div>
 
+    <!-- Core Auth & Admin Logic -->
+    <script src="auth.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

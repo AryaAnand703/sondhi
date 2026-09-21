@@ -103,49 +103,7 @@ const profileState = {
             subtotal: 1299
         }
     ],
-    orders: [
-        {
-            id: 'SND-9014',
-            date: 'September 12, 2026',
-            status: 'Pouring & Curing',
-            statusCode: 'pouring',
-            statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control',
-            itemsCount: 3,
-            total: 2647,
-            estimatedDelivery: 'Sep 21, 2026',
-            candles: [
-                'Lavender & Golden Amber (280g) × 2',
-                'Rain on Earth Mitti Attar (260g) × 1'
-            ]
-        },
-        {
-            id: 'SND-8890',
-            date: 'August 15, 2026',
-            status: 'Delivered',
-            statusCode: 'delivered',
-            statusDesc: 'Delivered via White-Glove Courier to Mumbai Sanctuary',
-            itemsCount: 1,
-            total: 2499,
-            estimatedDelivery: 'Delivered Aug 18, 2026',
-            candles: [
-                'Flame Circle Q3 Reserve Box (Monsoon Vetiver)'
-            ]
-        },
-        {
-            id: 'SND-8412',
-            date: 'June 10, 2026',
-            status: 'Delivered',
-            statusCode: 'delivered',
-            statusDesc: 'Delivered with bespoke wax sealing',
-            itemsCount: 2,
-            total: 2248,
-            estimatedDelivery: 'Delivered Jun 14, 2026',
-            candles: [
-                'Sandalwood & Velvet Oud (300g) × 1',
-                'Neroli Blossom & Petitgrain (260g) × 1'
-            ]
-        }
-    ],
+    orders: [],
     formulas: [
         {
             id: 'FORMULA-771',
@@ -190,19 +148,80 @@ const profileState = {
     ]
 };
 
+// --- Sync Profile With Central Auth State ---
+function syncProfileWithAuth() {
+    if (!window.sondhiAuth) return;
+    const user = window.sondhiAuth.getCurrentUser();
+    if (user) {
+        const names = (user.fullName || 'Patron').split(' ');
+        profileState.user.firstName = names[0] || 'Patron';
+        profileState.user.lastName = names.slice(1).join(' ') || '';
+        profileState.user.email = user.email || '';
+        profileState.user.phone = user.phone || '+91 98765 43210';
+        profileState.user.tier = user.tier || 'Patron';
+        profileState.user.points = user.points || 0;
+        profileState.orders = user.orders || [];
+
+        if (user.addresses && user.addresses.length) {
+            profileState.addresses = user.addresses;
+        }
+        if (user.formulas && user.formulas.length) {
+            profileState.formulas = user.formulas;
+        }
+
+        // Populate form inputs
+        const inputFirst = document.getElementById('input-first-name');
+        const inputLast = document.getElementById('input-last-name');
+        const inputEmail = document.getElementById('input-email');
+        const inputPhone = document.getElementById('input-phone');
+        if (inputFirst) inputFirst.value = profileState.user.firstName;
+        if (inputLast) inputLast.value = profileState.user.lastName;
+        if (inputEmail) inputEmail.value = profileState.user.email;
+        if (inputPhone) inputPhone.value = profileState.user.phone;
+    }
+}
+
 // --- DOM Loaded Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    renderPaymentMethods();
-    renderInvoices();
-    renderOrders();
-    renderFormulas();
-    renderAddresses();
-    updateIdentityHeader();
+    const initProfilePage = () => {
+        syncProfileWithAuth();
+        renderPaymentMethods();
+        renderInvoices();
+        renderOrders();
+        renderFormulas();
+        renderAddresses();
+        updateIdentityHeader();
 
-    // Check hash for direct tab navigation
-    const hash = window.location.hash.replace('#', '');
-    if (['overview', 'billing', 'orders', 'formulas', 'addresses'].includes(hash)) {
-        switchProfileTab(hash);
+        // Check hash for direct tab navigation
+        const hash = window.location.hash.replace('#', '');
+        if (['overview', 'billing', 'orders', 'formulas', 'addresses'].includes(hash)) {
+            switchProfileTab(hash);
+        }
+    };
+
+    if (window.sondhiAuth) {
+        if (!window.sondhiAuth.isAuthenticated()) {
+            window.sondhiAuth.openAuthModal(
+                'signin',
+                'Please sign in or create an account to view your sanctuary profile and order history.',
+                () => {
+                    initProfilePage();
+                }
+            );
+        } else {
+            initProfilePage();
+        }
+
+        // Listen for auth or order changes
+        window.addEventListener('sondhi_auth_change', () => {
+            initProfilePage();
+        });
+        window.addEventListener('sondhi_order_placed', () => {
+            syncProfileWithAuth();
+            renderOrders();
+        });
+    } else {
+        initProfilePage();
     }
 });
 
@@ -303,7 +322,31 @@ function renderInvoices(filterText = '') {
 // --- Render Orders ---
 function renderOrders() {
     const container = document.getElementById('orders-list-container');
+    const label = document.getElementById('orders-count-label');
+    const statTotal = document.getElementById('stat-total-orders');
     if (!container) return;
+
+    const count = profileState.orders.length;
+    if (label) label.textContent = `${count} ${count === 1 ? 'Commission' : 'Commissions'}`;
+    if (statTotal) statTotal.textContent = count;
+
+    if (count === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12 px-4 rounded-xl border border-white/5 bg-atelier-card/40">
+                <div class="w-12 h-12 rounded-full bg-luxe-gold/10 border border-luxe-gold/30 flex items-center justify-center text-luxe-gold text-lg mx-auto mb-3">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h4 class="font-display text-lg font-semibold text-atelier-cream">No Commission History Yet</h4>
+                <p class="text-xs text-atelier-muted max-w-sm mx-auto mt-1 mb-5">
+                    Your personal sanctuary commission history will appear here once you order your first hand-crafted fragrance candle.
+                </p>
+                <a href="index.html#collection" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                    <i class="fa-solid fa-fire text-xs"></i> Explore Signature Scents
+                </a>
+            </div>
+        `;
+        return;
+    }
 
     container.innerHTML = profileState.orders.map(order => {
         const isPouring = order.statusCode === 'pouring';
@@ -328,13 +371,13 @@ function renderOrders() {
                 </div>
 
                 <div class="text-xs text-atelier-muted space-y-1 mb-4">
-                    ${order.candles.map(c => `<div class="flex items-center gap-2"><i class="fa-regular fa-circle-dot text-[8px] text-luxe-gold"></i><span>${c}</span></div>`).join('')}
+                    ${(order.candles || []).map(c => `<div class="flex items-center gap-2"><i class="fa-regular fa-circle-dot text-[8px] text-luxe-gold"></i><span>${c}</span></div>`).join('')}
                 </div>
 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pt-3 border-t border-white/5">
                     <div class="text-atelier-dim flex items-center gap-2">
                         <i class="fa-solid fa-truck-fast text-xs"></i>
-                        <span>${order.statusDesc} · <strong class="text-atelier-muted">${order.estimatedDelivery}</strong></span>
+                        <span>${order.statusDesc || 'In transit'} · <strong class="text-atelier-muted">${order.estimatedDelivery || '7-9 Business Days'}</strong></span>
                     </div>
                     <button onclick="reorderBatch('${order.id}')" class="px-3 py-1.5 rounded-lg border border-luxe-gold/30 text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base font-semibold uppercase tracking-wider text-[10px] transition self-start sm:self-auto">
                         Commission Reorder
@@ -585,28 +628,46 @@ function saveProfileDetails() {
     const first = document.getElementById('input-first-name').value;
     const last = document.getElementById('input-last-name').value;
     const email = document.getElementById('input-email').value;
+    const phone = document.getElementById('input-phone') ? document.getElementById('input-phone').value : '';
 
     profileState.user.firstName = first;
     profileState.user.lastName = last;
     profileState.user.email = email;
+    profileState.user.phone = phone;
+
+    if (window.sondhiAuth) {
+        window.sondhiAuth.updateUser({
+            fullName: `${first} ${last}`.trim(),
+            email: email,
+            phone: phone
+        });
+    }
 
     updateIdentityHeader();
     showToast('Patron profile credentials updated.');
 }
 
 function updateIdentityHeader() {
-    const fullName = `${profileState.user.firstName} ${profileState.user.lastName}`;
-    const initials = `${profileState.user.firstName[0] || ''}${profileState.user.lastName[0] || ''}`;
+    const fullName = `${profileState.user.firstName} ${profileState.user.lastName}`.trim() || 'Patron';
+    const initials = `${(profileState.user.firstName[0] || 'P')}${(profileState.user.lastName[0] || '')}`.toUpperCase();
 
     const heroName = document.getElementById('hero-user-name');
     const headerName = document.getElementById('header-user-name');
     const heroEmail = document.getElementById('hero-user-email');
     const initialsEl = document.getElementById('profile-avatar-initials');
+    const avatarEl = document.getElementById('header-user-avatar');
+    const tierEl = document.getElementById('header-user-tier');
+    const statRewards = document.getElementById('stat-rewards-points');
+    const statBespoke = document.getElementById('stat-bespoke-formulas');
 
     if (heroName) heroName.textContent = fullName;
     if (headerName) headerName.textContent = fullName;
-    if (heroEmail) heroEmail.textContent = `${profileState.user.email} · Client since October 2024`;
+    if (heroEmail) heroEmail.textContent = `${profileState.user.email} · Client since 2026`;
     if (initialsEl) initialsEl.textContent = initials;
+    if (avatarEl) avatarEl.textContent = initials;
+    if (tierEl) tierEl.textContent = profileState.user.tier || 'Patron';
+    if (statRewards) statRewards.textContent = (profileState.user.points || 0).toLocaleString();
+    if (statBespoke) statBespoke.textContent = (profileState.formulas || []).length;
 }
 
 function manageMembershipModal() {

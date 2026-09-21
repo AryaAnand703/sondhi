@@ -194,8 +194,23 @@ const adminState = {
     ]
 };
 
-// --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
+// --- Section Auth Check & Initialization ---
+function initAdminPage() {
+    if (window.sondhiAuth) {
+        const globalOrders = window.sondhiAuth.getAllOrders();
+        if (globalOrders && globalOrders.length) {
+            adminState.orders = globalOrders.map(o => ({
+                id: o.id,
+                customer: o.customer || o.customerName || 'Patron',
+                tier: o.tier || 'Patron',
+                commission: o.commission || (Array.isArray(o.candles) ? o.candles.join(', ') : 'Botanical Candle'),
+                total: o.total || 0,
+                status: o.status || 'Pouring & Curing',
+                date: o.date || 'Today'
+            }));
+        }
+    }
+
     renderAdminOrders('all');
     renderAdminProducts();
     renderAdminBilling();
@@ -205,6 +220,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const hash = window.location.hash.replace('#', '');
     if (['orders', 'products', 'billing', 'supplies', 'concierge'].includes(hash)) {
         switchAdminTab(hash);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.sondhiAuth) {
+        if (!window.sondhiAuth.isSectionUnlocked('admin')) {
+            window.sondhiAuth.openSectionPassModal('admin', () => {
+                initAdminPage();
+            });
+        } else {
+            initAdminPage();
+        }
+
+        window.addEventListener('sondhi_order_placed', () => {
+            initAdminPage();
+        });
+    } else {
+        initAdminPage();
     }
 });
 
@@ -298,6 +331,10 @@ function advanceOrderStatus(orderId, newStatus) {
     const order = adminState.orders.find(o => o.id === orderId);
     if (order) {
         order.status = newStatus;
+        if (window.sondhiAuth) {
+            const code = newStatus === 'Pouring & Curing' ? 'pouring' : (newStatus === 'Dispatched' ? 'dispatched' : 'delivered');
+            window.sondhiAuth.updateOrderStatus(orderId, newStatus, code);
+        }
         renderAdminOrders('all');
         showToast(`Order ${orderId} moved to '${newStatus}'.`);
     }

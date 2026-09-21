@@ -767,11 +767,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Your bag is empty. Choose a fragrance to proceed.');
                 return;
             }
-            alert('🕯️ Order Confirmed!\n\nThank you for choosing Sondhi. Our artisans will hand-pour, pack, and ship your botanical candles with great care.');
-            state.cart = [];
-            saveCart();
-            closeCart();
-            showToast('Order placed successfully!');
+
+            // Check if user is authenticated
+            if (window.sondhiAuth && !window.sondhiAuth.isAuthenticated()) {
+                window.sondhiAuth.openAuthModal(
+                    'signin',
+                    'Please sign in or create an account to commission your candles and track your order.',
+                    () => {
+                        // After successful login, trigger checkout
+                        checkoutBtn.click();
+                    }
+                );
+                return;
+            }
+
+            // Calculate totals
+            const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const discountAmount = state.discount ? subtotal * state.discount.rate : 0;
+            const taxable = subtotal - discountAmount;
+            const gst = taxable * 0.18;
+            const finalTotal = Math.round(taxable + gst);
+
+            const orderData = {
+                total: finalTotal,
+                items: state.cart.map(item => ({
+                    name: item.name + (item.weight ? ` (${item.weight})` : ''),
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                candles: state.cart.map(item => `${item.name} (${item.weight || '280g'}) × ${item.quantity}`),
+                status: 'Pouring & Curing',
+                statusCode: 'pouring',
+                statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control'
+            };
+
+            if (window.sondhiAuth) {
+                const result = window.sondhiAuth.addUserOrder(orderData);
+                if (result.success) {
+                    state.cart = [];
+                    state.discount = null;
+                    saveCart();
+                    closeCart();
+                    window.sondhiAuth.showOrderSuccessModal(result.order);
+                } else {
+                    showToast(result.message || 'Failed to commission order.', true);
+                }
+            } else {
+                alert('🕯️ Order Confirmed!\n\nThank you for choosing Sondhi. Our artisans will hand-pour, pack, and ship your botanical candles with great care.');
+                state.cart = [];
+                saveCart();
+                closeCart();
+                showToast('Order placed successfully!');
+            }
         });
     }
 

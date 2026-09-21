@@ -251,7 +251,7 @@
                             class="fa-solid fa-chevron-down text-[8px] text-atelier-dim group-hover:text-luxe-gold transition"></i>
                     </button>
                     <!-- Dropdown Content -->
-                    <div
+                    <div id="account-dropdown-content"
                         class="absolute right-0 mt-2 w-64 rounded-2xl bg-atelier-surface border border-white/15 p-2.5 shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition duration-200 z-50">
                         <div
                             class="px-3 py-1.5 border-b border-white/10 text-[9px] uppercase tracking-widest text-atelier-dim font-bold">
@@ -328,16 +328,21 @@
             <a class="block py-2 hover:text-atelier-cream" href="#story">Our Atelier</a>
             <a class="block py-2 hover:text-atelier-cream" href="#reviews">Collector Notes</a>
             <div class="pt-3 border-t border-white/10 space-y-2">
-                <div class="text-[10px] font-bold uppercase tracking-wider text-atelier-dim">Atelier Portals & Billing
-                </div>
-                <a class="block py-1 text-luxe-gold hover:text-white flex items-center gap-2" href="profile.html">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-atelier-dim">Account & Sanctuary</div>
+                <button onclick="window.sondhiAuth.openAuthModal('signin')" class="w-full text-left py-1 text-luxe-gold hover:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket text-xs"></i> Sign In / Create Account
+                </button>
+                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="profile.html#orders">
+                    <i class="fa-solid fa-box-archive text-xs"></i> My Order History
+                </a>
+                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="profile.html">
                     <i class="fa-solid fa-user text-xs"></i> Client Profile & Billing
                 </a>
                 <a class="block py-1 text-flame-glow hover:text-white flex items-center gap-2" href="admin.html">
-                    <i class="fa-solid fa-shield-halved text-xs"></i> Atelier Admin Dashboard
+                    <i class="fa-solid fa-shield-halved text-xs"></i> Atelier Admin (Pass Required)
                 </a>
                 <a class="block py-1 text-red-400 hover:text-white flex items-center gap-2" href="superadmin.html">
-                    <i class="fa-solid fa-crown text-xs"></i> Super Admin Governance
+                    <i class="fa-solid fa-crown text-xs"></i> Super Admin (Pass Required)
                 </a>
             </div>
         </div>
@@ -1115,7 +1120,8 @@
         </div>
     </footer>
 
-    <!-- App Logic -->
+    <!-- Core Auth & App Logic -->
+    <script src="auth.js"></script>
     <script src="app.js"></script>
 </body>
 

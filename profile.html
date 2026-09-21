@@ -111,7 +111,7 @@
     <!-- Universal Portal Switcher Banner -->
     <div class="bg-atelier-card/90 border-b border-white/10 px-4 py-2 text-xs">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-atelier-muted">
+            <div class="flex items-center gap-2 text-atelier-muted" id="portal-user-badge">
                 <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-luxe-gold animate-pulse"></span>
                 <span class="text-[11px] uppercase tracking-wider font-semibold text-luxe-gold">Atelier Environment:</span>
                 <span class="text-[11px] text-atelier-cream">Active Mode — <strong class="text-white">Patron / Collector</strong></span>
@@ -162,14 +162,22 @@
                 <a href="index.html" class="hover:text-atelier-cream transition">Back to Store</a>
             </nav>
 
-            <!-- User Quick Badge -->
+            <!-- User Quick Badge & Actions -->
             <div class="flex items-center gap-3">
                 <div class="text-right hidden sm:block">
                     <div id="header-user-name" class="text-xs font-semibold text-atelier-cream">Arya Anand</div>
-                    <div class="text-[10px] text-luxe-gold uppercase tracking-wider">Flame Circle Patron</div>
+                    <div class="text-[10px] text-luxe-gold uppercase tracking-wider" id="header-user-tier">Flame Circle Patron</div>
                 </div>
-                <div class="h-10 w-10 rounded-full border border-luxe-gold/40 bg-flame-soft flex items-center justify-center text-luxe-gold font-bold text-sm">
+                <div id="header-user-avatar" class="h-10 w-10 rounded-full border border-luxe-gold/40 bg-flame-soft flex items-center justify-center text-luxe-gold font-bold text-sm">
                     AA
+                </div>
+                <div class="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-3">
+                    <button onclick="window.sondhiAuth.openAuthModal('signin', 'Switch to another patron account')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-atelier-muted hover:text-luxe-gold text-xs transition" title="Switch Account">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    </button>
+                    <button onclick="window.sondhiAuth.logout(); window.location.reload();" class="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/10 text-atelier-muted hover:text-red-400 text-xs transition" title="Sign Out">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -637,7 +645,8 @@
         <span id="toast-message">Action completed successfully</span>
     </div>
 
-    <!-- Client Logic -->
+    <!-- Core Auth & Client Logic -->
+    <script src="auth.js"></script>
     <script src="profile.js"></script>
 </body>
 </html>

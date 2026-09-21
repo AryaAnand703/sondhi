@@ -149,8 +149,23 @@ const superAdminState = {
     }
 };
 
-// --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
+// --- Section Auth Check & Initialization ---
+function initSuperAdminPage() {
+    if (window.sondhiAuth) {
+        const storedUsers = window.sondhiAuth.getAllUsers();
+        if (storedUsers && storedUsers.length) {
+            superAdminState.users = storedUsers.map(u => ({
+                id: u.id,
+                name: u.fullName,
+                email: u.email,
+                role: u.role === 'superadmin' ? 'Super Admin' : (u.role === 'admin' ? 'Admin' : 'Customer'),
+                permissions: u.role === 'superadmin' ? 'Tier 0 · Full Platform Root Access' : (u.role === 'admin' ? 'Tier 1 · Atelier Artisan & Order Manager' : 'Tier 3 · Patron & Collector'),
+                status: 'Active',
+                lastActive: 'Active session'
+            }));
+        }
+    }
+
     renderUsers();
     renderAuditLogs();
     renderSubscriptionTiers();
@@ -158,6 +173,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const hash = window.location.hash.replace('#', '');
     if (['users', 'billing', 'audit', 'settings'].includes(hash)) {
         switchSuperAdminTab(hash);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.sondhiAuth) {
+        if (!window.sondhiAuth.isSectionUnlocked('superadmin')) {
+            window.sondhiAuth.openSectionPassModal('superadmin', () => {
+                initSuperAdminPage();
+            });
+        } else {
+            initSuperAdminPage();
+        }
+
+        window.addEventListener('sondhi_auth_change', () => {
+            initSuperAdminPage();
+        });
+    } else {
+        initSuperAdminPage();
     }
 });
 
