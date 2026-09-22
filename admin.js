@@ -2,6 +2,9 @@
 // SONDHI ATELIER — ADMIN OPERATIONS & BILLING LOGIC
 // ==========================================================================
 
+const ADMIN_PRODUCTS_KEY = 'sondhi_admin_products';
+const ADMIN_PRODUCT_REQUESTS_KEY = 'sondhi_admin_product_requests';
+
 const adminState = {
     payoutBalance: 184520,
     orders: [
@@ -191,11 +194,17 @@ const adminState = {
             wick: 'Crackling Wood',
             date: 'Yesterday'
         }
-    ]
+    ],
+    productRequests: []
 };
 
 // --- Section Auth Check & Initialization ---
 function initAdminPage() {
+    const storedProducts = JSON.parse(localStorage.getItem(ADMIN_PRODUCTS_KEY) || 'null');
+    const storedRequests = JSON.parse(localStorage.getItem(ADMIN_PRODUCT_REQUESTS_KEY) || '[]');
+    if (Array.isArray(storedProducts) && storedProducts.length) adminState.products = storedProducts;
+    adminState.productRequests = Array.isArray(storedRequests) ? storedRequests : [];
+
     if (window.sondhiAuth) {
         const globalOrders = window.sondhiAuth.getAllOrders();
         if (globalOrders && globalOrders.length) {
@@ -213,6 +222,7 @@ function initAdminPage() {
 
     renderAdminOrders('all');
     renderAdminProducts();
+    renderProductRequests();
     renderAdminBilling();
     renderSupplies();
     renderConciergeQueue();
@@ -341,7 +351,41 @@ function advanceOrderStatus(orderId, newStatus) {
 }
 
 function printPackingSlip(orderId) {
-    showToast(`Generating artisan certification & packing slip for ${orderId}...`);
+    const order = adminState.orders.find(item => item.id === orderId);
+    if (!order) return;
+
+    const billWindow = window.open('', '_blank', 'width=800,height=900');
+    if (!billWindow) {
+        showToast('Allow pop-ups to print this bill.', true);
+        return;
+    }
+
+    billWindow.document.write(`
+        <!doctype html>
+        <html><head><title>Sondhi Bill ${order.id}</title>
+        <style>
+            body { font-family: Georgia, serif; color: #211914; margin: 48px; }
+            header { display: flex; justify-content: space-between; border-bottom: 2px solid #b47820; padding-bottom: 18px; }
+            h1 { margin: 0; letter-spacing: 0.16em; font-size: 24px; }
+            h2 { margin-top: 42px; font-size: 18px; }
+            .muted { color: #75695e; font: 13px Arial, sans-serif; }
+            .summary { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 28px; font-family: Arial, sans-serif; font-size: 13px; }
+            th, td { border-bottom: 1px solid #ddd4c8; padding: 12px 0; text-align: left; }
+            th:last-child, td:last-child { text-align: right; }
+            .total { font-size: 20px; font-weight: bold; color: #9b6417; }
+            footer { margin-top: 64px; border-top: 1px solid #ddd4c8; padding-top: 16px; }
+            @media print { body { margin: 24px; } }
+        </style></head><body>
+            <header><div><h1>SONDHI</h1><div class="muted">Botanical Candles Atelier</div></div><div><strong>INVOICE</strong><br><span class="muted">${order.id}</span></div></header>
+            <div class="summary"><div><strong>Bill To</strong><br>${order.customer}<br><span class="muted">${order.tier}</span></div><div><strong>Order Date</strong><br>${order.date}<br><span class="muted">Status: ${order.status}</span></div></div>
+            <h2>Order Details</h2>
+            <table><thead><tr><th>Item / Commission</th><th>Amount</th></tr></thead><tbody><tr><td>${order.commission}</td><td>₹${order.total.toLocaleString('en-IN')}</td></tr><tr><td><strong>Total</strong></td><td class="total">₹${order.total.toLocaleString('en-IN')}</td></tr></tbody></table>
+            <footer class="muted">Thank you for choosing Sondhi. Hand-crafted in India.</footer>
+            <script>window.onload = () => { window.print(); };</script>
+        </body></html>
+    `);
+    billWindow.document.close();
 }
 
 // --- Product Catalog Management ---
@@ -405,6 +449,7 @@ function submitNewCandle() {
     };
 
     adminState.products.push(newProd);
+    localStorage.setItem(ADMIN_PRODUCTS_KEY, JSON.stringify(adminState.products));
     closeModal('modal-new-candle');
     document.getElementById('new-candle-form').reset();
     renderAdminProducts();
@@ -415,6 +460,7 @@ function toggleProductStatus(id) {
     const prod = adminState.products.find(p => p.id === id);
     if (prod) {
         prod.active = !prod.active;
+        localStorage.setItem(ADMIN_PRODUCTS_KEY, JSON.stringify(adminState.products));
         renderAdminProducts();
         showToast(`'${prod.name}' status updated to ${prod.active ? 'Available' : 'Archived'}.`);
     }
@@ -423,12 +469,56 @@ function toggleProductStatus(id) {
 function editProductPrompt(id) {
     const prod = adminState.products.find(p => p.id === id);
     if (!prod) return;
-    const newPrice = prompt(`Update retail price for ${prod.name} (Current: ₹${prod.price}):`, prod.price);
-    if (newPrice && !isNaN(newPrice)) {
-        prod.price = parseInt(newPrice, 10);
-        renderAdminProducts();
-        showToast(`Price for ${prod.name} updated to ₹${prod.price}.`);
+    const newPrice = prompt(`Update retail price for ${prod.name}:`, prod.price);
+    if (!newPrice || isNaN(newPrice) || Number(newPrice) < 0) return;
+    const newStock = prompt(`Update stock units for ${prod.name}:`, prod.stock);
+    if (newStock === null || isNaN(newStock) || Number(newStock) < 0) return;
+    prod.price = parseInt(newPrice, 10);
+    prod.stock = parseInt(newStock, 10);
+    localStorage.setItem(ADMIN_PRODUCTS_KEY, JSON.stringify(adminState.products));
+    renderAdminProducts();
+    showToast(`${prod.name} inventory updated: ${prod.stock} units at ₹${prod.price}.`);
+}
+
+function renderProductRequests() {
+    const container = document.getElementById('product-requests-list');
+    if (!container) return;
+    if (!adminState.productRequests.length) {
+        container.innerHTML = '<p class="text-xs text-atelier-muted">No product requests submitted yet.</p>';
+        return;
     }
+    container.innerHTML = adminState.productRequests.map(request => `
+        <div class="flex flex-col gap-2 rounded-xl border border-white/10 bg-atelier-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="font-semibold text-atelier-cream">${request.name}</div>
+                <div class="text-[11px] text-atelier-muted">${request.category} · ₹${request.price.toLocaleString('en-IN')} · ${request.notes || 'No notes'}</div>
+            </div>
+            <span class="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-400">${request.status}</span>
+        </div>
+    `).join('');
+}
+
+function submitProductRequest() {
+    const name = document.getElementById('request-product-name').value.trim();
+    const category = document.getElementById('request-product-category').value;
+    const price = parseInt(document.getElementById('request-product-price').value, 10);
+    const notes = document.getElementById('request-product-notes').value.trim();
+    if (!name || isNaN(price) || price < 0) return;
+
+    adminState.productRequests.unshift({
+        id: `REQ-PROD-${Date.now()}`,
+        name,
+        category,
+        price,
+        notes,
+        status: 'Awaiting Approval',
+        requestedAt: new Date().toLocaleDateString('en-IN')
+    });
+    localStorage.setItem(ADMIN_PRODUCT_REQUESTS_KEY, JSON.stringify(adminState.productRequests));
+    closeModal('modal-product-request');
+    document.getElementById('product-request-form').reset();
+    renderProductRequests();
+    showToast(`Product request for '${name}' sent for approval.`);
 }
 
 // --- Store Billing & Merchant Payouts Section ---
