@@ -1,0 +1,1605 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Sondhi | Artisanal Candle Atelier</title>
+    <meta name="description"
+        content="Hand-poured 100% botanical soy candles, bespoke sensory formulations, and slow fragrances crafted for meaningful spaces.">
+
+    <!-- Theme Early Pre-paint Initializer (Avoids FOUC, defaults to Light Theme) -->
+    <meta name="color-scheme" content="light dark">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('sondhi_theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        atelier: {
+                            base: 'rgb(var(--atelier-base-rgb) / <alpha-value>)',
+                            surface: 'rgb(var(--atelier-surface-rgb) / <alpha-value>)',
+                            card: 'rgb(var(--atelier-card-rgb) / <alpha-value>)',
+                            hover: 'rgb(var(--atelier-hover-rgb) / <alpha-value>)',
+                            border: 'var(--atelier-border)',
+                            cream: 'rgb(var(--atelier-cream-rgb) / <alpha-value>)',
+                            muted: 'rgb(var(--atelier-muted-rgb) / <alpha-value>)',
+                            dim: 'rgb(var(--atelier-dim-rgb) / <alpha-value>)'
+                        },
+                        flame: {
+                            glow: 'rgb(var(--flame-glow-rgb) / <alpha-value>)',
+                            amber: 'rgb(var(--flame-amber-rgb) / <alpha-value>)',
+                            soft: 'var(--flame-soft)'
+                        },
+                        luxe: {
+                            gold: 'rgb(var(--luxe-gold-rgb) / <alpha-value>)',
+                            rose: '#D89797',
+                            sage: '#8FA189'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Custom Atelier Styles & Theme Variables -->
+    <style>
+        :root {
+            color-scheme: light;
+            /* Light Theme Palette: Artisanal Warm Alabaster, Porcelain & Burnished Amber */
+            --atelier-base-rgb: 250 247 242;       /* #FAF7F2 Warm Alabaster Linen Base */
+            --atelier-surface-rgb: 255 255 255;    /* #FFFFFF Crisp Porcelain Surface */
+            --atelier-card-rgb: 255 255 255;       /* #FFFFFF Pure Ivory Card */
+            --atelier-hover-rgb: 244 239 232;      /* #F4EFE8 Subtle Warm Parchment Hover */
+            --atelier-cream-rgb: 28 22 19;         /* #1C1613 Deep Warm Charcoal Espresso (Primary Text) */
+            --atelier-muted-rgb: 104 92 81;        /* #685C51 Refined Warm Stone (Secondary Text) */
+            --atelier-dim-rgb: 152 138 124;        /* #988A7C Subtle Warm Mineral (Tertiary Text) */
+
+            --luxe-gold-rgb: 180 120 32;           /* #B47820 Rich Burnished Molten Gold */
+            --flame-glow-rgb: 217 119 6;           /* #D97706 Radiant Amber Flame */
+            --flame-amber-rgb: 180 83 9;           /* #B45309 Warm Terracotta Flame */
+
+            --atelier-border: rgba(44, 34, 26, 0.09);
+            --flame-soft: rgba(217, 119, 6, 0.08);
+
+            --header-bg: rgba(250, 247, 242, 0.88);
+            --header-border: rgba(44, 34, 26, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --card-border: rgba(44, 34, 26, 0.08);
+            --card-hover-bg: #FFFFFF;
+            --card-hover-border: rgba(180, 120, 32, 0.35);
+
+            --scrollbar-track: #FAF7F2;
+            --scrollbar-thumb: #D8CFBF;
+            --scrollbar-thumb-hover: #B47820;
+
+            --announcement-bg: linear-gradient(90deg, #EFE8DE, #FAF5ED, #EFE8DE);
+            --newsletter-bg: linear-gradient(90deg, #F0EAE0, #FDFBF7, #F0EAE0);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
+        }
+
+        html.dark {
+            color-scheme: dark;
+            /* Dark Theme Palette: Twilight Obsidian Atelier */
+            --atelier-base-rgb: 13 11 10;          /* #0D0B0A Twilight Obsidian Base */
+            --atelier-surface-rgb: 21 18 16;       /* #151210 Deep Charcoal Surface */
+            --atelier-card-rgb: 28 24 21;          /* #1C1815 Smoked Card */
+            --atelier-hover-rgb: 38 33 29;         /* #26211D */
+            --atelier-cream-rgb: 250 247 242;      /* #FAF7F2 Cream Light Text */
+            --atelier-muted-rgb: 166 156 143;      /* #A69C8F Soft Sand Muted Text */
+            --atelier-dim-rgb: 110 101 91;         /* #6E655B */
+
+            --luxe-gold-rgb: 229 195 120;          /* #E5C378 Golden Glow */
+            --flame-glow-rgb: 245 158 11;          /* #F59E0B Vibrant Flame Glow */
+            --flame-amber-rgb: 217 119 6;          /* #D97706 Amber */
+
+            --atelier-border: rgba(255, 255, 255, 0.08);
+            --flame-soft: rgba(245, 158, 11, 0.12);
+
+            --header-bg: rgba(13, 11, 10, 0.84);
+            --header-border: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(28, 24, 21, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-bg: rgba(38, 33, 29, 0.85);
+            --card-hover-border: rgba(229, 195, 120, 0.35);
+
+            --scrollbar-track: #0D0B0A;
+            --scrollbar-thumb: #2A2420;
+            --scrollbar-thumb-hover: #D97706;
+
+            --announcement-bg: linear-gradient(90deg, #1C1510, #2A1E14, #1C1510);
+            --newsletter-bg: linear-gradient(90deg, #171310, #241C16, #171310);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            background-color: rgb(var(--atelier-base-rgb));
+            color: rgb(var(--atelier-cream-rgb));
+            overflow-x: hidden;
+            transition: background-color 250ms ease, color 250ms ease;
+        }
+
+        /* Ambient subtle grain overlay */
+        .grain-overlay {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+        }
+
+        /* Glassmorphism utility */
+        .glass-header {
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--header-border);
+            transition: background 250ms ease, border-color 250ms ease;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-atelier-card);
+            transition: all 250ms ease;
+        }
+
+        .glass-card:hover {
+            border-color: var(--card-hover-border);
+            background: var(--card-hover-bg);
+        }
+
+        /* Announcement and Newsletter Banners */
+        .announcement-banner {
+            background: var(--announcement-bg);
+        }
+
+        .newsletter-banner {
+            background: var(--newsletter-bg);
+        }
+
+        /* Nav link hover indicator */
+        .atelier-nav-link {
+            position: relative;
+            transition: color 240ms ease;
+        }
+
+        .atelier-nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 0;
+            height: 1.5px;
+            background: rgb(var(--luxe-gold-rgb));
+            transition: width 240ms ease, left 240ms ease;
+        }
+
+        .atelier-nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* Candle flame flicker animation */
+        @keyframes flameFlicker {
+            0%, 100% {
+                transform: scale(1) rotate(-1.5deg);
+                opacity: 0.95;
+            }
+            25% {
+                transform: scale(1.08, 0.96) rotate(1deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(0.96, 1.05) rotate(-0.5deg);
+                opacity: 0.88;
+            }
+            75% {
+                transform: scale(1.04, 1.02) rotate(2deg);
+                opacity: 1;
+            }
+        }
+
+        .flame-anim {
+            animation: flameFlicker 3s ease-in-out infinite;
+            transform-origin: 50% 90%;
+        }
+
+        /* Ambient glow pulse */
+        @keyframes ambientGlow {
+            0%, 100% {
+                opacity: 0.45;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.08);
+            }
+        }
+
+        .glow-pulse {
+            animation: ambientGlow 4s ease-in-out infinite;
+        }
+
+        /* Scroll reveal */
+        .reveal-node {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1), transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-node.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover);
+        }
+
+        /* =====================================================================
+           LIGHT THEME ADAPTIVE STYLES (Overrides dark classes when in light mode)
+           ===================================================================== */
+        html:not(.dark) [class*="border-white/5"] {
+            border-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="border-white/10"] {
+            border-color: rgba(44, 34, 26, 0.09) !important;
+        }
+        html:not(.dark) [class*="border-white/15"] {
+            border-color: rgba(44, 34, 26, 0.13) !important;
+        }
+        html:not(.dark) [class*="border-white/20"] {
+            border-color: rgba(44, 34, 26, 0.18) !important;
+        }
+        html:not(.dark) [class*="border-white/30"] {
+            border-color: rgba(44, 34, 26, 0.25) !important;
+        }
+
+        html:not(.dark) [class*="bg-white/5"] {
+            background-color: rgba(44, 34, 26, 0.035) !important;
+        }
+        html:not(.dark) [class*="bg-white/10"] {
+            background-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="bg-white/20"] {
+            background-color: rgba(44, 34, 26, 0.1) !important;
+        }
+        html:not(.dark) [class*="bg-white/[0.02]"] {
+            background-color: rgba(44, 34, 26, 0.02) !important;
+        }
+
+        html:not(.dark) .hover\:text-white:hover {
+            color: #1C1613 !important;
+        }
+        html:not(.dark) .hover\:bg-white:hover {
+            background-color: #1C1613 !important;
+            color: #FAF7F2 !important;
+        }
+        html:not(.dark) .hover\:bg-white\/10:hover {
+            background-color: rgba(44, 34, 26, 0.08) !important;
+        }
+        html:not(.dark) .hover\:border-white\/30:hover {
+            border-color: rgba(44, 34, 26, 0.3) !important;
+        }
+
+        /* Hero Image & Overlay adjustments in Light Mode */
+        html:not(.dark) .hero-bg-img {
+            filter: brightness(0.95) contrast(1.05) !important;
+            opacity: 0.36 !important;
+        }
+        html:not(.dark) .hero-overlay-grad {
+            background: linear-gradient(to top, rgba(250, 247, 242, 1) 0%, rgba(250, 247, 242, 0.85) 55%, rgba(250, 247, 242, 0.45) 100%) !important;
+        }
+
+        /* Mood Filter Active Pills in Light Mode */
+        html:not(.dark) .mood-pill.bg-luxe-gold {
+            background-color: #1C1613 !important;
+            color: #FAF7F2 !important;
+            border-color: #1C1613 !important;
+        }
+        html:not(.dark) .mood-pill:not(.bg-luxe-gold) {
+            background-color: #FFFFFF !important;
+            color: #685C51 !important;
+            border-color: rgba(44, 34, 26, 0.1) !important;
+        }
+        html:not(.dark) .mood-pill:not(.bg-luxe-gold):hover {
+            color: #1C1613 !important;
+            border-color: rgba(44, 34, 26, 0.3) !important;
+            background-color: #F4EFE8 !important;
+        }
+
+        /* Card and Drawer shadow enhancement in Light Mode */
+        html:not(.dark) .bg-atelier-card {
+            box-shadow: 0 4px 18px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
+        }
+
+        /* Selection styling */
+        ::selection {
+            background-color: rgba(217, 119, 6, 0.25);
+            color: inherit;
+        }
+
+        /* Glowing Heart Keyframes & Effects */
+        @keyframes glowingHeartPulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 24px rgba(244, 63, 94, 0.85)) drop-shadow(0 0 55px rgba(251, 113, 133, 0.5));
+            }
+            25% {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 38px rgba(244, 63, 94, 1)) drop-shadow(0 0 80px rgba(251, 113, 133, 0.8));
+            }
+            45% {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 28px rgba(244, 63, 94, 0.9)) drop-shadow(0 0 60px rgba(244, 63, 94, 0.6));
+            }
+            65% {
+                transform: scale(1.18);
+                filter: drop-shadow(0 0 45px rgba(244, 63, 94, 1)) drop-shadow(0 0 95px rgba(251, 113, 133, 0.95));
+            }
+        }
+
+        .glowing-heart-pulse {
+            animation: glowingHeartPulse 2.4s infinite ease-in-out;
+            display: inline-block;
+            transform-origin: center center;
+        }
+
+        @media (max-width: 639px) {
+            html,
+            body {
+                width: 100%;
+                min-width: 100%;
+                max-width: 100%;
+                margin: 0;
+                overflow-x: hidden;
+            }
+
+            .announcement-banner {
+                display: none;
+            }
+
+            main,
+            header,
+            footer,
+            section {
+                width: 100%;
+                max-width: none;
+            }
+
+            .announcement-banner {
+                line-height: 1.5;
+                letter-spacing: 0.08em;
+            }
+
+            #main-header > div:first-child {
+                gap: 0.75rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            #main-header .group > span:last-of-type {
+                font-size: 1.15rem;
+                letter-spacing: 0.16em;
+            }
+
+            #main-header > div:first-child > div:last-child {
+                gap: 0.5rem;
+            }
+
+            #theme-toggle-btn,
+            #search-toggle-btn,
+            #mobile-menu-btn {
+                height: 2.25rem;
+                width: 2.25rem;
+            }
+
+            #account-dropdown-btn,
+            #cart-toggle-btn {
+                padding-left: 0.7rem;
+                padding-right: 0.7rem;
+            }
+
+            #top > section:first-child > div {
+                padding-top: 6rem;
+                padding-bottom: 5rem;
+            }
+
+            #top > section:first-child h1 {
+                font-size: clamp(3.25rem, 16vw, 5rem);
+                line-height: 0.95;
+            }
+
+            #top > section:first-child .reveal-node:first-child {
+                max-width: 100%;
+                letter-spacing: 0.16em;
+            }
+
+            #top > section:first-child p {
+                font-size: 0.9rem;
+            }
+
+            #top > section:first-child .reveal-node.mt-10,
+            #custom-studio .mt-10,
+            #newsletter-form {
+                width: 100%;
+            }
+
+            #top > section:first-child .reveal-node.mt-10 > *,
+            #custom-studio .mt-10 > * {
+                width: 100%;
+                justify-content: center;
+            }
+
+            #top > section:nth-child(2),
+            #top > section:nth-child(3),
+            #rituals,
+            #story,
+            #reviews,
+            .newsletter-banner,
+            footer {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            #top > section:nth-child(2) h2,
+            #top > section:nth-child(3) h2,
+            #rituals h2,
+            #story h2,
+            #reviews h2 {
+                font-size: 2.75rem;
+            }
+
+            #top > section:nth-child(3) {
+                padding-top: 5rem;
+                padding-bottom: 5rem;
+            }
+
+            #custom-studio .glass-card,
+            #reviews .glass-card {
+                padding: 1.25rem;
+            }
+
+            #custom-studio .grid {
+                gap: 2rem;
+            }
+
+            .mood-pill {
+                flex: 1 1 auto;
+                min-width: 0;
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            #catalog-sort-select {
+                max-width: 72%;
+            }
+
+            #newsletter-form input,
+            #newsletter-form button {
+                width: 100%;
+            }
+
+            #floating-love-btn {
+                bottom: 1rem;
+                right: 1rem;
+                max-width: calc(100vw - 2rem);
+            }
+
+            #floating-love-btn span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            #welcome-overlay {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased">
+    <div class="grain-overlay pointer-events-none fixed inset-0 z-50"></div>
+
+    <div id="welcome-overlay"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm transition-all duration-700 ease-out select-none"
+        role="dialog" aria-modal="true" aria-label="Welcome love message">
+        <div class="relative z-10 flex flex-col items-center text-center">
+            <button id="welcome-heart-btn" type="button"
+                class="group flex items-center justify-center focus:outline-none transition-transform duration-300 hover:scale-110 active:scale-95 cursor-pointer"
+                aria-label="Glowing Heart">
+                <i class="fa-solid fa-heart text-7xl text-luxe-rose drop-shadow-[0_0_28px_rgba(216,151,151,0.95)] animate-pulse sm:text-8xl"></i>
+            </button>
+            <button id="welcome-overlay-close" type="button"
+                class="mt-5 flex flex-col items-center text-center text-white transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-luxe-gold focus-visible:ring-offset-4 focus-visible:ring-offset-black"
+                aria-label="Close welcome message">
+                <span class="font-display text-4xl italic text-white sm:text-5xl">I love you baby</span>
+                <span class="mt-2 font-display text-2xl italic text-luxe-rose sm:text-3xl">From Arya</span>
+                <span class="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/70">Tap to enter</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Announcement Bar -->
+    <div
+        class="announcement-banner relative z-40 border-b border-white/5 py-2 px-4 text-center text-[11px] font-medium tracking-[0.18em] text-atelier-muted">
+        <span class="inline-flex items-center gap-2">
+            <span class="h-1.5 w-1.5 rounded-full bg-flame-glow animate-ping"></span>
+            <span>COMPLIMENTARY ARTISAN MATCHES & GIFT BOX ON ALL ORDERS OVER ₹999 · HAND-CRAFTED IN INDIA</span>
+        </span>
+    </div>
+
+    <!-- Sticky Glassmorphic Header -->
+    <header id="main-header" class="glass-header sticky top-0 z-40 transition-all duration-300">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
+            <!-- Brand Logo -->
+            <a href="#top" class="group flex items-center gap-3">
+                <span class="flame-anim text-flame-glow text-xl">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                </span>
+                <span
+                    class="font-display text-2xl font-bold tracking-[0.25em] text-atelier-cream group-hover:text-luxe-gold transition duration-300">
+                    SONDHI
+                </span>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav
+                class="hidden items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-atelier-muted lg:flex">
+                <a href="#collection" class="atelier-nav-link hover:text-atelier-cream">Signature Scents</a>
+                <a href="#custom-studio"
+                    class="atelier-nav-link hover:text-atelier-cream flex items-center gap-1.5 text-luxe-gold">
+                    <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Custom Studio
+                </a>
+                <a href="#rituals" class="atelier-nav-link hover:text-atelier-cream">Candle Rituals</a>
+                <a href="#story" class="atelier-nav-link hover:text-atelier-cream">Our Atelier</a>
+                <a href="#reviews" class="atelier-nav-link hover:text-atelier-cream">Collector Notes</a>
+            </nav>
+
+            <!-- Actions: Theme Toggle, Search, Account & Cart Drawer Toggle -->
+            <div class="flex items-center gap-3 sm:gap-4">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle-btn" onclick="toggleAtelierTheme()"
+                    class="theme-toggle-btn hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
+                    title="Switch to Dark Theme" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon text-xs theme-moon-icon text-amber-700"></i>
+                    <i class="fa-solid fa-sun text-xs theme-sun-icon text-amber-400 hidden"></i>
+                </button>
+
+                <!-- Search Button -->
+                <button id="search-toggle-btn"
+                    class="hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
+                    aria-label="Search Fragrances">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </button>
+
+                <!-- Atelier Portals & Account Menu -->
+                <div class="relative group">
+                    <button id="account-dropdown-btn"
+                        class="flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-3.5 text-[11px] font-semibold uppercase tracking-wider text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
+                        aria-label="Atelier Portals & Account">
+                        <i class="fa-regular fa-user text-xs text-luxe-gold"></i>
+                        <span class="hidden md:inline">Portals</span>
+                        <i
+                            class="fa-solid fa-chevron-down text-[8px] text-atelier-dim group-hover:text-luxe-gold transition"></i>
+                    </button>
+                    <!-- Dropdown Content -->
+                    <div id="account-dropdown-content"
+                        class="absolute right-0 mt-2 w-64 rounded-2xl bg-atelier-surface border border-white/15 p-2.5 shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition duration-200 z-50">
+                        <div
+                            class="px-3 py-1.5 border-b border-white/10 text-[9px] uppercase tracking-widest text-atelier-dim font-bold">
+                            Atelier Workspaces & Billing
+                        </div>
+                        <a href="{{ route('profile.index') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-luxe-gold/10 hover:text-luxe-gold transition">
+                            <div
+                                class="w-7 h-7 rounded-lg bg-luxe-gold/10 flex items-center justify-center text-luxe-gold">
+                                <i class="fa-solid fa-user text-[11px]"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Client Profile & Billing</div>
+                                <div class="text-[10px] text-atelier-muted">Orders, Formulas & Cards</div>
+                            </div>
+                        </a>
+                        <a href="{{ route('admin.index') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-flame-soft hover:text-flame-glow transition">
+                            <div
+                                class="w-7 h-7 rounded-lg bg-flame-soft flex items-center justify-center text-flame-glow">
+                                <i class="fa-solid fa-shield-halved text-[11px]"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Atelier Admin</div>
+                                <div class="text-[10px] text-atelier-muted">Orders, Catalog & Payouts</div>
+                            </div>
+                        </a>
+                        <a href="{{ route('superadmin.index') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-red-500/10 hover:text-red-400 transition">
+                            <div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-crown text-[11px]"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Super Admin</div>
+                                <div class="text-[10px] text-atelier-muted">RBAC & Global Billing</div>
+                            </div>
+                        </a>
+                        <div class="mt-1 pt-1.5 border-t border-white/10">
+                            <a href="{{ route('profile.index') }}#billing"
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-luxe-gold hover:bg-white/5 transition">
+                                <i class="fa-solid fa-wallet text-[10px]"></i> Open Saved Cards & Invoices
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Drawer Trigger with Badge -->
+                <button id="cart-toggle-btn"
+                    class="relative hidden lg:flex items-center gap-2.5 rounded-full border border-luxe-gold/40 bg-flame-soft px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base transition duration-300"
+                    aria-label="Open Shopping Bag">
+                    <i class="fa-solid fa-bag-shopping text-xs"></i>
+                    <span class="hidden sm:inline">Bag</span>
+                    <span id="cart-count-badge"
+                        class="flex h-5 w-5 items-center justify-center rounded-full bg-flame-glow text-[10px] font-bold text-atelier-base">
+                        0
+                    </span>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn"
+                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-atelier-muted hover:text-white lg:hidden"
+                    aria-label="Toggle navigation">
+                    <i class="fa-solid fa-bars text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Dropdown -->
+        <div id="mobile-menu"
+            class="hidden border-t border-white/10 bg-atelier-surface px-6 py-5 text-xs font-semibold uppercase tracking-[0.2em] text-atelier-muted lg:hidden space-y-4">
+            <a class="block py-2 hover:text-atelier-cream" href="#collection">Signature Scents</a>
+            <a class="block py-2 text-luxe-gold hover:text-white" href="#custom-studio">Custom Candle Studio</a>
+            <a class="block py-2 hover:text-atelier-cream" href="#rituals">Candle Rituals</a>
+            <a class="block py-2 hover:text-atelier-cream" href="#story">Our Atelier</a>
+            <a class="block py-2 hover:text-atelier-cream" href="#reviews">Collector Notes</a>
+            <div class="pt-3 border-t border-white/10 space-y-2">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-atelier-dim">Account & Sanctuary</div>
+                <button id="mobile-search-btn" type="button" class="w-full text-left py-1 text-atelier-cream hover:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-xs text-luxe-gold"></i> Search Fragrances
+                </button>
+                <button id="mobile-cart-btn" type="button" class="w-full text-left py-1 text-luxe-gold hover:text-white flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-xs"></i> Shopping Bag</span>
+                    <span id="mobile-cart-count" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-flame-glow px-1 text-[10px] font-bold text-atelier-base">0</span>
+                </button>
+                <button onclick="toggleAtelierTheme()" class="w-full text-left py-1 text-atelier-cream hover:text-white flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-half-stroke text-xs text-luxe-gold"></i>
+                        <span>Theme Mode</span>
+                    </span>
+                    <span id="mobile-theme-label" class="text-[10px] font-bold uppercase tracking-wider text-luxe-gold">Light</span>
+                </button>
+                <button onclick="window.sondhiAuth.openAuthModal('signin')" class="w-full text-left py-1 text-luxe-gold hover:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket text-xs"></i> Sign In / Create Account
+                </button>
+                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="{{ route('profile.index') }}#orders">
+                    <i class="fa-solid fa-box-archive text-xs"></i> My Order History
+                </a>
+                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="{{ route('profile.index') }}">
+                    <i class="fa-solid fa-user text-xs"></i> Client Profile & Billing
+                </a>
+                <a class="block py-1 text-flame-glow hover:text-white flex items-center gap-2" href="{{ route('admin.index') }}">
+                    <i class="fa-solid fa-shield-halved text-xs"></i> Atelier Admin (Pass Required)
+                </a>
+                <a class="block py-1 text-red-400 hover:text-white flex items-center gap-2" href="{{ route('superadmin.index') }}">
+                    <i class="fa-solid fa-crown text-xs"></i> Super Admin (Pass Required)
+                </a>
+            </div>
+        </div>
+
+        <!-- Expandable Search Overlay -->
+        <div id="search-overlay" class="hidden border-t border-white/10 bg-atelier-surface/95 px-6 py-4">
+            <div class="mx-auto flex max-w-2xl items-center gap-3 border-b border-luxe-gold/40 pb-2">
+                <i class="fa-solid fa-magnifying-glass text-luxe-gold"></i>
+                <input id="header-search-input"
+                    class="w-full bg-transparent text-sm text-atelier-cream placeholder:text-atelier-dim outline-none font-sans"
+                    placeholder="Search by fragrance note (e.g. Lavender, Sandalwood, Vanilla, Oud)..." type="search">
+                <button id="search-close-btn" class="text-xs text-atelier-muted hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="top">
+        <!-- Hero Section: Atelier Atmosphere -->
+        <section
+            class="relative isolate min-h-[85vh] overflow-hidden flex items-center justify-center border-b border-white/10">
+            <!-- Background Image with Ambient Glow Overlays -->
+            <img class="hero-bg-img absolute inset-0 -z-30 h-full w-full object-cover object-center filter brightness-[0.45] contrast-[1.1] transition-transform duration-1000 scale-105"
+                src="https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=2200&q=90"
+                alt="Sondhi botanical soy candle glowing in warm twilight">
+            <div class="hero-overlay-grad absolute inset-0 -z-20 bg-gradient-to-t from-atelier-base via-atelier-base/60 to-transparent">
+            </div>
+            <div class="absolute inset-0 -z-10 bg-radial from-amber-500/10 via-transparent to-transparent"></div>
+
+            <!-- Glowing Ambient Circle -->
+            <div
+                class="glow-pulse pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 -z-10 h-[500px] w-[500px] rounded-full bg-flame-glow/15 blur-[120px]">
+            </div>
+
+            <div class="mx-auto max-w-5xl px-6 py-24 text-center">
+                <!-- Tagline Badge -->
+                <div
+                    class="reveal-node inline-flex items-center gap-2 rounded-full border border-luxe-gold/30 bg-atelier-surface/60 backdrop-blur-md px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-luxe-gold mb-8">
+                    <span class="h-1.5 w-1.5 rounded-full bg-flame-glow flame-anim"></span>
+                    Hand-Poured Soy Botanicals · Slow Fragrance
+                </div>
+
+                <!-- Main Editorial Headline -->
+                <h1
+                    class="reveal-node font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-semibold leading-[0.88] tracking-tight text-atelier-cream">
+                    Light, sculpted<br>
+                    <span class="italic font-normal text-luxe-gold">into memory.</span>
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="reveal-node mx-auto mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-atelier-muted">
+                    Formulated in small numbered batches using pure golden soy wax, organic unbleached cotton wicks, and
+                    cold-extracted botanicals. Designed to transform the emotional temperature of your sanctuary.
+                </p>
+
+                <!-- Hero Action Buttons -->
+                <div class="reveal-node mt-10 flex flex-wrap items-center justify-center gap-4">
+                    <a href="#collection"
+                        class="group flex items-center gap-3 rounded-full bg-luxe-gold px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-base shadow-lg shadow-amber-900/20 transition-all duration-300 hover:bg-white hover:scale-105">
+                        <span>Explore Fragrances</span>
+                        <i
+                            class="fa-solid fa-arrow-right text-[11px] transition-transform duration-300 group-hover:translate-x-1"></i>
+                    </a>
+                    <a href="#custom-studio"
+                        class="flex items-center gap-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-cream transition-all duration-300 hover:border-luxe-gold hover:bg-white/10 hover:scale-105">
+                        <i class="fa-solid fa-sparkles text-luxe-gold"></i>
+                        <span>Custom Candle Studio</span>
+                    </a>
+                </div>
+
+                <!-- Trust Metrics Bar -->
+                <div
+                    class="reveal-node mt-16 grid grid-cols-2 gap-4 border-t border-white/10 pt-8 sm:grid-cols-4 max-w-3xl mx-auto text-center">
+                    <div>
+                        <span class="block font-display text-2xl font-bold text-luxe-gold">100%</span>
+                        <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Botanical Soy</span>
+                    </div>
+                    <div>
+                        <span class="block font-display text-2xl font-bold text-luxe-gold">50+ Hrs</span>
+                        <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Clean Burn Time</span>
+                    </div>
+                    <div>
+                        <span class="block font-display text-2xl font-bold text-luxe-gold">0%</span>
+                        <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Toxins &
+                            Phthalates</span>
+                    </div>
+                    <div>
+                        <span class="block font-display text-2xl font-bold text-luxe-gold">Numbered</span>
+                        <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Artisan Batches</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Romantic Dedication Section: "I Love You Baby" -->
+        <section id="love-sanctuary"
+            class="reveal-node relative overflow-hidden border-b border-white/10 py-20 lg:py-28 px-6 lg:px-10 bg-gradient-to-b from-rose-950/10 via-atelier-surface/30 to-atelier-base">
+            <!-- Ambient Glow Backgrounds -->
+            <div class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[500px] w-[500px] rounded-full bg-rose-500/15 blur-[120px] dark:bg-rose-500/20"></div>
+            <div class="pointer-events-none absolute left-1/3 top-1/4 -z-10 h-[300px] w-[300px] rounded-full bg-amber-500/10 blur-[90px]"></div>
+
+            <div class="mx-auto max-w-4xl text-center">
+                <!-- Top Badge -->
+                <div class="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 backdrop-blur-md px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.3em] text-rose-500 dark:text-rose-300 mb-8">
+                    <i class="fa-solid fa-heart text-[10px] animate-pulse text-rose-500"></i>
+                    <span>The Heart of Our Atelier · A Love Dedication</span>
+                    <i class="fa-solid fa-sparkles text-[10px] text-amber-400"></i>
+                </div>
+
+                <!-- Glowing Heart Centerpiece -->
+                <div class="relative mx-auto mb-8 flex h-36 w-36 sm:h-44 sm:w-44 items-center justify-center">
+                    <!-- Concentric Glowing Rings -->
+                    <div class="absolute inset-0 rounded-full border border-rose-400/25 animate-ping opacity-30"></div>
+                    <div class="absolute -inset-3 rounded-full border border-rose-400/30 blur-sm animate-pulse"></div>
+                    <div class="absolute -inset-6 rounded-full bg-gradient-to-tr from-rose-500/20 via-pink-500/15 to-amber-500/20 blur-2xl"></div>
+
+                    <!-- Glowing Heart Button / Trigger -->
+                    <button id="main-heart-spark-btn" type="button"
+                        class="group relative flex h-28 w-28 sm:h-32 sm:w-32 items-center justify-center rounded-full bg-gradient-to-br from-rose-500/20 via-rose-500/10 to-transparent border border-rose-400/40 shadow-[0_0_40px_rgba(244,63,94,0.45)] transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer focus:outline-none"
+                        title="Click to spark hearts!" aria-label="Glowing Heart of Love">
+                        <i class="fa-solid fa-heart text-5xl sm:text-6xl text-rose-500 glowing-heart-pulse transition-transform duration-300 group-hover:scale-110"></i>
+                    </button>
+                </div>
+
+                <!-- Grand Serif Headline -->
+                <h2 class="font-display text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-atelier-cream">
+                    I love you <span class="italic font-normal text-rose-500 dark:text-rose-400 drop-shadow-[0_0_30px_rgba(244,63,94,0.4)]">baby</span>
+                </h2>
+
+                <div class="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-luxe-gold">
+                    <span>— Forever & Always, from Arya —</span>
+                </div>
+
+                <!-- Dedication Copy -->
+                <p class="mx-auto mt-6 max-w-2xl text-base sm:text-xl font-display italic leading-relaxed text-atelier-muted">
+                    "Every candle in this atelier is poured with the quiet warmth, tender devotion, and eternal glow you bring into my life. No matter how dark the world outside, your love is my sacred light."
+                </p>
+
+                <!-- Interactive Love Spark Button & Action -->
+                <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+                    <button id="spark-love-btn" type="button"
+                        class="group flex items-center gap-3 rounded-full border border-rose-400/50 bg-rose-500 px-8 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-rose-500/30 transition-all duration-300 hover:bg-rose-600 hover:scale-105 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-heart text-white group-hover:scale-125 transition-transform text-xs"></i>
+                        <span>Send Love Sparks</span>
+                    </button>
+                    <a href="#custom-studio"
+                        class="flex items-center gap-2.5 rounded-full border border-rose-400/30 bg-white/5 backdrop-blur-md px-7 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-atelier-cream transition-all duration-300 hover:border-luxe-gold hover:bg-white/10 hover:scale-105">
+                        <i class="fa-solid fa-wand-magic-sparkles text-luxe-gold"></i>
+                        <span>Pour Bespoke Candle</span>
+                    </a>
+                </div>
+
+                <!-- Romance Feature Attributes -->
+                <div class="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto border-t border-white/10 pt-8 text-center">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-atelier-muted">Fragrance Notes</div>
+                        <div class="mt-1 font-display text-lg font-bold text-rose-500 dark:text-rose-400">Damask Rose & Vanilla</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-atelier-muted">Flame Warmth</div>
+                        <div class="mt-1 font-display text-lg font-bold text-flame-glow">Infinite & Everlasting</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <div class="text-[10px] uppercase tracking-widest text-atelier-muted">Dedication</div>
+                        <div class="mt-1 font-display text-lg font-bold text-luxe-gold">Arya & Baby</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Signature Collection Section -->
+        <section id="collection" class="relative px-6 py-24 lg:px-10 lg:py-32 border-b border-white/10">
+            <div class="mx-auto max-w-7xl">
+                <!-- Section Header -->
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-luxe-gold mb-2">The Permanent
+                            Collection</p>
+                        <h2 class="font-display text-4xl sm:text-6xl font-semibold leading-tight text-atelier-cream">
+                            Find your <span class="italic font-normal text-luxe-gold">atmosphere.</span>
+                        </h2>
+                    </div>
+                    <p class="max-w-md text-sm leading-relaxed text-atelier-muted">
+                        Every scent is constructed like high perfumery with distinguished top, heart, and lingering base
+                        notes. Select a mood to curate your atmosphere.
+                    </p>
+                </div>
+
+                <!-- Mood Filter Tabs -->
+                <div class="mt-12 flex flex-wrap items-center gap-3">
+                    <button
+                        class="mood-pill active rounded-full border border-luxe-gold bg-luxe-gold px-5 py-2 text-xs font-bold uppercase tracking-wider text-atelier-base transition duration-200"
+                        data-category="All">
+                        All Scents
+                    </button>
+                    <button
+                        class="mood-pill rounded-full border border-white/10 bg-atelier-surface px-5 py-2 text-xs font-bold uppercase tracking-wider text-atelier-muted hover:border-white/30 hover:text-white transition duration-200"
+                        data-category="Floral">
+                        <i class="fa-solid fa-fan mr-1 text-[10px] text-luxe-rose"></i> Floral & Luminous
+                    </button>
+                    <button
+                        class="mood-pill rounded-full border border-white/10 bg-atelier-surface px-5 py-2 text-xs font-bold uppercase tracking-wider text-atelier-muted hover:border-white/30 hover:text-white transition duration-200"
+                        data-category="Warm">
+                        <i class="fa-solid fa-fire mr-1 text-[10px] text-flame-glow"></i> Warm & Amber
+                    </button>
+                    <button
+                        class="mood-pill rounded-full border border-white/10 bg-atelier-surface px-5 py-2 text-xs font-bold uppercase tracking-wider text-atelier-muted hover:border-white/30 hover:text-white transition duration-200"
+                        data-category="Woody">
+                        <i class="fa-solid fa-tree mr-1 text-[10px] text-luxe-sage"></i> Deep Woods & Oud
+                    </button>
+                    <button
+                        class="mood-pill rounded-full border border-white/10 bg-atelier-surface px-5 py-2 text-xs font-bold uppercase tracking-wider text-atelier-muted hover:border-white/30 hover:text-white transition duration-200"
+                        data-category="Fresh">
+                        <i class="fa-solid fa-droplet mr-1 text-[10px] text-sky-400"></i> Petrichor & Fresh
+                    </button>
+                </div>
+
+                <!-- Search & Sorting Filter Bar -->
+                <div
+                    class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-y border-white/10 py-4">
+                    <div class="relative w-full sm:w-80">
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-atelier-dim"></i>
+                        <input id="catalog-search-input"
+                            class="w-full rounded-full border border-white/10 bg-atelier-surface pl-9 pr-4 py-2 text-xs text-atelier-cream placeholder:text-atelier-dim outline-none focus:border-luxe-gold transition"
+                            placeholder="Filter by note or scent name..." type="text">
+                    </div>
+
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <span class="text-[11px] uppercase tracking-wider text-atelier-dim">Sort By:</span>
+                        <select id="catalog-sort-select"
+                            class="rounded-full border border-white/10 bg-atelier-surface px-4 py-2 text-xs font-semibold text-atelier-cream outline-none focus:border-luxe-gold transition cursor-pointer">
+                            <option value="featured">Featured Collection</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="rating">Highest Rated</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Product Grid (Dynamically Rendered by app.js) -->
+                <div id="product-grid" class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Custom Candle Studio (Interactive Builder) -->
+        <section id="custom-studio"
+            class="relative overflow-hidden bg-gradient-to-b from-atelier-surface via-atelier-base to-atelier-surface px-6 py-24 lg:px-10 lg:py-32 border-b border-white/10">
+            <!-- Background Glow -->
+            <div
+                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-flame-glow/10 blur-[100px]">
+            </div>
+
+            <div class="mx-auto max-w-7xl">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span
+                        class="inline-flex items-center gap-2 rounded-full border border-luxe-gold/30 bg-luxe-gold/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold mb-4">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Atelier Bespoke Service
+                    </span>
+                    <h2 class="font-display text-4xl sm:text-6xl font-semibold text-atelier-cream leading-tight">
+                        The Custom <span class="italic font-normal text-luxe-gold">Candle Studio</span>
+                    </h2>
+                    <p class="mt-4 text-sm text-atelier-muted">
+                        Design your own bespoke botanical candle. Select your handcrafted vessel, choose an exclusive
+                        aromatic formulation, and dedicate it with personalized laser-embossed label text.
+                    </p>
+                </div>
+
+                <div class="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+                    <!-- Left: Step-by-Step Configurator -->
+                    <div class="space-y-8 glass-card rounded-2xl p-6 sm:p-10">
+                        <!-- Step 1: Vessel Choice -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-luxe-gold">
+                                    Step 1 · Choose Vessel
+                                </h3>
+                                <span id="vessel-selected-label" class="text-xs font-semibold text-atelier-cream">Smoked
+                                    Obsidian</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="vessel-selector">
+                                <button
+                                    class="vessel-option active group rounded-xl border-2 border-luxe-gold bg-atelier-hover p-3 text-center transition duration-200"
+                                    data-vessel="Smoked Obsidian" data-color="#1A1817" data-border="#332D29"
+                                    data-price="1399">
+                                    <div
+                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-stone-900 to-stone-700 shadow-inner border border-white/10">
+                                    </div>
+                                    <span class="block text-xs font-semibold text-atelier-cream">Obsidian</span>
+                                    <span class="text-[10px] text-atelier-muted">₹1,399</span>
+                                </button>
+                                <button
+                                    class="vessel-option group rounded-xl border-2 border-white/10 bg-atelier-surface p-3 text-center transition duration-200"
+                                    data-vessel="Amber Apothecary" data-color="#78350F" data-border="#B45309"
+                                    data-price="1299">
+                                    <div
+                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-amber-900 to-amber-600 shadow-inner border border-white/10">
+                                    </div>
+                                    <span class="block text-xs font-semibold text-atelier-cream">Amber Glass</span>
+                                    <span class="text-[10px] text-atelier-muted">₹1,299</span>
+                                </button>
+                                <button
+                                    class="vessel-option group rounded-xl border-2 border-white/10 bg-atelier-surface p-3 text-center transition duration-200"
+                                    data-vessel="Matte Alabaster" data-color="#E7E2D8" data-border="#D6CEBF"
+                                    data-price="1449">
+                                    <div
+                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-stone-300 to-stone-100 shadow-inner border border-black/10">
+                                    </div>
+                                    <span class="block text-xs font-semibold text-atelier-cream">Alabaster</span>
+                                    <span class="text-[10px] text-atelier-muted">₹1,449</span>
+                                </button>
+                                <button
+                                    class="vessel-option group rounded-xl border-2 border-white/10 bg-atelier-surface p-3 text-center transition duration-200"
+                                    data-vessel="Raw Terracotta" data-color="#9A5038" data-border="#BD6B50"
+                                    data-price="1499">
+                                    <div
+                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-orange-900 to-stone-600 shadow-inner border border-white/10">
+                                    </div>
+                                    <span class="block text-xs font-semibold text-atelier-cream">Terracotta</span>
+                                    <span class="text-[10px] text-atelier-muted">₹1,499</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Scent Formulation -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-luxe-gold">
+                                    Step 2 · Select Fragrance Blend
+                                </h3>
+                                <span id="scent-selected-notes" class="text-xs font-medium text-atelier-dim">Oud ·
+                                    Saffron · Dark Wood</span>
+                            </div>
+                            <select id="custom-scent-select"
+                                class="w-full rounded-xl border border-white/15 bg-atelier-surface px-4 py-3 text-sm text-atelier-cream outline-none focus:border-luxe-gold transition cursor-pointer">
+                                <option value="Sandalwood & Velvet Oud" data-notes="Oud · Saffron · Dark Wood">
+                                    Sandalwood & Velvet Oud (Warm, grounding & meditative)</option>
+                                <option value="Midnight Jasmine & Cardamom"
+                                    data-notes="Indian Jasmine · Green Cardamom · Amber">Midnight Jasmine & Cardamom
+                                    (Floral, opulent & luminous)</option>
+                                <option value="Smoked Tonka & Madagascar Vanilla"
+                                    data-notes="Smoked Tonka · Bourbon Vanilla · Cedar">Smoked Tonka & Madagascar
+                                    Vanilla (Enveloping & velvety)</option>
+                                <option value="Monsoon Petrichor & Wild Vetiver"
+                                    data-notes="Wet Earth · Fresh Vetiver · Rain Accord">Monsoon Petrichor & Wild
+                                    Vetiver (Earthy, crisp & rejuvenating)</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 3: Personalized Dedication Text -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-luxe-gold">
+                                    Step 3 · Custom Label Dedication
+                                </h3>
+                                <span class="text-[10px] text-atelier-dim">Max 32 chars</span>
+                            </div>
+                            <input id="custom-label-input" type="text" maxlength="32"
+                                placeholder="e.g. For Slow Evenings / Arya's Atelier"
+                                class="w-full rounded-xl border border-white/15 bg-atelier-surface px-4 py-3 text-sm text-atelier-cream placeholder:text-atelier-dim outline-none focus:border-luxe-gold transition">
+                            <p class="mt-2 text-[11px] text-atelier-dim">This text will be printed in gold foil on the
+                                candle's artisanal linen label.</p>
+                        </div>
+
+                        <!-- Custom Creation Total & CTA -->
+                        <div
+                            class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-6">
+                            <div>
+                                <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Custom Atelier
+                                    Piece</span>
+                                <div id="custom-price-display" class="font-display text-3xl font-bold text-luxe-gold">
+                                    ₹1,399</div>
+                            </div>
+                            <button id="add-custom-candle-btn"
+                                class="w-full sm:w-auto flex items-center justify-center gap-3 rounded-full bg-luxe-gold px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-base hover:bg-white transition duration-300 shadow-xl shadow-amber-900/30">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Add Custom Candle To Bag</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Live Visual Candle Mockup Preview -->
+                    <div
+                        class="relative flex flex-col items-center justify-center p-8 glass-card rounded-2xl border border-luxe-gold/30">
+                        <span
+                            class="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest text-luxe-gold bg-luxe-gold/10 px-3 py-1 rounded-full">
+                            Live Atelier Preview
+                        </span>
+
+                        <!-- Interactive Candle Mockup -->
+                        <div class="relative mt-8 mb-6 flex flex-col items-center">
+                            <!-- Animated Candle Flame -->
+                            <div class="relative flex flex-col items-center">
+                                <div
+                                    class="flame-anim h-10 w-4 rounded-full bg-gradient-to-t from-flame-amber via-flame-glow to-yellow-100 shadow-[0_0_24px_rgba(245,158,11,0.85)]">
+                                </div>
+                                <div class="h-2 w-0.5 bg-stone-900"></div>
+                            </div>
+
+                            <!-- Candle Vessel Container -->
+                            <div id="mockup-vessel"
+                                class="relative flex h-64 w-52 flex-col items-center justify-center rounded-2xl p-4 shadow-2xl transition-all duration-500"
+                                style="background-color: #1A1817; border: 2px solid #332D29;">
+                                <!-- Linen Label -->
+                                <div
+                                    class="flex h-36 w-40 flex-col items-center justify-between rounded-lg bg-[#FAF7F2] p-3 text-center text-[#1C1815] shadow-md border border-stone-300">
+                                    <div class="text-[8px] font-bold uppercase tracking-[0.25em] text-stone-500">
+                                        SONDHI · BESPOKE
+                                    </div>
+                                    <div>
+                                        <div id="mockup-label-title"
+                                            class="font-display text-base font-semibold leading-tight text-stone-900">
+                                            For Slow Evenings
+                                        </div>
+                                        <div id="mockup-label-scent"
+                                            class="mt-1 text-[9px] uppercase tracking-wider text-amber-800 font-medium">
+                                            Sandalwood & Oud
+                                        </div>
+                                    </div>
+                                    <div class="text-[7px] uppercase tracking-widest text-stone-400">
+                                        100% SOY · 50H BURN
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-xs text-atelier-muted max-w-xs">
+                            Hand-poured into a 280g weighted glass vessel with dual natural cotton wicks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Candle Rituals & Care Section -->
+        <section id="rituals" class="px-6 py-24 lg:px-10 lg:py-32 border-b border-white/10">
+            <div class="mx-auto max-w-7xl">
+                <div class="grid gap-12 lg:grid-cols-2 items-center">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-luxe-gold mb-2">The Philosophy
+                            of Fire</p>
+                        <h2 class="font-display text-4xl sm:text-6xl font-semibold text-atelier-cream leading-tight">
+                            Rituals for a <br><span class="italic font-normal text-luxe-gold">longer, cleaner
+                                burn.</span>
+                        </h2>
+                        <p class="mt-6 leading-relaxed text-atelier-muted">
+                            Wax has memory. How you treat your candle on its first lighting dictates its entire
+                            lifespan. We invite you to slow down and treat lighting your candle as an intentional pause.
+                        </p>
+
+                        <div class="mt-10 space-y-6">
+                            <!-- Ritual 1 -->
+                            <div class="flex gap-4 items-start">
+                                <span
+                                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-luxe-gold text-xs font-bold text-luxe-gold">01</span>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold text-atelier-cream">The First Melt
+                                        Pool</h3>
+                                    <p class="mt-1 text-xs text-atelier-muted leading-relaxed">Burn for at least 3 hours
+                                        on first lighting until the molten wax pool reaches the outer edges of the glass
+                                        to prevent tunneling.</p>
+                                </div>
+                            </div>
+
+                            <!-- Ritual 2 -->
+                            <div class="flex gap-4 items-start">
+                                <span
+                                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-luxe-gold text-xs font-bold text-luxe-gold">02</span>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold text-atelier-cream">Trim to 5mm</h3>
+                                    <p class="mt-1 text-xs text-atelier-muted leading-relaxed">Always trim the wick
+                                        before re-lighting. A short wick produces a clean, smoke-free amber flame
+                                        without black soot.</p>
+                                </div>
+                            </div>
+
+                            <!-- Ritual 3 -->
+                            <div class="flex gap-4 items-start">
+                                <span
+                                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-luxe-gold text-xs font-bold text-luxe-gold">03</span>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold text-atelier-cream">Repurposing the
+                                        Vessel</h3>
+                                    <p class="mt-1 text-xs text-atelier-muted leading-relaxed">When 10mm of wax remains,
+                                        gently melt with warm water. Wash the glass and repurpose it as a cocktail
+                                        tumbler or brush holder.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ritual Visual Grid -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <img class="aspect-[3/4] w-full rounded-2xl object-cover shadow-2xl filter brightness-90"
+                            src="https://images.unsplash.com/photo-1608181831718-c9e7d8a2a3a5?auto=format&fit=crop&w=800&q=85"
+                            alt="Artisan trimming candle wick">
+                        <img class="mt-8 aspect-[3/4] w-full rounded-2xl object-cover shadow-2xl filter brightness-90"
+                            src="https://images.unsplash.com/photo-1602607207252-4c2b2f07a5d3?auto=format&fit=crop&w=800&q=85"
+                            alt="Hand-poured candle on marble table">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Our Story / Atelier Section -->
+        <section id="story"
+            class="relative overflow-hidden bg-atelier-surface px-6 py-24 lg:px-10 lg:py-32 border-b border-white/10">
+            <div class="mx-auto max-w-5xl text-center">
+                <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-luxe-gold">The Story of Sondhi</span>
+                <h2 class="mt-4 font-display text-4xl sm:text-6xl font-semibold text-atelier-cream">
+                    From the Hindi word for <br><span class="italic font-normal text-luxe-gold">"the smell of earth
+                        after rain."</span>
+                </h2>
+                <p class="mt-8 text-base sm:text-lg leading-relaxed text-atelier-muted">
+                    Sondhi was born from an obsession with sensory memory. We grew weary of artificial
+                    petroleum-paraffin candles that give headaches and pollute indoor air. Instead, we formulate
+                    slow-burning botanicals poured into reusable art pieces that make your home feel grounded, warm, and
+                    deeply personal.
+                </p>
+                <div
+                    class="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs uppercase tracking-widest text-atelier-muted">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-leaf text-luxe-sage"></i> 100%
+                        Vegan</span>
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-hand-holding-heart text-luxe-rose"></i>
+                        Cruelty Free</span>
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-recycle text-luxe-gold"></i> Infinitely
+                        Recyclable</span>
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-flame-glow"></i>
+                        Crafted in India</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Collector Reviews Section -->
+        <section id="reviews" class="px-6 py-24 lg:px-10 lg:py-32 border-b border-white/10">
+            <div class="mx-auto max-w-7xl">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-luxe-gold mb-2">Verified
+                            Collector Notes</p>
+                        <h2 class="font-display text-4xl sm:text-5xl font-semibold text-atelier-cream">
+                            Loved in over <span class="italic font-normal text-luxe-gold">1,400 sanctuaries.</span>
+                        </h2>
+                    </div>
+                    <div class="flex items-center gap-2 text-luxe-gold">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <span class="text-xs font-bold text-atelier-cream ml-2">4.9 / 5.0 Average Rating</span>
+                    </div>
+                </div>
+
+                <!-- Testimonials Grid -->
+                <div class="grid gap-6 md:grid-cols-3">
+                    <div class="glass-card rounded-2xl p-8 flex flex-col justify-between">
+                        <div>
+                            <div class="flex text-xs text-luxe-gold mb-4">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-sm leading-relaxed text-atelier-cream italic font-display text-lg">
+                                "The Sandalwood & Velvet Oud candle literally fills my entire apartment within 20
+                                minutes without ever being overpowering. The amber glass container looks like high art
+                                on my mantle."
+                            </p>
+                        </div>
+                        <div class="mt-6 border-t border-white/10 pt-4 flex items-center justify-between">
+                            <div>
+                                <span class="block text-xs font-bold text-atelier-cream">Ananya Mehta</span>
+                                <span class="text-[10px] text-atelier-dim">Mumbai · Verified Buyer</span>
+                            </div>
+                            <span class="text-[10px] uppercase font-bold text-luxe-gold">Sandalwood</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 flex flex-col justify-between">
+                        <div>
+                            <div class="flex text-xs text-luxe-gold mb-4">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-sm leading-relaxed text-atelier-cream italic font-display text-lg">
+                                "I made a bespoke custom candle with my fiancé's name for our anniversary. The
+                                personalized label was stunning and the Midnight Jasmine scent smells heavenly."
+                            </p>
+                        </div>
+                        <div class="mt-6 border-t border-white/10 pt-4 flex items-center justify-between">
+                            <div>
+                                <span class="block text-xs font-bold text-atelier-cream">Kabir Sengupta</span>
+                                <span class="text-[10px] text-atelier-dim">Bengaluru · Verified Buyer</span>
+                            </div>
+                            <span class="text-[10px] uppercase font-bold text-luxe-gold">Custom Atelier</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 flex flex-col justify-between">
+                        <div>
+                            <div class="flex text-xs text-luxe-gold mb-4">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                                    class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-sm leading-relaxed text-atelier-cream italic font-display text-lg">
+                                "Rain on Earth evokes memories of monsoon mornings in Kerala. The crackle of the
+                                unbleached cotton wick and the slow burn is unmatched. I've re-ordered three times."
+                            </p>
+                        </div>
+                        <div class="mt-6 border-t border-white/10 pt-4 flex items-center justify-between">
+                            <div>
+                                <span class="block text-xs font-bold text-atelier-cream">Dr. Priya Nair</span>
+                                <span class="text-[10px] text-atelier-dim">Delhi · Verified Buyer</span>
+                            </div>
+                            <span class="text-[10px] uppercase font-bold text-luxe-gold">Rain on Earth</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter & Concierge Section -->
+        <section
+            class="newsletter-banner relative overflow-hidden px-6 py-20 text-center border-b border-white/10">
+            <div class="mx-auto max-w-2xl">
+                <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-luxe-gold">Private Collector
+                    Circle</span>
+                <h2 class="mt-3 font-display text-4xl sm:text-5xl font-semibold text-atelier-cream">
+                    Keep a little <span class="italic font-normal text-luxe-gold">warmth close.</span>
+                </h2>
+                <p class="mt-4 text-xs sm:text-sm text-atelier-muted">
+                    Join our quiet list for early access to small-batch seasonal releases and receive 10% off your first
+                    order.
+                </p>
+
+                <form id="newsletter-form" class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <input id="newsletter-email" type="email" required placeholder="Enter your personal email"
+                        class="w-full sm:w-80 rounded-full border border-white/15 bg-atelier-base/80 px-6 py-3.5 text-xs text-atelier-cream placeholder:text-atelier-dim outline-none focus:border-luxe-gold transition">
+                    <button type="submit"
+                        class="w-full sm:w-auto rounded-full bg-luxe-gold px-8 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-atelier-base hover:bg-white transition duration-200">
+                        Join Circle
+                    </button>
+                </form>
+
+                <div id="newsletter-success"
+                    class="hidden mt-4 rounded-xl border border-luxe-gold/40 bg-flame-soft p-4 text-xs text-luxe-gold">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Welcome to Sondhi. Use code <strong
+                        class="underline font-mono">LIGHT10</strong> at checkout for 10% off your order!
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Slide-Out Cart Drawer -->
+    <div id="cart-drawer-backdrop"
+        class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+    </div>
+    <div id="cart-drawer"
+        class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-atelier-surface border-l border-white/10 p-6 flex flex-col justify-between shadow-2xl translate-x-full transition-transform duration-300 ease-in-out">
+        <!-- Cart Drawer Header -->
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-bag-shopping text-luxe-gold"></i>
+                <h3 class="font-display text-2xl font-bold text-atelier-cream">Your Sanctuary Bag</h3>
+                <span id="cart-items-counter" class="text-xs text-atelier-dim font-sans">(0 items)</span>
+            </div>
+            <button id="cart-close-btn"
+                class="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center text-atelier-muted hover:text-white"
+                aria-label="Close Cart">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Free Shipping Progress Bar -->
+        <div class="mt-4 rounded-xl bg-atelier-card p-3 border border-white/5">
+            <div class="flex justify-between text-[11px] font-semibold mb-1.5">
+                <span id="shipping-progress-text" class="text-atelier-muted">Add ₹301 more for Free Shipping</span>
+                <span class="text-luxe-gold"><i class="fa-solid fa-truck-fast"></i> Free Over ₹999</span>
+            </div>
+            <div class="h-1.5 w-full rounded-full bg-atelier-base overflow-hidden">
+                <div id="shipping-progress-bar"
+                    class="h-full bg-gradient-to-r from-flame-amber to-luxe-gold transition-all duration-300"
+                    style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Cart Items List Container -->
+        <div id="cart-items-container" class="my-4 flex-1 overflow-y-auto space-y-4 pr-1">
+            <!-- Populated dynamically via app.js -->
+        </div>
+
+        <!-- Cart Drawer Footer: Total & Checkout -->
+        <div class="border-t border-white/10 pt-4 space-y-3">
+            <!-- Promo Code Accordion/Input -->
+            <div class="flex gap-2">
+                <input id="coupon-input" type="text" placeholder="Promo code (try LIGHT10)"
+                    class="w-full rounded-lg border border-white/10 bg-atelier-card px-3 py-2 text-xs text-atelier-cream uppercase outline-none focus:border-luxe-gold">
+                <button id="apply-coupon-btn"
+                    class="rounded-lg border border-luxe-gold/50 px-4 py-2 text-xs font-bold uppercase tracking-wider text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base transition">
+                    Apply
+                </button>
+            </div>
+
+            <div class="flex justify-between text-xs text-atelier-muted">
+                <span>Subtotal</span>
+                <span id="cart-subtotal-display" class="font-semibold text-atelier-cream">₹0</span>
+            </div>
+            <div id="cart-discount-row" class="hidden flex justify-between text-xs text-luxe-gold">
+                <span>Circle Discount (10%)</span>
+                <span id="cart-discount-display">-₹0</span>
+            </div>
+            <div class="flex justify-between text-xs text-atelier-muted">
+                <span>Shipping</span>
+                <span id="cart-shipping-display" class="font-semibold text-luxe-sage">Complimentary</span>
+            </div>
+            <div class="flex justify-between text-base font-bold text-atelier-cream border-t border-white/5 pt-2">
+                <span>Total</span>
+                <span id="cart-total-display" class="font-display text-2xl text-luxe-gold">₹0</span>
+            </div>
+
+            <button id="checkout-btn"
+                class="w-full rounded-full bg-luxe-gold py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-base hover:bg-white transition duration-200 shadow-xl shadow-amber-900/30 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-lock text-[10px]"></i>
+                <span>Proceed To Secure Checkout</span>
+            </button>
+            <p class="text-center text-[10px] text-atelier-dim">Includes taxes & eco-conscious recyclable packaging</p>
+        </div>
+    </div>
+
+    <!-- Quick View Product Modal -->
+    <div id="quickview-modal-backdrop"
+        class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div id="quickview-modal"
+            class="relative w-full max-w-2xl rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto">
+            <button id="quickview-close-btn"
+                class="absolute top-4 right-4 h-8 w-8 rounded-full border border-white/10 flex items-center justify-center text-atelier-muted hover:text-white"
+                aria-label="Close Quick View">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <div id="quickview-content">
+                <!-- Dynamically injected via app.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="atelier-toast"
+        class="fixed bottom-6 left-1/2 z-[70] hidden -translate-x-1/2 items-center gap-3 rounded-full border border-luxe-gold/50 bg-atelier-surface/95 backdrop-blur-md px-6 py-3 text-xs font-semibold text-atelier-cream shadow-2xl transition-all duration-300">
+        <i class="fa-solid fa-circle-check text-luxe-gold"></i>
+        <span id="atelier-toast-msg">Item added to your sanctuary bag</span>
+    </div>
+
+    <!-- Modern Luxury Footer -->
+    <footer class="bg-atelier-base px-6 py-16 text-atelier-muted lg:px-10 border-t border-white/10">
+        <div class="mx-auto max-w-7xl">
+            <div class="grid gap-12 border-b border-white/10 pb-16 sm:grid-cols-2 lg:grid-cols-5">
+                <!-- Col 1: Brand -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3">
+                        <span class="flame-anim text-flame-glow text-2xl"><i
+                                class="fa-solid fa-fire-flame-curved"></i></span>
+                        <span class="font-display text-3xl font-bold tracking-[0.2em] text-atelier-cream">SONDHI</span>
+                    </div>
+                    <p class="mt-4 max-w-sm text-xs leading-relaxed text-atelier-muted">
+                        Handcrafted botanical soy candles formulated for slow living, quiet evenings, and timeless
+                        gifts. Poured with patience in India.
+                    </p>
+                    <div class="mt-6 flex gap-4 text-atelier-cream">
+                        <a href="https://instagram.com" target="_blank" rel="noreferrer"
+                            class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 hover:border-luxe-gold hover:text-luxe-gold transition">
+                            <i class="fa-brands fa-instagram text-sm"></i>
+                        </a>
+                        <a href="https://wa.me/919999999999" target="_blank" rel="noreferrer"
+                            class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 hover:border-luxe-gold hover:text-luxe-gold transition">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                        </a>
+                        <a href="mailto:concierge@sondhi.co"
+                            class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 hover:border-luxe-gold hover:text-luxe-gold transition">
+                            <i class="fa-regular fa-envelope text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Collection -->
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold">Collection</h4>
+                    <ul class="mt-4 space-y-2.5 text-xs text-atelier-muted">
+                        <li><a href="#collection" class="hover:text-atelier-cream transition">All Fragrances</a></li>
+                        <li><a href="#collection" class="hover:text-atelier-cream transition">Floral & Velvet</a></li>
+                        <li><a href="#collection" class="hover:text-atelier-cream transition">Warm Spiced Amber</a></li>
+                        <li><a href="#collection" class="hover:text-atelier-cream transition">Woody & Smoked Oud</a>
+                        </li>
+                        <li><a href="#custom-studio" class="text-luxe-gold hover:text-white transition">Custom Atelier
+                                Studio</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Atelier -->
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold">The Atelier</h4>
+                    <ul class="mt-4 space-y-2.5 text-xs text-atelier-muted">
+                        <li><a href="#story" class="hover:text-atelier-cream transition">Our Philosophy</a></li>
+                        <li><a href="#rituals" class="hover:text-atelier-cream transition">Candle Care & Rituals</a>
+                        </li>
+                        <li><a href="#story" class="hover:text-atelier-cream transition">Sustainability & Wax</a></li>
+                        <li><a href="mailto:corporate@sondhi.co" class="hover:text-atelier-cream transition">Corporate &
+                                Wedding Gifting</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Concierge -->
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold">Concierge</h4>
+                    <ul class="mt-4 space-y-2.5 text-xs text-atelier-muted">
+                        <li><a href="mailto:concierge@sondhi.co" class="hover:text-atelier-cream transition">Order
+                                Tracking</a></li>
+                        <li><a href="mailto:concierge@sondhi.co" class="hover:text-atelier-cream transition">Shipping &
+                                Returns</a></li>
+                        <li><a href="mailto:concierge@sondhi.co" class="hover:text-atelier-cream transition">Wholesale
+                                Inquiries</a></li>
+                        <li><a href="mailto:concierge@sondhi.co"
+                                class="hover:text-atelier-cream transition">concierge@sondhi.co</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 5: Governance & Portals -->
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold">Atelier Portals</h4>
+                    <ul class="mt-4 space-y-2.5 text-xs text-atelier-muted">
+                        <li><a href="{{ route('profile.index') }}" class="hover:text-atelier-cream transition text-luxe-gold">Client
+                                Profile & Billing</a></li>
+                        <li><a href="{{ route('admin.index') }}" class="hover:text-atelier-cream transition">Atelier Operations
+                                Admin</a></li>
+                        <li><a href="{{ route('superadmin.index') }}" class="hover:text-atelier-cream transition">Super Admin
+                                Governance</a></li>
+                        <li><a href="{{ route('profile.index') }}#billing" class="hover:text-atelier-cream transition">Flame Circle
+                                Membership</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-atelier-dim">
+                <span>© 2026 SONDHI BOTANICALS ATELIER · HAND-CRAFTED IN INDIA.</span>
+                <span>DESIGNED FOR SANCTUARIES & SLOW EVENINGS.</span>
+                <span class="font-display italic text-sm tracking-wide text-atelier-cream">From Sondhi</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Love Note Replay Trigger -->
+    <button id="floating-love-btn" type="button"
+        class="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 rounded-full border border-rose-400/40 bg-atelier-surface/90 px-4 py-2.5 text-xs font-semibold text-rose-500 shadow-xl shadow-rose-950/20 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-rose-400 hover:bg-rose-500/10 active:scale-95 group cursor-pointer"
+        aria-label="Open Love Note For Baby" title="A Love Note For Baby">
+        <i class="fa-solid fa-heart text-sm text-rose-500 animate-pulse group-hover:scale-125 transition-transform duration-300"></i>
+        <span class="font-display italic text-sm tracking-wide text-atelier-cream">I love you baby</span>
+    </button>
+
+    <!-- Core Auth & App Logic -->
+    <script src="{{ asset('js/auth.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
+</body>
+
+</html>

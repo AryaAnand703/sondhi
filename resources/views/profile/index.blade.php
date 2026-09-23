@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Client Sanctuary & Billing | Sondhi Atelier</title>
+    <meta name="description" content="Personal account, bespoke fragrance formulas, order history, and billing management for Sondhi Atelier patrons.">
+
+    <!-- Theme Early Pre-paint Initializer (Avoids FOUC, defaults to Light Theme) -->
+    <meta name="color-scheme" content="light dark">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('sondhi_theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        atelier: {
+                            base: 'rgb(var(--atelier-base-rgb) / <alpha-value>)',
+                            surface: 'rgb(var(--atelier-surface-rgb) / <alpha-value>)',
+                            card: 'rgb(var(--atelier-card-rgb) / <alpha-value>)',
+                            hover: 'rgb(var(--atelier-hover-rgb) / <alpha-value>)',
+                            border: 'var(--atelier-border)',
+                            cream: 'rgb(var(--atelier-cream-rgb) / <alpha-value>)',
+                            muted: 'rgb(var(--atelier-muted-rgb) / <alpha-value>)',
+                            dim: 'rgb(var(--atelier-dim-rgb) / <alpha-value>)'
+                        },
+                        flame: {
+                            glow: 'rgb(var(--flame-glow-rgb) / <alpha-value>)',
+                            amber: 'rgb(var(--flame-amber-rgb) / <alpha-value>)',
+                            soft: 'var(--flame-soft)'
+                        },
+                        luxe: {
+                            gold: 'rgb(var(--luxe-gold-rgb) / <alpha-value>)',
+                            rose: '#D89797',
+                            sage: '#8FA189'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Custom Atelier Styles & Theme Variables -->
+    <style>
+        :root {
+            color-scheme: light;
+            --atelier-base-rgb: 250 247 242;       /* #FAF7F2 Warm Alabaster Linen Base */
+            --atelier-surface-rgb: 255 255 255;    /* #FFFFFF Crisp Porcelain Surface */
+            --atelier-card-rgb: 255 255 255;       /* #FFFFFF Pure Ivory Card */
+            --atelier-hover-rgb: 244 239 232;      /* #F4EFE8 Subtle Warm Parchment Hover */
+            --atelier-cream-rgb: 28 22 19;         /* #1C1613 Deep Warm Charcoal Espresso (Primary Text) */
+            --atelier-muted-rgb: 104 92 81;        /* #685C51 Refined Warm Stone (Secondary Text) */
+            --atelier-dim-rgb: 152 138 124;        /* #988A7C Subtle Warm Mineral (Tertiary Text) */
+
+            --luxe-gold-rgb: 180 120 32;           /* #B47820 Rich Burnished Molten Gold */
+            --flame-glow-rgb: 217 119 6;           /* #D97706 Radiant Amber Flame */
+            --flame-amber-rgb: 180 83 9;           /* #B45309 Warm Terracotta Flame */
+
+            --atelier-border: rgba(44, 34, 26, 0.09);
+            --flame-soft: rgba(217, 119, 6, 0.08);
+
+            --header-bg: rgba(250, 247, 242, 0.88);
+            --header-border: rgba(44, 34, 26, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --card-border: rgba(44, 34, 26, 0.08);
+            --card-hover-border: rgba(180, 120, 32, 0.35);
+
+            --scrollbar-track: #FAF7F2;
+            --scrollbar-thumb: #D8CFBF;
+            --scrollbar-thumb-hover: #B47820;
+
+            --tab-active-color: #B47820;
+            --tab-active-bg: rgba(180, 120, 32, 0.08);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
+        }
+
+        html.dark {
+            color-scheme: dark;
+            --atelier-base-rgb: 13 11 10;          /* #0D0B0A */
+            --atelier-surface-rgb: 21 18 16;       /* #151210 */
+            --atelier-card-rgb: 28 24 21;          /* #1C1815 */
+            --atelier-hover-rgb: 38 33 29;         /* #26211D */
+            --atelier-cream-rgb: 250 247 242;      /* #FAF7F2 */
+            --atelier-muted-rgb: 166 156 143;      /* #A69C8F */
+            --atelier-dim-rgb: 110 101 91;         /* #6E655B */
+
+            --luxe-gold-rgb: 229 195 120;          /* #E5C378 */
+            --flame-glow-rgb: 245 158 11;          /* #F59E0B */
+            --flame-amber-rgb: 217 119 6;          /* #D97706 */
+
+            --atelier-border: rgba(255, 255, 255, 0.08);
+            --flame-soft: rgba(245, 158, 11, 0.12);
+
+            --header-bg: rgba(13, 11, 10, 0.88);
+            --header-border: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(28, 24, 21, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-border: rgba(229, 195, 120, 0.3);
+
+            --scrollbar-track: #0D0B0A;
+            --scrollbar-thumb: #26211D;
+            --scrollbar-thumb-hover: #E5C378;
+
+            --tab-active-color: #E5C378;
+            --tab-active-bg: rgba(229, 195, 120, 0.05);
+            --shadow-atelier-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            background-color: rgb(var(--atelier-base-rgb));
+            color: rgb(var(--atelier-cream-rgb));
+            overflow-x: hidden;
+            transition: background-color 250ms ease, color 250ms ease;
+        }
+
+        .glass-header {
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--header-border);
+            transition: background 250ms ease, border-color 250ms ease;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-atelier-card);
+            transition: all 250ms ease;
+        }
+
+        .glass-card:hover {
+            border-color: var(--card-hover-border);
+        }
+
+        .tab-btn.active {
+            color: var(--tab-active-color);
+            border-bottom-color: var(--tab-active-color);
+            background: var(--tab-active-bg);
+        }
+
+        .portal-pill {
+            transition: all 0.2s ease;
+        }
+        .portal-pill:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover);
+        }
+
+        /* Light theme adaptive overrides */
+        html:not(.dark) [class*="border-white/5"] {
+            border-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="border-white/10"] {
+            border-color: rgba(44, 34, 26, 0.09) !important;
+        }
+        html:not(.dark) [class*="border-white/15"] {
+            border-color: rgba(44, 34, 26, 0.13) !important;
+        }
+        html:not(.dark) [class*="border-white/20"] {
+            border-color: rgba(44, 34, 26, 0.18) !important;
+        }
+        html:not(.dark) [class*="border-white/30"] {
+            border-color: rgba(44, 34, 26, 0.25) !important;
+        }
+
+        html:not(.dark) [class*="bg-white/5"] {
+            background-color: rgba(44, 34, 26, 0.035) !important;
+        }
+        html:not(.dark) [class*="bg-white/10"] {
+            background-color: rgba(44, 34, 26, 0.06) !important;
+        }
+        html:not(.dark) [class*="bg-white/20"] {
+            background-color: rgba(44, 34, 26, 0.1) !important;
+        }
+        html:not(.dark) [class*="bg-white/[0.02]"] {
+            background-color: rgba(44, 34, 26, 0.02) !important;
+        }
+
+        html:not(.dark) .hover\:text-white:hover {
+            color: #1C1613 !important;
+        }
+        html:not(.dark) .hover\:bg-white:hover {
+            background-color: #1C1613 !important;
+            color: #FAF7F2 !important;
+        }
+        html:not(.dark) .hover\:bg-white\/10:hover {
+            background-color: rgba(44, 34, 26, 0.08) !important;
+        }
+        html:not(.dark) .hover\:border-white\/30:hover {
+            border-color: rgba(44, 34, 26, 0.3) !important;
+        }
+        html:not(.dark) .bg-atelier-card {
+            box-shadow: 0 4px 18px -2px rgba(44, 34, 26, 0.05), 0 1px 3px rgba(44, 34, 26, 0.03);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-atelier-cream bg-atelier-base min-h-screen flex flex-col">
+
+    <!-- Universal Portal Switcher Banner -->
+    <div class="bg-atelier-card/90 border-b border-white/10 px-4 py-2 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-atelier-muted" id="portal-user-badge">
+                <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-luxe-gold animate-pulse"></span>
+                <span class="text-[11px] uppercase tracking-wider font-semibold text-luxe-gold">Atelier Environment:</span>
+                <span class="text-[11px] text-atelier-cream">Active Mode — <strong class="text-white">Patron / Collector</strong></span>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span class="text-[10px] uppercase tracking-widest text-atelier-dim hidden sm:inline">Switch Workspace:</span>
+                <a href="{{ route('home') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-white/30">
+                    <i class="fa-solid fa-store text-[9px]"></i> Storefront
+                </a>
+                <a href="{{ route('profile.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-luxe-gold bg-luxe-gold/10 text-luxe-gold">
+                    <i class="fa-solid fa-user text-[9px]"></i> Client Profile
+                </a>
+                <a href="{{ route('admin.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-luxe-gold/50">
+                    <i class="fa-solid fa-shield-halved text-[9px]"></i> Atelier Admin
+                </a>
+                <a href="{{ route('superadmin.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-flame-amber">
+                    <i class="fa-solid fa-crown text-[9px] text-flame-glow"></i> Super Admin
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="glass-header sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="{{ route('home') }}" class="group flex items-center gap-3">
+                <span class="text-flame-glow text-xl">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                </span>
+                <div class="flex flex-col">
+                    <span class="font-display text-2xl font-bold tracking-[0.25em] text-atelier-cream group-hover:text-luxe-gold transition">
+                        SONDHI
+                    </span>
+                    <span class="text-[9px] tracking-[0.3em] uppercase text-atelier-muted">Sanctuary Account</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.2em] text-atelier-muted">
+                <a href="index.html#collection" class="hover:text-atelier-cream transition">Fragrances</a>
+                <a href="index.html#custom-studio" class="hover:text-luxe-gold transition flex items-center gap-1 text-luxe-gold">
+                    <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Studio
+                </a>
+                <a href="#billing" onclick="switchProfileTab('billing')" class="hover:text-atelier-cream transition text-luxe-gold">
+                    <i class="fa-regular fa-credit-card mr-1 text-[10px]"></i> Billing & Cards
+                </a>
+                <a href="{{ route('home') }}" class="hover:text-atelier-cream transition">Back to Store</a>
+            </nav>
+
+            <!-- User Quick Badge & Actions -->
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div id="header-user-name" class="text-xs font-semibold text-atelier-cream">Arya Anand</div>
+                    <div class="text-[10px] text-luxe-gold uppercase tracking-wider" id="header-user-tier">Flame Circle Patron</div>
+                </div>
+                <div id="header-user-avatar" class="h-10 w-10 rounded-full border border-luxe-gold/40 bg-flame-soft flex items-center justify-center text-luxe-gold font-bold text-sm">
+                    AA
+                </div>
+                <div class="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-3">
+                    <button id="theme-toggle-btn" onclick="toggleAtelierTheme()" class="theme-toggle-btn p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-atelier-muted hover:text-luxe-gold text-xs transition" title="Switch to Dark Theme" aria-label="Toggle Theme">
+                        <i class="fa-solid fa-moon text-xs theme-moon-icon text-amber-700"></i>
+                        <i class="fa-solid fa-sun text-xs theme-sun-icon text-amber-400 hidden"></i>
+                    </button>
+                    <button onclick="window.sondhiAuth.openAuthModal('signin', 'Switch to another patron account')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-atelier-muted hover:text-luxe-gold text-xs transition" title="Switch Account">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    </button>
+                    <button onclick="window.sondhiAuth.logout(); window.location.reload();" class="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/10 text-atelier-muted hover:text-red-400 text-xs transition" title="Sign Out">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+
+        <!-- Patron Identity Banner -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-flame-glow/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div class="flex items-center gap-5">
+                    <div class="relative group cursor-pointer" onclick="openAvatarModal()">
+                        <div class="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border-2 border-luxe-gold/50 bg-gradient-to-br from-atelier-card to-atelier-hover flex items-center justify-center text-3xl font-display text-luxe-gold shadow-xl">
+                            <span id="profile-avatar-initials">AA</span>
+                        </div>
+                        <div class="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs">
+                            <i class="fa-solid fa-camera mr-1"></i> Change
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h1 id="hero-user-name" class="font-display text-2xl sm:text-3xl font-semibold text-atelier-cream">Arya Anand</h1>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-luxe-gold/15 text-luxe-gold border border-luxe-gold/30">
+                                <i class="fa-solid fa-gem text-[9px]"></i> VIP Collector
+                            </span>
+                        </div>
+                        <p id="hero-user-email" class="text-xs text-atelier-muted mt-1 font-sans">arya@example.com · Client since October 2024</p>
+                        <p class="text-xs text-atelier-dim mt-1.5 italic font-display">"Smoked Oud & Damask Rose form the sacred atmosphere of my evening meditation."</p>
+                    </div>
+                </div>
+
+                <!-- Quick Metric Counters -->
+                <div class="grid grid-cols-3 gap-4 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8">
+                    <div class="text-center md:text-left">
+                        <div class="font-display text-2xl font-bold text-luxe-gold" id="stat-total-orders">8</div>
+                        <div class="text-[10px] uppercase tracking-wider text-atelier-muted">Orders Poured</div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <div class="font-display text-2xl font-bold text-flame-glow" id="stat-bespoke-formulas">3</div>
+                        <div class="text-[10px] uppercase tracking-wider text-atelier-muted">Custom Blends</div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <div class="font-display text-2xl font-bold text-atelier-cream" id="stat-rewards-points">1,450</div>
+                        <div class="text-[10px] uppercase tracking-wider text-atelier-muted">Flame Points</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex overflow-x-auto border-b border-white/10 gap-1 sm:gap-2 mb-8 no-scrollbar">
+            <button onclick="switchProfileTab('overview')" id="tab-btn-overview" class="tab-btn active px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-regular fa-user text-xs"></i> Overview & Details
+            </button>
+            <button onclick="switchProfileTab('billing')" id="tab-btn-billing" class="tab-btn px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2 text-luxe-gold">
+                <i class="fa-solid fa-wallet text-xs"></i> Billing & Membership
+            </button>
+            <button onclick="switchProfileTab('orders')" id="tab-btn-orders" class="tab-btn px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-box-archive text-xs"></i> Order History & Tracking
+            </button>
+            <button onclick="switchProfileTab('formulas')" id="tab-btn-formulas" class="tab-btn px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-flask-vial text-xs"></i> Bespoke Formula Vault
+            </button>
+            <button onclick="switchProfileTab('addresses')" id="tab-btn-addresses" class="tab-btn px-4 sm:px-6 py-3 border-b-2 border-transparent text-xs sm:text-sm font-semibold tracking-wider uppercase whitespace-nowrap transition flex items-center gap-2">
+                <i class="fa-solid fa-location-dot text-xs"></i> Sanctuary Addresses
+            </button>
+        </div>
+
+        <!-- TAB 1: OVERVIEW & PROFILE DETAILS -->
+        <section id="section-overview" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Personal Info Card -->
+                <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                        <div>
+                            <h2 class="font-display text-xl font-semibold text-atelier-cream">Patron Credentials</h2>
+                            <p class="text-xs text-atelier-muted">Manage your personal identification and atelier contacts</p>
+                        </div>
+                        <button onclick="saveProfileDetails()" class="px-4 py-2 rounded-lg bg-luxe-gold/20 border border-luxe-gold text-luxe-gold text-xs font-semibold uppercase tracking-wider hover:bg-luxe-gold hover:text-atelier-base transition">
+                            <i class="fa-solid fa-check mr-1.5"></i> Save Changes
+                        </button>
+                    </div>
+
+                    <form id="profile-details-form" class="space-y-4" onsubmit="event.preventDefault(); saveProfileDetails();">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">First Name</label>
+                                <input type="text" id="input-first-name" value="Arya" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Last Name</label>
+                                <input type="text" id="input-last-name" value="Anand" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Email Address</label>
+                                <input type="email" id="input-email" value="arya@example.com" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Phone (Direct / WhatsApp)</label>
+                                <input type="tel" id="input-phone" value="+91 98765 43210" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Atelier Fragrance Philosophy / Sensory Notes</label>
+                            <textarea id="input-fragrance-bio" rows="3" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">Smoked Oud & Damask Rose form the sacred atmosphere of my evening meditation. Prefer wooden wicks and slow cold throws.</textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sensory Preferences Card -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="border-b border-white/10 pb-4 mb-5">
+                            <h2 class="font-display text-xl font-semibold text-atelier-cream">Olfactory Profile</h2>
+                            <p class="text-xs text-atelier-muted">Customized fragrance recommendations</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs text-atelier-muted block mb-2">Favorite Fragrance Accords</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2.5 py-1 rounded-full text-xs bg-luxe-gold/15 text-luxe-gold border border-luxe-gold/30">Woody Oud</span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs bg-flame-soft text-flame-glow border border-flame-glow/30">Smoked Amber</span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs bg-white/5 text-atelier-muted border border-white/10">Damask Rose</span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs bg-white/5 text-atelier-muted border border-white/10">Mitti Attar</span>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-white/10">
+                                <label class="text-xs text-atelier-muted block mb-1.5">Preferred Wick Style</label>
+                                <div class="text-sm font-semibold text-atelier-cream flex items-center gap-2">
+                                    <i class="fa-solid fa-fire text-flame-glow text-xs"></i> Hand-cut Organic Crackling Wood
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-white/10">
+                                <label class="text-xs text-atelier-muted block mb-1.5">Burn Time Preference</label>
+                                <div class="text-sm font-semibold text-atelier-cream">50+ Hours (280g Grande Size)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-white/10 bg-atelier-surface/60 rounded-xl p-3 text-center">
+                        <span class="text-xs text-atelier-muted">Flame Concierge Status</span>
+                        <div class="text-sm font-semibold text-luxe-gold mt-0.5">Priority Artisan Batch Allocation</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: BILLING & MEMBERSHIP (REQUESTED CORE SECTION) -->
+        <section id="section-billing" class="tab-content hidden space-y-8">
+            <!-- Top Billing Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Flame Circle Subscription Tier -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden border border-luxe-gold/40">
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-luxe-gold/15 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-luxe-gold/20 text-luxe-gold border border-luxe-gold/30">
+                            Active Membership
+                        </span>
+                        <i class="fa-solid fa-fire text-luxe-gold text-lg"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-atelier-cream">The Flame Circle</h3>
+                    <p class="text-xs text-atelier-muted mt-1">Quarterly Bespoke Artisan Allocation</p>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-baseline justify-between">
+                        <div>
+                            <span class="text-2xl font-display font-bold text-luxe-gold">₹2,499</span>
+                            <span class="text-xs text-atelier-dim"> / quarter</span>
+                        </div>
+                        <span class="text-[11px] text-luxe-sage font-medium"><i class="fa-solid fa-shield-check"></i> Auto-renews Nov 15</span>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="manageMembershipModal()" class="flex-1 py-2 rounded-lg bg-atelier-hover hover:bg-white/10 text-xs font-semibold uppercase tracking-wider text-atelier-cream transition border border-white/10">
+                            Manage Tier
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Default Payment Method -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-atelier-muted">Primary Payment Card</span>
+                            <i class="fa-brands fa-cc-visa text-xl text-blue-400"></i>
+                        </div>
+                        <div class="font-mono text-base text-atelier-cream tracking-wider mt-2">•••• •••• •••• 8842</div>
+                        <div class="flex justify-between text-xs text-atelier-muted mt-2">
+                            <span>Arya Anand</span>
+                            <span>Exp: 09/28</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-1.5 text-xs text-luxe-sage">
+                            <span class="w-1.5 h-1.5 rounded-full bg-luxe-sage"></span> Verified & Secure
+                        </span>
+                        <button onclick="openAddCardModal()" class="text-xs text-luxe-gold hover:underline font-semibold">
+                            + Add New Method
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lifetime Spending & Tax Info -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-atelier-muted">Atelier Financial Summary</span>
+                        <div class="mt-3">
+                            <div class="text-[11px] text-atelier-dim uppercase tracking-wider">Total Atelier Patronage</div>
+                            <div class="font-display text-2xl font-bold text-atelier-cream mt-0.5">₹19,840</div>
+                        </div>
+                        <div class="mt-3 text-xs text-atelier-muted">
+                            <span class="text-atelier-dim">GSTIN / Tax ID:</span> 27AADCS9982Q1Z3 (Registered)
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <span class="text-xs text-atelier-muted">E-Invoicing Enabled</span>
+                        <button onclick="downloadAllReceipts()" class="text-xs text-luxe-gold hover:text-white transition flex items-center gap-1">
+                            <i class="fa-solid fa-download text-[10px]"></i> Tax Statement
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Payment Methods Grid -->
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Saved Payment Methods</h2>
+                        <p class="text-xs text-atelier-muted">Card credentials encrypted under 256-bit PCI-DSS standards</p>
+                    </div>
+                    <button onclick="openAddCardModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                        <i class="fa-solid fa-plus"></i> Add Payment Method
+                    </button>
+                </div>
+
+                <div id="payment-methods-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Cards will be populated by profile.js -->
+                </div>
+            </div>
+
+            <!-- Invoices & Transaction History -->
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Invoices & Receipts Ledger</h2>
+                        <p class="text-xs text-atelier-muted">Download tax-compliant receipts for all candle commissions and club memberships</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="invoice-search" placeholder="Search invoice #" onkeyup="filterInvoices()" class="bg-atelier-surface border border-white/10 rounded-lg px-3 py-1.5 text-xs text-atelier-cream focus:border-luxe-gold outline-none">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-white/10 text-atelier-muted uppercase tracking-wider text-[10px]">
+                                <th class="pb-3 font-semibold">Invoice #</th>
+                                <th class="pb-3 font-semibold">Date</th>
+                                <th class="pb-3 font-semibold">Description</th>
+                                <th class="pb-3 font-semibold">Amount</th>
+                                <th class="pb-3 font-semibold">Payment Status</th>
+                                <th class="pb-3 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoices-table-body" class="divide-y divide-white/5">
+                            <!-- Invoices populated by profile.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: ORDER HISTORY & TRACKING -->
+        <section id="section-orders" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Atelier Commission History</h2>
+                        <p class="text-xs text-atelier-muted">Track artisan hand-pouring, curing, and white-glove dispatch</p>
+                    </div>
+                    <span class="text-xs text-luxe-gold font-semibold" id="orders-count-label">8 Commissions</span>
+                </div>
+
+                <div id="orders-list-container" class="space-y-4">
+                    <!-- Orders will be injected by profile.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: BESPOKE FORMULA VAULT -->
+        <section id="section-formulas" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Saved Bespoke Formulations</h2>
+                        <p class="text-xs text-atelier-muted">Formulas crafted in your Sondhi Custom Studio sessions</p>
+                    </div>
+                    <a href="index.html#custom-studio" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-luxe-gold/20 border border-luxe-gold text-luxe-gold text-xs font-bold uppercase tracking-wider hover:bg-luxe-gold hover:text-atelier-base transition">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Open Custom Studio
+                    </a>
+                </div>
+
+                <div id="formulas-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Formulas populated by profile.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: SANCTUARY ADDRESSES -->
+        <section id="section-addresses" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+                    <div>
+                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Sanctuary Delivery Addresses</h2>
+                        <p class="text-xs text-atelier-muted">Addresses for white-glove candle delivery and temperature-controlled shipping</p>
+                    </div>
+                    <button onclick="openAddAddressModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                        <i class="fa-solid fa-plus"></i> Add Sanctuary Address
+                    </button>
+                </div>
+
+                <div id="addresses-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Addresses populated by profile.js -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-white/10 bg-atelier-surface py-6 text-center text-xs text-atelier-muted">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span class="font-display tracking-widest uppercase">Sondhi Botanicals Atelier · Client Sanctuary</span>
+            <div class="flex items-center gap-4 text-xs text-atelier-dim">
+                <a href="{{ route('home') }}" class="hover:text-atelier-cream">Storefront</a>
+                <span>•</span>
+                <a href="{{ route('admin.index') }}" class="hover:text-atelier-cream">Atelier Admin</a>
+                <span>•</span>
+                <a href="{{ route('superadmin.index') }}" class="hover:text-atelier-cream">Super Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal: Add Payment Method -->
+    <div id="modal-add-card" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <h3 class="font-display text-xl font-semibold text-atelier-cream">Add Payment Method</h3>
+                <button onclick="closeModal('modal-add-card')" class="text-atelier-muted hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="add-card-form" onsubmit="event.preventDefault(); submitNewCard();" class="space-y-4 text-xs">
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Cardholder Full Name</label>
+                    <input type="text" id="card-name" required placeholder="e.g. Arya Anand" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                </div>
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Card Number</label>
+                    <div class="relative">
+                        <input type="text" id="card-number" required maxlength="19" placeholder="4111 •••• •••• 8842" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none font-mono">
+                        <i class="fa-brands fa-cc-visa absolute right-3 top-3 text-atelier-muted text-base"></i>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Expiry (MM/YY)</label>
+                        <input type="text" id="card-expiry" required maxlength="5" placeholder="08/29" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none text-center">
+                    </div>
+                    <div>
+                        <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">CVV / CVC</label>
+                        <input type="password" id="card-cvv" required maxlength="4" placeholder="•••" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none text-center">
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 pt-2">
+                    <input type="checkbox" id="card-default" class="rounded bg-atelier-card border-white/20 text-luxe-gold focus:ring-0">
+                    <label for="card-default" class="text-atelier-muted cursor-pointer">Set as primary payment method for candle deliveries</label>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('modal-add-card')" class="flex-1 py-2.5 rounded-lg border border-white/10 text-atelier-muted hover:text-white uppercase font-semibold tracking-wider">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-lg bg-luxe-gold text-atelier-base font-bold uppercase tracking-wider hover:bg-white transition">Save Method</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Invoice -->
+    <div id="modal-invoice" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice text-luxe-gold text-lg"></i>
+                    <h3 class="font-display text-xl font-semibold text-atelier-cream" id="invoice-modal-title">Tax Invoice #INV-2026-084</h3>
+                </div>
+                <button onclick="closeModal('modal-invoice')" class="text-atelier-muted hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div id="invoice-modal-content" class="text-xs space-y-6">
+                <!-- Dynamically filled -->
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-white/10 flex justify-end gap-3">
+                <button onclick="window.print()" class="px-4 py-2 rounded-lg bg-atelier-card border border-white/10 text-atelier-cream hover:text-white text-xs font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Print Invoice
+                </button>
+                <button onclick="closeModal('modal-invoice')" class="px-5 py-2 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Address -->
+    <div id="modal-add-address" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <h3 class="font-display text-xl font-semibold text-atelier-cream">New Sanctuary Address</h3>
+                <button onclick="closeModal('modal-add-address')" class="text-atelier-muted hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="add-address-form" onsubmit="event.preventDefault(); submitNewAddress();" class="space-y-4 text-xs">
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Address Label</label>
+                    <input type="text" id="addr-label" required placeholder="e.g. Primary Residence / Studio / Summer House" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                </div>
+                <div>
+                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Street Address</label>
+                    <input type="text" id="addr-street" required placeholder="Apartment, suite, street name" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">City</label>
+                        <input type="text" id="addr-city" required placeholder="Mumbai / Delhi" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                    </div>
+                    <div>
+                        <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Postal Code</label>
+                        <input type="text" id="addr-pincode" required placeholder="400050" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream focus:border-luxe-gold outline-none">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('modal-add-address')" class="flex-1 py-2.5 rounded-lg border border-white/10 text-atelier-muted hover:text-white uppercase font-semibold tracking-wider">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-lg bg-luxe-gold text-atelier-base font-bold uppercase tracking-wider hover:bg-white transition">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-atelier-surface border border-luxe-gold px-4 py-3 shadow-2xl text-xs text-atelier-cream opacity-0 pointer-events-none transition-all duration-300">
+        <i class="fa-solid fa-circle-check text-luxe-gold text-sm" id="toast-icon"></i>
+        <span id="toast-message">Action completed successfully</span>
+    </div>
+
+    <!-- Core Auth & Client Logic -->
+    <script src="{{ asset('js/auth.js') }}"></script>
+    <script src="{{ asset('js/profile.js') }}"></script>
+</body>
+</html>
