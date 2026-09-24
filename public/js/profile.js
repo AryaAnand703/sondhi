@@ -178,6 +178,16 @@ function syncProfileWithAuth() {
         if (inputLast) inputLast.value = profileState.user.lastName;
         if (inputEmail) inputEmail.value = profileState.user.email;
         if (inputPhone) inputPhone.value = profileState.user.phone;
+
+        // Toggle admin/superadmin workspace pills based on role
+        const adminPill = document.getElementById('pill-admin-link');
+        const superPill = document.getElementById('pill-superadmin-link');
+        if (adminPill) {
+            adminPill.style.display = (user && (user.role === 'admin' || user.role === 'superadmin')) ? 'inline-flex' : 'none';
+        }
+        if (superPill) {
+            superPill.style.display = (user && user.role === 'superadmin') ? 'inline-flex' : 'none';
+        }
     }
 }
 

@@ -93,4 +93,51 @@ class ExampleTest extends TestCase
         $response = $this->actingAs($superadmin)->get('/superadmin');
         $response->assertStatus(200);
     }
+
+    /**
+     * Test storefront page does not show admin or superadmin login links.
+     */
+    public function test_storefront_does_not_contain_admin_or_superadmin_logins(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertDontSee('Atelier Admin (Pass Required)');
+        $response->assertDontSee('Super Admin (Pass Required)');
+        $response->assertDontSee('Atelier Operations Admin');
+        $response->assertDontSee('Super Admin Governance');
+    }
+
+    /**
+     * Test separate admin login opens admin portal.
+     */
+    public function test_admin_login_redirects_to_admin_portal(): void
+    {
+        $response = $this->postJson('/auth/login', [
+            'login' => 'meera',
+            'password' => 'meera123',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'redirect' => route('admin.index'),
+        ]);
+    }
+
+    /**
+     * Test separate superadmin login opens superadmin portal.
+     */
+    public function test_superadmin_login_redirects_to_superadmin_portal(): void
+    {
+        $response = $this->postJson('/auth/login', [
+            'login' => 'superadmin',
+            'password' => 'admin123',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'redirect' => route('superadmin.index'),
+        ]);
+    }
 }

@@ -258,9 +258,11 @@
                 <a href="{{ route('admin.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-flame-glow bg-flame-soft text-flame-glow font-bold">
                     <i class="fa-solid fa-shield-halved text-[9px]"></i> Atelier Admin
                 </a>
+                @if(Auth::check() && Auth::user()->role === 'superadmin')
                 <a href="{{ route('superadmin.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-flame-amber">
                     <i class="fa-solid fa-crown text-[9px] text-flame-glow"></i> Super Admin
                 </a>
+                @endif
             </div>
         </div>
     </div>
@@ -584,8 +586,10 @@
                 <a href="{{ route('home') }}" class="hover:text-atelier-cream">Storefront</a>
                 <span>•</span>
                 <a href="{{ route('profile.index') }}" class="hover:text-atelier-cream">Client Profile</a>
+                @if(Auth::check() && Auth::user()->role === 'superadmin')
                 <span>•</span>
                 <a href="{{ route('superadmin.index') }}" class="hover:text-atelier-cream">Super Admin Governance</a>
+                @endif
             </div>
         </div>
     </footer>

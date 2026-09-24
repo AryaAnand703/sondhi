@@ -646,25 +646,15 @@
                                 <div class="text-[10px] text-atelier-muted">Orders, Formulas & Cards</div>
                             </div>
                         </a>
-                        <a href="{{ route('admin.index') }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-flame-soft hover:text-flame-glow transition">
+                        <a href="{{ route('profile.index') }}#orders"
+                            class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-white/5 hover:text-luxe-gold transition">
                             <div
-                                class="w-7 h-7 rounded-lg bg-flame-soft flex items-center justify-center text-flame-glow">
-                                <i class="fa-solid fa-shield-halved text-[11px]"></i>
+                                class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-atelier-muted">
+                                <i class="fa-solid fa-box-archive text-[11px]"></i>
                             </div>
                             <div>
-                                <div class="font-semibold">Atelier Admin</div>
-                                <div class="text-[10px] text-atelier-muted">Orders, Catalog & Payouts</div>
-                            </div>
-                        </a>
-                        <a href="{{ route('superadmin.index') }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-red-500/10 hover:text-red-400 transition">
-                            <div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
-                                <i class="fa-solid fa-crown text-[11px]"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Super Admin</div>
-                                <div class="text-[10px] text-atelier-muted">RBAC & Global Billing</div>
+                                <div class="font-semibold">Order History & Tracking</div>
+                                <div class="text-[10px] text-atelier-muted">Curing & delivery timeline</div>
                             </div>
                         </a>
                         <div class="mt-1 pt-1.5 border-t border-white/10">
@@ -730,11 +720,8 @@
                 <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="{{ route('profile.index') }}">
                     <i class="fa-solid fa-user text-xs"></i> Client Profile & Billing
                 </a>
-                <a class="block py-1 text-flame-glow hover:text-white flex items-center gap-2" href="{{ route('admin.index') }}">
-                    <i class="fa-solid fa-shield-halved text-xs"></i> Atelier Admin (Pass Required)
-                </a>
-                <a class="block py-1 text-red-400 hover:text-white flex items-center gap-2" href="{{ route('superadmin.index') }}">
-                    <i class="fa-solid fa-crown text-xs"></i> Super Admin (Pass Required)
+                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="{{ route('profile.index') }}#billing">
+                    <i class="fa-solid fa-crown text-xs text-luxe-gold"></i> Flame Circle Membership
                 </a>
             </div>
         </div>
@@ -1565,18 +1552,14 @@
                     </ul>
                 </div>
 
-                <!-- Col 5: Governance & Portals -->
+                <!-- Col 5: Patron Sanctuary -->
                 <div>
-                    <h4 class="text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold">Atelier Portals</h4>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold">Patron Sanctuary</h4>
                     <ul class="mt-4 space-y-2.5 text-xs text-atelier-muted">
-                        <li><a href="{{ route('profile.index') }}" class="hover:text-atelier-cream transition text-luxe-gold">Client
-                                Profile & Billing</a></li>
-                        <li><a href="{{ route('admin.index') }}" class="hover:text-atelier-cream transition">Atelier Operations
-                                Admin</a></li>
-                        <li><a href="{{ route('superadmin.index') }}" class="hover:text-atelier-cream transition">Super Admin
-                                Governance</a></li>
-                        <li><a href="{{ route('profile.index') }}#billing" class="hover:text-atelier-cream transition">Flame Circle
-                                Membership</a></li>
+                        <li><a href="{{ route('profile.index') }}" class="hover:text-atelier-cream transition text-luxe-gold">Client Profile & Billing</a></li>
+                        <li><a href="{{ route('profile.index') }}#orders" class="hover:text-atelier-cream transition">Order Tracking & History</a></li>
+                        <li><a href="{{ route('profile.index') }}#formulas" class="hover:text-atelier-cream transition">Bespoke Formulas Archive</a></li>
+                        <li><a href="{{ route('profile.index') }}#billing" class="hover:text-atelier-cream transition">Flame Circle Membership</a></li>
                     </ul>
                 </div>
             </div>

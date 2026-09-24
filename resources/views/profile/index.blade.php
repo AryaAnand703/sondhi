@@ -256,12 +256,16 @@
                 <a href="{{ route('profile.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-luxe-gold bg-luxe-gold/10 text-luxe-gold">
                     <i class="fa-solid fa-user text-[9px]"></i> Client Profile
                 </a>
-                <a href="{{ route('admin.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-luxe-gold/50">
+                @if(Auth::check() && in_array(Auth::user()->role, ['admin', 'superadmin']))
+                <a href="{{ route('admin.index') }}" id="pill-admin-link" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-luxe-gold/50">
                     <i class="fa-solid fa-shield-halved text-[9px]"></i> Atelier Admin
                 </a>
-                <a href="{{ route('superadmin.index') }}" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-flame-amber">
+                @endif
+                @if(Auth::check() && Auth::user()->role === 'superadmin')
+                <a href="{{ route('superadmin.index') }}" id="pill-superadmin-link" class="portal-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase border border-white/10 text-atelier-muted hover:text-white hover:border-flame-amber">
                     <i class="fa-solid fa-crown text-[9px] text-flame-glow"></i> Super Admin
                 </a>
+                @endif
             </div>
         </div>
     </div>
@@ -657,9 +661,9 @@
             <div class="flex items-center gap-4 text-xs text-atelier-dim">
                 <a href="{{ route('home') }}" class="hover:text-atelier-cream">Storefront</a>
                 <span>•</span>
-                <a href="{{ route('admin.index') }}" class="hover:text-atelier-cream">Atelier Admin</a>
+                <a href="{{ route('profile.index') }}" class="hover:text-atelier-cream">Client Sanctuary</a>
                 <span>•</span>
-                <a href="{{ route('superadmin.index') }}" class="hover:text-atelier-cream">Super Admin</a>
+                <a href="{{ route('profile.index') }}#orders" class="hover:text-atelier-cream">Order History</a>
             </div>
         </div>
     </footer>

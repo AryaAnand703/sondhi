@@ -10,12 +10,6 @@
     const CURRENT_USER_KEY = 'sondhi_current_user';
     const ORDERS_KEY = 'sondhi_global_orders';
 
-    // Section Passwords
-    const SECTION_PASSWORDS = {
-        admin: 'atelier2026',
-        superadmin: 'sovereign2026'
-    };
-
     // Pre-seeded initial accounts
     const INITIAL_USERS = [
         {
@@ -165,6 +159,30 @@
                 }
             ],
             formulas: []
+        },
+        {
+            id: 'USR-004',
+            username: 'admin',
+            fullName: 'Atelier Administrator',
+            email: 'admin@sondhi.co',
+            password: 'admin123',
+            role: 'admin',
+            tier: 'Master Artisan & Manager',
+            points: 1000,
+            phone: '+91 91234 00000',
+            createdAt: '2025-01-01',
+            orders: [],
+            addresses: [
+                {
+                    id: 'addr-admin-1',
+                    label: 'Atelier Headquarters',
+                    street: '14 Craft Guild Lane, Fort',
+                    city: 'Mumbai',
+                    pincode: '400001',
+                    isDefault: true
+                }
+            ],
+            formulas: []
         }
     ];
 
@@ -278,6 +296,21 @@
             }
 
             this.setCurrentUser(user);
+
+            // Synchronize with Laravel server session
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ login: trimmedIdent, password: trimmedPass })
+                }).catch(err => console.log('Server session sync error:', err));
+            }
+
             return { success: true, user: user, message: `Welcome back, ${user.fullName}!` };
         },
 
@@ -339,12 +372,43 @@
             this.saveAllUsers(users);
             this.setCurrentUser(newUser);
 
+            // Synchronize with Laravel server
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: cleanName,
+                        username: cleanUser,
+                        email: cleanEmail,
+                        password: cleanPass
+                    })
+                }).catch(err => console.log('Server register sync error:', err));
+            }
+
             return { success: true, user: newUser, message: `Account created! Welcome to Sondhi Atelier, ${cleanName}.` };
         },
 
         logout: function () {
             const user = this.getCurrentUser();
             this.setCurrentUser(null);
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                fetch('/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                }).catch(err => console.log('Server logout error:', err));
+            }
+
             return { success: true, message: 'You have been logged out.' };
         },
 
@@ -514,29 +578,27 @@
             }
         },
 
-        // --- Section Protection & Password Gate ---
-        verifySectionAccess: function (section, enteredPassword) {
-            const current = this.getCurrentUser();
-
-            // If user has direct role access
-            if (section === 'admin' && this.hasRole('admin')) return true;
-            if (section === 'superadmin' && this.hasRole('superadmin')) return true;
-
-            // Otherwise verify section password
-            const requiredPass = SECTION_PASSWORDS[section];
-            if (requiredPass && enteredPassword === requiredPass) {
-                // Grant temporary section authorization in sessionStorage
-                sessionStorage.setItem(`sondhi_section_auth_${section}`, 'true');
-                return true;
+        // --- Section Protection & Dedicated User ID / Password Gate ---
+        verifySectionAccess: function (section, ident, password) {
+            const res = this.login(ident, password);
+            if (!res.success) {
+                return { success: false, message: res.message };
             }
 
-            return false;
+            if (section === 'admin' && !this.hasRole('admin')) {
+                return { success: false, message: 'Access denied: Valid Admin User ID & Password required.' };
+            }
+            if (section === 'superadmin' && !this.hasRole('superadmin')) {
+                return { success: false, message: 'Access denied: Valid Super Admin User ID & Password required.' };
+            }
+
+            return { success: true, user: res.user };
         },
 
         isSectionUnlocked: function (section) {
             if (section === 'admin' && this.hasRole('admin')) return true;
             if (section === 'superadmin' && this.hasRole('superadmin')) return true;
-            return sessionStorage.getItem(`sondhi_section_auth_${section}`) === 'true';
+            return false;
         },
 
         // --- UI & Modal Components ---
@@ -648,27 +710,21 @@
                         </button>
                     </form>
 
-                    <!-- Quick Demo Accounts -->
+                    <!-- Quick Demo Account for Patron -->
                     <div class="mt-6 pt-4 border-t border-white/10 text-center">
                         <div class="text-[10px] uppercase tracking-widest text-atelier-dim font-bold mb-2.5">
                             Quick Demo Sign-In (1-Click Fill)
                         </div>
                         <div class="flex flex-wrap gap-2 justify-center">
-                            <button type="button" onclick="window.sondhiAuth.fillDemoAccount('arya', 'arya123')" class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 hover:border-luxe-gold text-atelier-cream hover:text-luxe-gold text-[10px] font-semibold transition">
-                                <i class="fa-solid fa-user text-[9px] text-luxe-gold mr-1"></i> Patron: arya
-                            </button>
-                            <button type="button" onclick="window.sondhiAuth.fillDemoAccount('meera', 'meera123')" class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 hover:border-flame-glow text-atelier-cream hover:text-flame-glow text-[10px] font-semibold transition">
-                                <i class="fa-solid fa-shield-halved text-[9px] text-flame-glow mr-1"></i> Admin: meera
-                            </button>
-                            <button type="button" onclick="window.sondhiAuth.fillDemoAccount('superadmin', 'admin123')" class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 hover:border-red-400 text-atelier-cream hover:text-red-400 text-[10px] font-semibold transition">
-                                <i class="fa-solid fa-crown text-[9px] text-red-400 mr-1"></i> Super Admin
+                            <button type="button" onclick="window.sondhiAuth.fillDemoAccount('arya', 'arya123')" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-luxe-gold text-atelier-cream hover:text-luxe-gold text-[10px] font-semibold transition">
+                                <i class="fa-solid fa-user text-[9px] text-luxe-gold mr-1"></i> Patron Account (arya)
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION PASSWORD CHALLENGE MODAL -->
+            <!-- PORTAL CREDENTIALS CHALLENGE MODAL (USER ID + PASSWORD) -->
             <div id="sondhi-section-pass-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
                 <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-flame-glow/50 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300 text-atelier-cream">
                     <button id="section-modal-close-btn" class="absolute top-5 right-5 text-atelier-muted hover:text-white transition p-1" aria-label="Close modal">
@@ -677,29 +733,30 @@
 
                     <div class="text-center mb-6">
                         <div class="inline-flex items-center justify-center w-14 h-14 rounded-full border border-flame-glow/40 bg-flame-soft text-flame-glow mb-3">
-                            <i class="fa-solid fa-lock text-2xl animate-pulse"></i>
+                            <i class="fa-solid fa-shield-halved text-2xl animate-pulse"></i>
                         </div>
                         <h3 class="font-display text-2xl font-bold tracking-wider text-atelier-cream" id="section-pass-title">Restricted Atelier Portal</h3>
-                        <p class="text-xs text-atelier-muted mt-1" id="section-pass-subtitle">Enter the section authorization password or log in with an authorized account.</p>
+                        <p class="text-xs text-atelier-muted mt-1" id="section-pass-subtitle">Enter your separate User ID and Password to authenticate.</p>
                     </div>
 
                     <div id="section-modal-error" class="hidden mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300 flex items-center gap-2">
                         <i class="fa-solid fa-circle-exclamation flex-shrink-0"></i>
-                        <span id="section-modal-error-msg">Incorrect section password.</span>
+                        <span id="section-modal-error-msg">Incorrect credentials. Access denied.</span>
                     </div>
 
                     <form id="section-pass-form" class="space-y-4 text-xs" onsubmit="event.preventDefault(); window.sondhiAuth.handleSectionPassSubmit();">
                         <div>
-                            <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1.5" for="section-pass-input">Section Password</label>
-                            <input type="password" id="section-pass-input" required placeholder="Enter section password" class="w-full bg-atelier-card border border-white/15 rounded-xl px-4 py-2.5 text-sm text-atelier-cream focus:border-flame-glow outline-none font-mono">
-                            <div class="text-[10px] text-atelier-dim mt-1.5 flex items-center justify-between">
-                                <span id="section-pass-hint">Hint: atelier2026</span>
-                                <button type="button" onclick="window.sondhiAuth.openAuthModal('signin')" class="text-luxe-gold hover:underline">Log in with account instead</button>
-                            </div>
+                            <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1.5" for="section-auth-ident">User ID or Email</label>
+                            <input type="text" id="section-auth-ident" required placeholder="Enter User ID or Email" class="w-full bg-atelier-card border border-white/15 rounded-xl px-4 py-2.5 text-sm text-atelier-cream focus:border-flame-glow outline-none transition">
                         </div>
 
-                        <button type="submit" class="w-full rounded-xl bg-flame-soft border border-flame-glow/50 py-3 text-xs font-bold uppercase tracking-widest text-flame-glow hover:bg-flame-glow hover:text-atelier-base transition duration-200">
-                            Authorize & Unlock Section
+                        <div>
+                            <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1.5" for="section-auth-pass">Password</label>
+                            <input type="password" id="section-auth-pass" required placeholder="••••••••" class="w-full bg-atelier-card border border-white/15 rounded-xl px-4 py-2.5 text-sm text-atelier-cream focus:border-flame-glow outline-none transition">
+                        </div>
+
+                        <button type="submit" id="section-submit-btn" class="w-full rounded-xl bg-flame-soft border border-flame-glow/50 py-3 text-xs font-bold uppercase tracking-widest text-flame-glow hover:bg-flame-glow hover:text-atelier-base transition duration-200">
+                            Authenticate & Open Portal
                         </button>
                     </form>
                 </div>
@@ -746,7 +803,7 @@
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <a href="profile.html#orders" class="flex-1 rounded-xl bg-luxe-gold py-3 text-xs font-bold uppercase tracking-widest text-atelier-base hover:bg-white transition flex items-center justify-center gap-2">
+                        <a href="/profile#orders" class="flex-1 rounded-xl bg-luxe-gold py-3 text-xs font-bold uppercase tracking-widest text-atelier-base hover:bg-white transition flex items-center justify-center gap-2">
                             <i class="fa-solid fa-box-archive text-xs"></i> View in Order History
                         </a>
                         <button onclick="window.sondhiAuth.closeOrderSuccessModal()" class="flex-1 rounded-xl bg-atelier-hover border border-white/10 py-3 text-xs font-bold uppercase tracking-widest text-atelier-cream hover:border-luxe-gold/40 transition">
@@ -762,13 +819,20 @@
             // Bind events for tabs
             const tabSignIn = document.getElementById('auth-tab-signin');
             const tabSignUp = document.getElementById('auth-tab-signup');
-            const closeAuthBtn = document.getElementById('auth-modal-close-btn');
             const closeSecBtn = document.getElementById('section-modal-close-btn');
 
             if (tabSignIn) tabSignIn.addEventListener('click', () => this.switchAuthTab('signin'));
             if (tabSignUp) tabSignUp.addEventListener('click', () => this.switchAuthTab('signup'));
             if (closeAuthBtn) closeAuthBtn.addEventListener('click', () => this.closeAuthModal());
-            if (closeSecBtn) closeSecBtn.addEventListener('click', () => this.closeSectionPassModal());
+            if (closeSecBtn) closeSecBtn.addEventListener('click', () => {
+                this.closeSectionPassModal();
+                if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/superadmin')) {
+                    const sec = this._pendingSection || (window.location.pathname.includes('superadmin') ? 'superadmin' : 'admin');
+                    if (!this.isSectionUnlocked(sec)) {
+                        window.location.href = '/';
+                    }
+                }
+            });
         },
 
         switchAuthTab: function (tab) {
@@ -874,11 +938,25 @@
             } else {
                 errorDiv.classList.add('hidden');
                 this.closeAuthModal();
-                this.showToast(res.message);
 
                 if (typeof this._onAuthSuccess === 'function') {
                     this._onAuthSuccess(res.user);
                     this._onAuthSuccess = null;
+                }
+
+                // If user logged in with separate Admin or Super Admin credentials, open respective portal
+                if (res.user.role === 'superadmin') {
+                    this.showToast(`Welcome, ${res.user.fullName}! Opening Super Admin Governance...`);
+                    setTimeout(() => {
+                        window.location.href = '/superadmin';
+                    }, 400);
+                } else if (res.user.role === 'admin') {
+                    this.showToast(`Welcome, ${res.user.fullName}! Opening Atelier Operations...`);
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 400);
+                } else {
+                    this.showToast(res.message);
                 }
             }
         },
@@ -914,7 +992,7 @@
             }
         },
 
-        // --- Section Password Modal Handlers ---
+        // --- Portal Credentials Modal Handlers (Separate User ID & Password) ---
         openSectionPassModal: function (section, onUnlocked) {
             this.ensureAuthModalInDOM();
             this._pendingSection = section;
@@ -922,17 +1000,21 @@
 
             const modal = document.getElementById('sondhi-section-pass-modal');
             const title = document.getElementById('section-pass-title');
-            const hint = document.getElementById('section-pass-hint');
+            const subtitle = document.getElementById('section-pass-subtitle');
             const errorDiv = document.getElementById('section-modal-error');
+            const identInput = document.getElementById('section-auth-ident');
+            const passInput = document.getElementById('section-auth-pass');
 
+            if (identInput) identInput.value = '';
+            if (passInput) passInput.value = '';
             if (errorDiv) errorDiv.classList.add('hidden');
 
             if (section === 'admin') {
-                title.textContent = 'Atelier Admin Authorization';
-                hint.textContent = 'Section Pass: atelier2026 (or login as meera)';
+                if (title) title.textContent = 'Atelier Admin Verification';
+                if (subtitle) subtitle.textContent = 'Enter your separate Admin User ID and Password to enter.';
             } else if (section === 'superadmin') {
-                title.textContent = 'Super Admin Governance Access';
-                hint.textContent = 'Section Pass: sovereign2026 (or login as superadmin)';
+                if (title) title.textContent = 'Super Admin Governance Clearance';
+                if (subtitle) subtitle.textContent = 'Enter your separate Super Admin User ID and Password to enter.';
             }
 
             modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -941,6 +1023,7 @@
                 inner.classList.remove('scale-95');
                 inner.classList.add('scale-100');
             }
+            if (identInput) identInput.focus();
         },
 
         closeSectionPassModal: function () {
@@ -955,23 +1038,27 @@
         },
 
         handleSectionPassSubmit: function () {
-            const input = document.getElementById('section-pass-input');
-            const pass = input ? input.value : '';
+            const identEl = document.getElementById('section-auth-ident');
+            const passEl = document.getElementById('section-auth-pass');
+            const ident = identEl ? identEl.value.trim() : '';
+            const pass = passEl ? passEl.value.trim() : '';
             const errorDiv = document.getElementById('section-modal-error');
             const errorMsg = document.getElementById('section-modal-error-msg');
 
             const section = this._pendingSection || 'admin';
-            const ok = this.verifySectionAccess(section, pass);
+            const check = this.verifySectionAccess(section, ident, pass);
 
-            if (ok) {
+            if (check.success) {
                 errorDiv.classList.add('hidden');
                 this.closeSectionPassModal();
-                this.showToast(`Access granted to ${section.toUpperCase()} portal.`);
+                this.showToast(`Access granted. Welcome, ${check.user.fullName}!`);
                 if (typeof this._onSectionUnlocked === 'function') {
                     this._onSectionUnlocked();
+                } else {
+                    window.location.reload();
                 }
             } else {
-                errorMsg.textContent = 'Incorrect section password. Access denied.';
+                errorMsg.textContent = check.message || 'Access denied. Incorrect User ID or Password.';
                 errorDiv.classList.remove('hidden');
             }
         },
@@ -1013,7 +1100,7 @@
         updateNavUI: function () {
             const user = this.getCurrentUser();
 
-            // 1. Update Account Dropdown button in index.html if exists
+            // 1. Update Account Dropdown button in / if exists
             const accountBtn = document.getElementById('account-dropdown-btn');
             if (accountBtn) {
                 if (user) {
@@ -1045,7 +1132,7 @@
                             </div>
                             <span class="px-2 py-0.5 rounded-full text-[9px] bg-luxe-gold/15 text-luxe-gold font-mono">${user.points || 0} pts</span>
                         </div>
-                        <a href="profile.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-luxe-gold/10 hover:text-luxe-gold transition">
+                        <a href="/profile" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-luxe-gold/10 hover:text-luxe-gold transition">
                             <div class="w-7 h-7 rounded-lg bg-luxe-gold/10 flex items-center justify-center text-luxe-gold">
                                 <i class="fa-solid fa-user text-[11px]"></i>
                             </div>
@@ -1054,7 +1141,7 @@
                                 <div class="text-[10px] text-atelier-muted">Addresses, Formulas & Settings</div>
                             </div>
                         </a>
-                        <a href="profile.html#orders" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-luxe-gold/10 hover:text-luxe-gold transition">
+                        <a href="/profile#orders" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-luxe-gold/10 hover:text-luxe-gold transition">
                             <div class="w-7 h-7 rounded-lg bg-luxe-gold/10 flex items-center justify-center text-luxe-gold">
                                 <i class="fa-solid fa-box-archive text-[11px]"></i>
                             </div>
@@ -1063,27 +1150,39 @@
                                 <div class="text-[10px] text-atelier-muted">Live Tracking & Invoices (${(user.orders || []).length})</div>
                             </div>
                         </a>
-                        <div class="px-3 py-1.5 border-t border-b border-white/10 text-[9px] uppercase tracking-widest text-atelier-dim font-bold mt-1">
-                            Atelier Portals
-                        </div>
-                        <a href="admin.html" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-flame-soft hover:text-flame-glow transition">
-                            <div class="w-7 h-7 rounded-lg bg-flame-soft flex items-center justify-center text-flame-glow">
-                                <i class="fa-solid fa-shield-halved text-[11px]"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Atelier Admin</div>
-                                <div class="text-[10px] text-atelier-muted">Orders & Payouts (Pass Required)</div>
-                            </div>
-                        </a>
-                        <a href="superadmin.html" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-red-500/10 hover:text-red-400 transition">
-                            <div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
-                                <i class="fa-solid fa-crown text-[11px]"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Super Admin</div>
-                                <div class="text-[10px] text-atelier-muted">RBAC & Governance (Pass Required)</div>
-                            </div>
-                        </a>
+                        ${(function() {
+                            let portalsHtml = '';
+                            if (user.role === 'admin' || user.role === 'superadmin') {
+                                portalsHtml += `
+                                    <div class="px-3 py-1.5 border-t border-b border-white/10 text-[9px] uppercase tracking-widest text-atelier-dim font-bold mt-1">
+                                        Authorized Workspace
+                                    </div>
+                                    <a href="/admin" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-flame-soft hover:text-flame-glow transition">
+                                        <div class="w-7 h-7 rounded-lg bg-flame-soft flex items-center justify-center text-flame-glow">
+                                            <i class="fa-solid fa-shield-halved text-[11px]"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold">Atelier Admin</div>
+                                            <div class="text-[10px] text-atelier-muted">Orders & Catalog Management</div>
+                                        </div>
+                                    </a>
+                                `;
+                            }
+                            if (user.role === 'superadmin') {
+                                portalsHtml += `
+                                    <a href="/superadmin" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-red-500/10 hover:text-red-400 transition">
+                                        <div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
+                                            <i class="fa-solid fa-crown text-[11px]"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold">Super Admin</div>
+                                            <div class="text-[10px] text-atelier-muted">RBAC & Governance</div>
+                                        </div>
+                                    </a>
+                                `;
+                            }
+                            return portalsHtml;
+                        })()}
                         <div class="mt-1 pt-1.5 border-t border-white/10 flex items-center justify-between px-2">
                             <button onclick="window.sondhiAuth.openAuthModal('signin', 'Switching to another patron account')" class="text-[11px] text-atelier-muted hover:text-luxe-gold transition py-1">
                                 <i class="fa-solid fa-arrow-right-arrow-left text-[10px] mr-1"></i> Switch Account
@@ -1107,27 +1206,11 @@
                                 <i class="fa-solid fa-user-plus text-xs"></i> Create New Account
                             </button>
                         </div>
-                        <div class="px-3 py-1.5 border-t border-b border-white/10 text-[9px] uppercase tracking-widest text-atelier-dim font-bold">
-                            Workspaces (Protected)
+                        <div class="mt-1 pt-1.5 border-t border-white/10">
+                            <a href="/profile" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-atelier-muted hover:text-luxe-gold transition">
+                                <i class="fa-solid fa-gem text-[10px]"></i> Client Sanctuary & Rewards
+                            </a>
                         </div>
-                        <a href="admin.html" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-flame-soft hover:text-flame-glow transition">
-                            <div class="w-7 h-7 rounded-lg bg-flame-soft flex items-center justify-center text-flame-glow">
-                                <i class="fa-solid fa-shield-halved text-[11px]"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Atelier Admin</div>
-                                <div class="text-[10px] text-atelier-muted">Password: atelier2026</div>
-                            </div>
-                        </a>
-                        <a href="superadmin.html" class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-red-500/10 hover:text-red-400 transition">
-                            <div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
-                                <i class="fa-solid fa-crown text-[11px]"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Super Admin</div>
-                                <div class="text-[10px] text-atelier-muted">Password: sovereign2026</div>
-                            </div>
-                        </a>
                     `;
                 }
             }
@@ -1152,6 +1235,16 @@
                         </button>
                     `;
                 }
+            }
+
+            // 4. Update workspace pills in header if present
+            const adminPill = document.getElementById('pill-admin-link');
+            const superPill = document.getElementById('pill-superadmin-link');
+            if (adminPill) {
+                adminPill.style.display = (user && (user.role === 'admin' || user.role === 'superadmin')) ? 'inline-flex' : 'none';
+            }
+            if (superPill) {
+                superPill.style.display = (user && user.role === 'superadmin') ? 'inline-flex' : 'none';
             }
         },
 
