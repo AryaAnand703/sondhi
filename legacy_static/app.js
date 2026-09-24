@@ -929,6 +929,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainHeartSparkBtn = document.querySelector('#main-heart-spark-btn');
     const sparkLoveBtn = document.querySelector('#spark-love-btn');
 
+    // Welcome overlay displays strictly ONE time on initial entry
+    try {
+        const welcomeParams = new URLSearchParams(window.location.search);
+        if (welcomeParams.get('welcome') === '1' || welcomeParams.get('reset_welcome') === '1') {
+            localStorage.removeItem('sondhi_welcome_seen');
+        }
+
+        const hasSeenWelcome = localStorage.getItem('sondhi_welcome_seen');
+        if (!hasSeenWelcome) {
+            if (welcomeOverlay) {
+                welcomeOverlay.style.display = 'flex';
+                welcomeOverlay.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+            }
+            // Mark as seen so subsequent reloads or navigations will never display it again
+            localStorage.setItem('sondhi_welcome_seen', 'true');
+        } else {
+            if (welcomeOverlay) {
+                welcomeOverlay.style.display = 'none';
+                welcomeOverlay.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+            }
+        }
+    } catch (e) {
+        if (welcomeOverlay) welcomeOverlay.style.display = 'none';
+    }
+
     const romanticNotes = [
         "I love you baby! With all my heart, from Arya ❤️",
         "You are the most precious flame in my life ✨",
@@ -940,6 +965,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeWelcomeOverlay(e) {
         if (!welcomeOverlay) return;
+
+        try {
+            localStorage.setItem('sondhi_welcome_seen', 'true');
+        } catch (err) {}
+
         const rect = welcomeCloseBtn ? welcomeCloseBtn.getBoundingClientRect() : null;
         const x = e && e.clientX ? e.clientX : (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
         const y = e && e.clientY ? e.clientY : (rect ? rect.top + rect.height / 2 : window.innerHeight / 2);

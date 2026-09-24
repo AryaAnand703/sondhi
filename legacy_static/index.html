@@ -545,8 +545,8 @@
 <body class="font-sans antialiased">
     <div class="grain-overlay pointer-events-none fixed inset-0 z-50"></div>
 
-    <div id="welcome-overlay"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm transition-all duration-700 ease-out select-none"
+    <div id="welcome-overlay" style="display: none;"
+        class="fixed inset-0 z-[100] items-center justify-center bg-black/70 px-6 backdrop-blur-sm transition-all duration-700 ease-out select-none"
         role="dialog" aria-modal="true" aria-label="Welcome love message">
         <div class="relative z-10 flex flex-col items-center text-center">
             <button id="welcome-heart-btn" type="button"
@@ -563,6 +563,23 @@
             </button>
         </div>
     </div>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('welcome') === '1' || params.get('reset_welcome') === '1') {
+                    localStorage.removeItem('sondhi_welcome_seen');
+                }
+                var seen = localStorage.getItem('sondhi_welcome_seen');
+                if (!seen) {
+                    var overlay = document.getElementById('welcome-overlay');
+                    if (overlay) {
+                        overlay.style.display = 'flex';
+                    }
+                }
+            } catch (e) {}
+        })();
+    </script>
 
     <!-- Announcement Bar -->
     <div
