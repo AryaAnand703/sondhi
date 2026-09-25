@@ -143,11 +143,22 @@ const products = [
 ];
 
 // --- 2. Application State ---
+let initialCart = [];
+try {
+    const rawCart = localStorage.getItem('sondhi_cart');
+    if (rawCart) {
+        const parsed = JSON.parse(rawCart);
+        if (Array.isArray(parsed)) initialCart = parsed;
+    }
+} catch (e) {
+    initialCart = [];
+}
+
 const state = {
     category: 'All',
     query: '',
     sortBy: 'featured',
-    cart: JSON.parse(localStorage.getItem('sondhi_cart') || '[]'),
+    cart: initialCart,
     discount: { code: '', rate: 0 },
     customCandle: {
         vessel: 'Smoked Obsidian',
@@ -314,19 +325,24 @@ function updateCartUI() {
     const progressBar = document.querySelector('#shipping-progress-bar');
     const progressText = document.querySelector('#shipping-progress-text');
 
-    const totalCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (!Array.isArray(state.cart)) {
+        state.cart = [];
+    }
+
+    const totalCount = state.cart.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
     if (badge) badge.textContent = totalCount;
     if (mobileBadge) mobileBadge.textContent = totalCount;
     if (counter) counter.textContent = `(${totalCount} item${totalCount === 1 ? '' : 's'})`;
 
-    // Compute Subtotal
-    const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const discountAmount = subtotal * state.discount.rate;
-    const finalTotal = subtotal - discountAmount;
+    // Compute Subtotal with safe fallback for discount
+    const subtotal = state.cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.quantity) || 1)), 0);
+    const discountRate = (state.discount && typeof state.discount.rate === 'number') ? state.discount.rate : 0;
+    const discountAmount = subtotal * discountRate;
+    const finalTotal = Math.max(0, subtotal - discountAmount);
 
     if (subtotalEl) subtotalEl.textContent = formatINR(subtotal);
     if (discountRow) {
-        if (state.discount.rate > 0) {
+        if (discountRate > 0) {
             discountRow.classList.remove('hidden');
             if (discountEl) discountEl.textContent = `-${formatINR(discountAmount)}`;
         } else {
@@ -337,14 +353,17 @@ function updateCartUI() {
 
     // Shipping threshold (Free over ₹999)
     if (progressBar && progressText) {
-        if (subtotal >= 999) {
+        if (subtotal >= 999 && totalCount > 0) {
             progressBar.style.width = '100%';
             progressText.innerHTML = '<span class="text-luxe-gold font-bold">✓ Complimentary Shipping Unlocked!</span>';
-        } else {
+        } else if (totalCount > 0) {
             const needed = 999 - subtotal;
             const pct = Math.min(100, Math.round((subtotal / 999) * 100));
             progressBar.style.width = `${pct}%`;
             progressText.textContent = `Add ${formatINR(needed)} more for Free Shipping`;
+        } else {
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Add ₹999 for Complimentary Shipping';
         }
     }
 
@@ -405,16 +424,20 @@ window.addToBag = function(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
+    if (!Array.isArray(state.cart)) {
+        state.cart = [];
+    }
+
     const existingIndex = state.cart.findIndex(item => item.id === productId && !item.isCustom);
     if (existingIndex > -1) {
-        state.cart[existingIndex].quantity += 1;
+        state.cart[existingIndex].quantity = (Number(state.cart[existingIndex].quantity) || 1) + 1;
     } else {
         state.cart.push({
             id: product.id,
             name: product.name,
             category: product.category,
             fragrance: product.fragrance,
-            price: product.price,
+            price: Number(product.price) || 0,
             image: product.image,
             quantity: 1,
             isCustom: false
@@ -428,13 +451,15 @@ window.addToBag = function(productId) {
 
 // Cart Mutators
 window.removeFromCart = function(index) {
-    state.cart.splice(index, 1);
-    saveCart();
+    if (state.cart && state.cart[index]) {
+        state.cart.splice(index, 1);
+        saveCart();
+    }
 };
 
 window.changeCartQty = function(index, delta) {
-    if (!state.cart[index]) return;
-    state.cart[index].quantity += delta;
+    if (!state.cart || !state.cart[index]) return;
+    state.cart[index].quantity = (Number(state.cart[index].quantity) || 1) + delta;
     if (state.cart[index].quantity <= 0) {
         state.cart.splice(index, 1);
     }
@@ -703,6 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') {
             closeCart();
             closeQuickView();
+            if (typeof closeCheckoutModal === 'function') closeCheckoutModal();
         }
     });
 
@@ -794,64 +820,370 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutBtn = document.querySelector('#checkout-btn');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
-            if (!state.cart.length) {
+            if (!state.cart || !state.cart.length) {
                 showToast('Your bag is empty. Choose a fragrance to proceed.');
                 return;
             }
+
+            // Close cart drawer
+            closeCart();
 
             // Check if user is authenticated
             if (window.sondhiAuth && !window.sondhiAuth.isAuthenticated()) {
                 window.sondhiAuth.openAuthModal(
                     'signin',
-                    'Please sign in or create an account to commission your candles and track your order.',
+                    'Please sign in or create an account to proceed to Checkout & Billing.',
                     () => {
-                        // After successful login, trigger checkout
-                        checkoutBtn.click();
+                        window.openCheckoutModal();
                     }
                 );
                 return;
             }
 
-            // Calculate totals
-            const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const discountAmount = state.discount ? subtotal * state.discount.rate : 0;
-            const taxable = subtotal - discountAmount;
-            const gst = taxable * 0.18;
-            const finalTotal = Math.round(taxable + gst);
-
-            const orderData = {
-                total: finalTotal,
-                items: state.cart.map(item => ({
-                    name: item.name + (item.weight ? ` (${item.weight})` : ''),
-                    quantity: item.quantity,
-                    price: item.price
-                })),
-                candles: state.cart.map(item => `${item.name} (${item.weight || '280g'}) × ${item.quantity}`),
-                status: 'Pouring & Curing',
-                statusCode: 'pouring',
-                statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control'
-            };
-
-            if (window.sondhiAuth) {
-                const result = window.sondhiAuth.addUserOrder(orderData);
-                if (result.success) {
-                    state.cart = [];
-                    state.discount = null;
-                    saveCart();
-                    closeCart();
-                    window.sondhiAuth.showOrderSuccessModal(result.order);
-                } else {
-                    showToast(result.message || 'Failed to commission order.', true);
-                }
-            } else {
-                alert('🕯️ Order Confirmed!\n\nThank you for choosing Sondhi. Our artisans will hand-pour, pack, and ship your botanical candles with great care.');
-                state.cart = [];
-                saveCart();
-                closeCart();
-                showToast('Order placed successfully!');
-            }
+            window.openCheckoutModal();
         });
     }
+
+    // --- Sanctuary Checkout & Billing Modal Management ---
+    window.ensureCheckoutModalInDOM = function() {
+        if (document.getElementById('sondhi-checkout-modal')) return;
+
+        const modalHtml = `
+            <div id="sondhi-checkout-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+                <div class="relative w-full max-w-3xl rounded-2xl bg-atelier-surface border border-luxe-gold/40 p-5 sm:p-8 shadow-2xl scale-95 transition-transform duration-300 text-atelier-cream my-auto max-h-[92vh] overflow-y-auto">
+                    <!-- Close Button -->
+                    <button type="button" onclick="window.closeCheckoutModal()" class="absolute top-5 right-5 text-atelier-muted hover:text-white transition p-1" aria-label="Close Checkout">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+
+                    <!-- Header -->
+                    <div class="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                        <div class="w-10 h-10 rounded-full border border-luxe-gold/40 bg-flame-soft text-luxe-gold flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-shield-halved text-base"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl sm:text-2xl font-bold tracking-wider text-atelier-cream">Sanctuary Checkout & Billing</h3>
+                            <p class="text-xs text-atelier-muted">Review bespoke candle commission and delivery allocation</p>
+                        </div>
+                    </div>
+
+                    <form id="sanctuary-checkout-form" onsubmit="event.preventDefault(); window.handleCheckoutOrderSubmit();" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <!-- Left Column: Shipping & Payment (7 cols) -->
+                            <div class="md:col-span-7 space-y-5">
+                                <!-- Address Section -->
+                                <div class="rounded-xl border border-white/10 bg-atelier-card p-4 space-y-3">
+                                    <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                                        <span class="text-xs font-bold uppercase tracking-wider text-luxe-gold flex items-center gap-2">
+                                            <i class="fa-solid fa-location-dot"></i> Delivery Address
+                                        </span>
+                                        <span class="text-[10px] text-atelier-dim">White-Glove Courier</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                        <div>
+                                            <label class="block uppercase text-[10px] text-atelier-muted mb-1" for="checkout-name">Full Name</label>
+                                            <input type="text" id="checkout-name" required placeholder="Aarav Sharma" class="w-full bg-atelier-surface border border-white/15 rounded-lg px-3 py-2 text-atelier-cream text-xs outline-none focus:border-luxe-gold">
+                                        </div>
+                                        <div>
+                                            <label class="block uppercase text-[10px] text-atelier-muted mb-1" for="checkout-email">Email</label>
+                                            <input type="email" id="checkout-email" required placeholder="aarav@sanctuary.in" class="w-full bg-atelier-surface border border-white/15 rounded-lg px-3 py-2 text-atelier-cream text-xs outline-none focus:border-luxe-gold">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                        <div>
+                                            <label class="block uppercase text-[10px] text-atelier-muted mb-1" for="checkout-phone">Phone Number</label>
+                                            <input type="tel" id="checkout-phone" required placeholder="+91 98201 44892" class="w-full bg-atelier-surface border border-white/15 rounded-lg px-3 py-2 text-atelier-cream text-xs outline-none focus:border-luxe-gold">
+                                        </div>
+                                        <div>
+                                            <label class="block uppercase text-[10px] text-atelier-muted mb-1" for="checkout-pincode">Postal PIN Code</label>
+                                            <input type="text" id="checkout-pincode" required placeholder="400050" class="w-full bg-atelier-surface border border-white/15 rounded-lg px-3 py-2 text-atelier-cream text-xs outline-none focus:border-luxe-gold">
+                                        </div>
+                                    </div>
+                                    <div class="text-xs">
+                                        <label class="block uppercase text-[10px] text-atelier-muted mb-1" for="checkout-street">Street Address</label>
+                                        <input type="text" id="checkout-street" required placeholder="Penthouse 4B, Pali Hill Road, Bandra West" class="w-full bg-atelier-surface border border-white/15 rounded-lg px-3 py-2 text-atelier-cream text-xs outline-none focus:border-luxe-gold">
+                                    </div>
+                                    <div class="text-xs">
+                                        <label class="block uppercase text-[10px] text-atelier-muted mb-1" for="checkout-city">City / Region</label>
+                                        <input type="text" id="checkout-city" required placeholder="Mumbai, Maharashtra" class="w-full bg-atelier-surface border border-white/15 rounded-lg px-3 py-2 text-atelier-cream text-xs outline-none focus:border-luxe-gold">
+                                    </div>
+                                </div>
+
+                                <!-- Payment Method Section -->
+                                <div class="rounded-xl border border-white/10 bg-atelier-card p-4 space-y-3">
+                                    <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                                        <span class="text-xs font-bold uppercase tracking-wider text-luxe-gold flex items-center gap-2">
+                                            <i class="fa-solid fa-credit-card"></i> Payment & Billing Method
+                                        </span>
+                                        <span class="text-[10px] text-luxe-sage"><i class="fa-solid fa-lock"></i> SSL Secured</span>
+                                    </div>
+                                    <div class="space-y-2 text-xs">
+                                        <label class="flex items-center gap-3 p-2.5 rounded-lg border border-luxe-gold/40 bg-white/[0.03] cursor-pointer hover:border-luxe-gold transition">
+                                            <input type="radio" name="checkout-payment-method" value="UPI Instant & NetBanking" checked class="accent-luxe-gold">
+                                            <div class="flex-1">
+                                                <div class="font-semibold text-atelier-cream flex items-center justify-between">
+                                                    <span>UPI Direct & QR (Fast-Track)</span>
+                                                    <span class="text-[10px] font-normal text-luxe-gold">GPay / PhonePe / Paytm</span>
+                                                </div>
+                                                <p class="text-[10px] text-atelier-muted mt-0.5">Instant dispatch confirmation with zero banking fee</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-2.5 rounded-lg border border-white/10 bg-white/[0.01] cursor-pointer hover:border-luxe-gold/40 transition">
+                                            <input type="radio" name="checkout-payment-method" value="Credit / Debit Card" class="accent-luxe-gold">
+                                            <div class="flex-1">
+                                                <div class="font-semibold text-atelier-cream flex items-center justify-between">
+                                                    <span>Credit & Debit Cards</span>
+                                                    <span class="text-[10px] text-atelier-dim">Visa • Mastercard • Amex</span>
+                                                </div>
+                                                <p class="text-[10px] text-atelier-muted mt-0.5">Encrypted 256-bit tokenized checkout</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-2.5 rounded-lg border border-white/10 bg-white/[0.01] cursor-pointer hover:border-luxe-gold/40 transition">
+                                            <input type="radio" name="checkout-payment-method" value="Cash on Delivery" class="accent-luxe-gold">
+                                            <div class="flex-1">
+                                                <div class="font-semibold text-atelier-cream flex items-center justify-between">
+                                                    <span>Cash on Delivery</span>
+                                                    <span class="text-[10px] text-atelier-dim">White-Glove Handover</span>
+                                                </div>
+                                                <p class="text-[10px] text-atelier-muted mt-0.5">Pay in cash or UPI upon package inspection</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Order Items & Breakdown (5 cols) -->
+                            <div class="md:col-span-5 flex flex-col justify-between space-y-4">
+                                <div class="rounded-xl border border-white/10 bg-atelier-card p-4 flex-1">
+                                    <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-3">
+                                        <span class="text-xs font-bold uppercase tracking-wider text-atelier-cream">Allocation Review</span>
+                                        <span id="checkout-items-count" class="text-xs text-luxe-gold font-sans font-semibold">0 items</span>
+                                    </div>
+                                    <div id="checkout-items-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                                        <!-- Items populated by JS -->
+                                    </div>
+                                </div>
+
+                                <!-- Totals breakdown card -->
+                                <div class="rounded-xl border border-white/10 bg-atelier-card p-4 space-y-2 text-xs">
+                                    <div class="flex justify-between text-atelier-muted">
+                                        <span>Subtotal</span>
+                                        <span id="checkout-subtotal" class="font-semibold text-atelier-cream">₹0</span>
+                                    </div>
+                                    <div id="checkout-discount-row" class="hidden flex justify-between text-luxe-gold">
+                                        <span>Circle Discount (10%)</span>
+                                        <span id="checkout-discount">-₹0</span>
+                                    </div>
+                                    <div class="flex justify-between text-atelier-muted">
+                                        <span>White-Glove Shipping</span>
+                                        <span class="font-semibold text-luxe-sage">Complimentary</span>
+                                    </div>
+                                    <div class="flex justify-between text-atelier-muted">
+                                        <span>Applicable Taxes (18% GST)</span>
+                                        <span class="text-atelier-dim">Included</span>
+                                    </div>
+                                    <div class="border-t border-white/10 pt-2 flex justify-between items-baseline font-bold">
+                                        <span class="text-atelier-cream text-sm">Grand Total</span>
+                                        <span id="checkout-total" class="font-display text-2xl text-luxe-gold">₹0</span>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="checkout-submit-btn" class="w-full rounded-full bg-luxe-gold py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-base hover:bg-white transition duration-200 shadow-xl shadow-amber-900/30 flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-lock text-[10px]"></i>
+                                    <span id="checkout-submit-total">Complete Commission & Place Order</span>
+                                </button>
+                                <div class="text-center">
+                                    <button type="button" onclick="window.closeCheckoutModal(); openCart();" class="text-[11px] text-atelier-muted hover:text-luxe-gold transition">
+                                        ← Return to Shopping Bag
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        const modal = document.getElementById('sondhi-checkout-modal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    window.closeCheckoutModal();
+                }
+            });
+        }
+    };
+
+    window.openCheckoutModal = function() {
+        if (!state.cart || !state.cart.length) {
+            showToast('Your bag is empty. Choose a fragrance to proceed.');
+            return;
+        }
+
+        window.ensureCheckoutModalInDOM();
+        window.populateCheckoutModal();
+
+        const modal = document.querySelector('#sondhi-checkout-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            const inner = modal.querySelector('.scale-95, .scale-100');
+            if (inner) {
+                inner.classList.remove('scale-95');
+                inner.classList.add('scale-100');
+            }
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    window.closeCheckoutModal = function() {
+        const modal = document.querySelector('#sondhi-checkout-modal');
+        if (modal) {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            const inner = modal.querySelector('.scale-100');
+            if (inner) {
+                inner.classList.remove('scale-100');
+                inner.classList.add('scale-95');
+            }
+            document.body.style.overflow = '';
+        }
+    };
+
+    window.populateCheckoutModal = function() {
+        const user = window.sondhiAuth ? window.sondhiAuth.getCurrentUser() : null;
+
+        // Fill user info
+        const nameInput = document.querySelector('#checkout-name');
+        const emailInput = document.querySelector('#checkout-email');
+        const phoneInput = document.querySelector('#checkout-phone');
+        const streetInput = document.querySelector('#checkout-street');
+        const cityInput = document.querySelector('#checkout-city');
+        const pincodeInput = document.querySelector('#checkout-pincode');
+
+        if (nameInput) nameInput.value = user ? user.fullName : (nameInput.value || '');
+        if (emailInput) emailInput.value = user ? user.email : (emailInput.value || '');
+        if (phoneInput && !phoneInput.value) phoneInput.value = user && user.phone ? user.phone : '+91 98201 44892';
+        if (streetInput && !streetInput.value) streetInput.value = (user && user.addresses && user.addresses[0]) ? user.addresses[0].street : '742 Evergreen Sanctuary';
+        if (cityInput && !cityInput.value) cityInput.value = (user && user.addresses && user.addresses[0]) ? user.addresses[0].city : 'Mumbai';
+        if (pincodeInput && !pincodeInput.value) pincodeInput.value = (user && user.addresses && user.addresses[0]) ? user.addresses[0].pincode : '400050';
+
+        // Populate Items
+        const itemsContainer = document.querySelector('#checkout-items-list');
+        const countBadge = document.querySelector('#checkout-items-count');
+        const totalCount = state.cart.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
+
+        if (countBadge) countBadge.textContent = `${totalCount} item${totalCount === 1 ? '' : 's'}`;
+
+        if (itemsContainer) {
+            itemsContainer.innerHTML = state.cart.map(item => `
+                <div class="flex items-center gap-3 py-2 border-b border-white/5 last:border-b-0">
+                    <img src="${item.image}" alt="${item.name}" class="w-12 h-14 object-cover rounded-lg bg-atelier-surface flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-xs font-semibold text-atelier-cream truncate">${item.name}</h5>
+                        <p class="text-[10px] text-atelier-dim">${item.fragrance || item.category || 'Botanical Formula'} • Qty: ${item.quantity}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-bold text-luxe-gold">${formatINR(item.price * item.quantity)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Populate Financials
+        const subtotal = state.cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+        const discountRate = (state.discount && typeof state.discount.rate === 'number') ? state.discount.rate : 0;
+        const discountAmount = subtotal * discountRate;
+        const finalTotal = Math.max(0, subtotal - discountAmount);
+
+        const subtotalEl = document.querySelector('#checkout-subtotal');
+        const discountRow = document.querySelector('#checkout-discount-row');
+        const discountEl = document.querySelector('#checkout-discount');
+        const totalEl = document.querySelector('#checkout-total');
+        const submitBtnSpan = document.querySelector('#checkout-submit-total');
+
+        if (subtotalEl) subtotalEl.textContent = formatINR(subtotal);
+        if (discountRow) {
+            if (discountRate > 0) {
+                discountRow.classList.remove('hidden');
+                if (discountEl) discountEl.textContent = `-${formatINR(discountAmount)}`;
+            } else {
+                discountRow.classList.add('hidden');
+            }
+        }
+        if (totalEl) totalEl.textContent = formatINR(finalTotal);
+        if (submitBtnSpan) submitBtnSpan.textContent = `Pay ${formatINR(finalTotal)} & Complete Order`;
+    };
+
+    window.handleCheckoutOrderSubmit = function() {
+        if (!state.cart || !state.cart.length) {
+            showToast('Your bag is empty. Choose a fragrance to proceed.', true);
+            window.closeCheckoutModal();
+            return;
+        }
+
+        const name = document.querySelector('#checkout-name')?.value.trim();
+        const email = document.querySelector('#checkout-email')?.value.trim();
+        const phone = document.querySelector('#checkout-phone')?.value.trim();
+        const street = document.querySelector('#checkout-street')?.value.trim();
+        const city = document.querySelector('#checkout-city')?.value.trim();
+        const pincode = document.querySelector('#checkout-pincode')?.value.trim();
+        const paymentMethodEl = document.querySelector('input[name="checkout-payment-method"]:checked');
+        const paymentMethod = paymentMethodEl ? paymentMethodEl.value : 'UPI Instant & NetBanking';
+
+        if (!name || !email || !street || !city || !pincode) {
+            showToast('Please complete all delivery address fields to proceed.', true);
+            return;
+        }
+
+        // Calculate totals
+        const subtotal = state.cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+        const discountRate = (state.discount && typeof state.discount.rate === 'number') ? state.discount.rate : 0;
+        const discountAmount = subtotal * discountRate;
+        const finalTotal = Math.max(0, subtotal - discountAmount);
+
+        const orderData = {
+            total: finalTotal,
+            subtotal: subtotal,
+            items: state.cart.map(item => ({
+                name: item.name + (item.weight ? ` (${item.weight})` : ''),
+                quantity: item.quantity,
+                price: item.price,
+                image: item.image
+            })),
+            candles: state.cart.map(item => `${item.name} (${item.weight || '280g'}) × ${item.quantity}`),
+            shippingAddress: `${street}, ${city} - ${pincode}`,
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phone || '+91 98201 44892',
+            paymentMethod: paymentMethod,
+            status: 'Pouring & Curing',
+            statusCode: 'pouring',
+            statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control'
+        };
+
+        if (window.sondhiAuth) {
+            const result = window.sondhiAuth.addUserOrder(orderData);
+            if (result.success) {
+                // Safely reset cart
+                state.cart = [];
+                state.discount = { code: '', rate: 0 };
+                saveCart();
+                window.closeCheckoutModal();
+                window.sondhiAuth.showOrderSuccessModal(result.order);
+                showToast(`🕯️ Order ${result.order.id} placed successfully!`);
+            } else {
+                showToast(result.message || 'Failed to commission order.', true);
+            }
+        } else {
+            alert(`🕯️ Commission Confirmed!\n\nThank you for choosing Sondhi Atelier, ${name}.\nOrder Total: ₹${finalTotal.toLocaleString()}.\nOur artisans will hand-pour and dispatch your candles to:\n${street}, ${city} - ${pincode}`);
+            state.cart = [];
+            state.discount = { code: '', rate: 0 };
+            saveCart();
+            window.closeCheckoutModal();
+            showToast('Order placed successfully!');
+        }
+    };
 
     // Newsletter Subscription Form
     const newsletterForm = document.querySelector('#newsletter-form');

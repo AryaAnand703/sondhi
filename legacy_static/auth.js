@@ -437,9 +437,29 @@
         },
 
         addUserOrder: function (orderData) {
-            const current = this.getCurrentUser();
+            let current = this.getCurrentUser();
             if (!current) {
-                return { success: false, message: 'Please log in to place an order.' };
+                // If user is placing an order with guest contact info, automatically create patron session
+                if (orderData && (orderData.customerEmail || orderData.customerName)) {
+                    const guestName = orderData.customerName || 'Sanctuary Patron';
+                    const guestEmail = orderData.customerEmail || 'patron@sondhi.in';
+                    const guestUsername = guestEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') || ('patron' + Math.floor(100 + Math.random() * 900));
+                    const regRes = this.register({
+                        fullName: guestName,
+                        username: guestUsername,
+                        email: guestEmail,
+                        password: 'PatronPass' + Math.floor(100 + Math.random() * 900)
+                    });
+                    if (regRes.success) {
+                        current = regRes.user;
+                    } else {
+                        current = this.getAllUsers().find(u => u.email === guestEmail) || this.getCurrentUser();
+                    }
+                }
+            }
+
+            if (!current) {
+                return { success: false, message: 'Please log in or provide your details to place an order.' };
             }
 
             const users = this.getAllUsers();
@@ -448,24 +468,43 @@
                 return { success: false, message: 'User record not found.' };
             }
 
+            const orderId = orderData.id || 'SND-' + Math.floor(1000 + Math.random() * 9000);
+            const orderDate = orderData.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
             const newOrder = {
-                id: orderData.id || 'SND-' + Math.floor(1000 + Math.random() * 9000),
-                date: orderData.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                id: orderId,
+                date: orderDate,
                 status: orderData.status || 'Pouring & Curing',
                 statusCode: orderData.statusCode || 'pouring',
                 statusDesc: orderData.statusDesc || 'Artisan bench allocated; botanicals hand-infused into soy wax',
                 itemsCount: orderData.itemsCount || (orderData.items ? orderData.items.reduce((s, i) => s + (i.quantity || 1), 0) : 1),
                 total: orderData.total || 0,
+                subtotal: orderData.subtotal || orderData.total || 0,
+                shippingAddress: orderData.shippingAddress || 'Sanctuary Residence',
+                paymentMethod: orderData.paymentMethod || 'UPI Direct & Online',
                 estimatedDelivery: orderData.estimatedDelivery || this.calculateEstimatedDelivery(7),
                 candles: orderData.candles || (orderData.items ? orderData.items.map(i => `${i.name} × ${i.quantity || 1}`) : ['Signature Candle']),
                 customerName: current.fullName,
                 customerUsername: current.username,
-                customerEmail: current.email
+                customerEmail: current.email,
+                customerPhone: orderData.customerPhone || current.phone || '+91 98201 44892'
             };
 
             // Prepend to user's orders (most recent first)
             if (!users[userIndex].orders) users[userIndex].orders = [];
             users[userIndex].orders.unshift(newOrder);
+
+            // Prepend invoice record for Billing tab
+            if (!users[userIndex].invoices) users[userIndex].invoices = [];
+            const newInvoice = {
+                id: 'INV-' + orderId.replace('SND-', ''),
+                date: orderDate,
+                description: `Sanctuary Order (${newOrder.itemsCount} candles - ${newOrder.candles[0] || 'Artisan Candle'})`,
+                amount: newOrder.total,
+                status: 'Paid',
+                method: newOrder.paymentMethod
+            };
+            users[userIndex].invoices.unshift(newInvoice);
 
             // Add bonus patron points (1 point per ₹10 spent)
             const earnedPoints = Math.floor(newOrder.total / 10);
@@ -1091,12 +1130,20 @@
             if (totalEl) totalEl.textContent = `₹${(order.total || 0).toLocaleString()}`;
             if (delEl) delEl.textContent = order.estimatedDelivery || '7-9 Business Days';
 
+            // Support static .html vs route
+            const orderLink = document.querySelector('#sondhi-order-success-modal a[href*="profile"]');
+            if (orderLink) {
+                orderLink.href = window.location.pathname.includes('.html') ? 'profile.html#orders' : '/profile#orders';
+            }
+
             const modal = document.getElementById('sondhi-order-success-modal');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            const inner = modal.querySelector('.scale-95');
-            if (inner) {
-                inner.classList.remove('scale-95');
-                inner.classList.add('scale-100');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                const inner = modal.querySelector('.scale-95, .scale-100');
+                if (inner) {
+                    inner.classList.remove('scale-95');
+                    inner.classList.add('scale-100');
+                }
             }
         },
 

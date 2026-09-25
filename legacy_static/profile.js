@@ -178,6 +178,16 @@ function syncProfileWithAuth() {
         if (inputLast) inputLast.value = profileState.user.lastName;
         if (inputEmail) inputEmail.value = profileState.user.email;
         if (inputPhone) inputPhone.value = profileState.user.phone;
+
+        // Toggle admin/superadmin workspace pills based on role
+        const adminPill = document.getElementById('pill-admin-link');
+        const superPill = document.getElementById('pill-superadmin-link');
+        if (adminPill) {
+            adminPill.style.display = (user && (user.role === 'admin' || user.role === 'superadmin')) ? 'inline-flex' : 'none';
+        }
+        if (superPill) {
+            superPill.style.display = (user && user.role === 'superadmin') ? 'inline-flex' : 'none';
+        }
     }
 }
 
@@ -340,7 +350,7 @@ function renderOrders() {
                 <p class="text-xs text-atelier-muted max-w-sm mx-auto mt-1 mb-5">
                     Your personal sanctuary commission history will appear here once you order your first hand-crafted fragrance candle.
                 </p>
-                <a href="index.html#collection" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                <a href="/#collection" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
                     <i class="fa-solid fa-fire text-xs"></i> Explore Signature Scents
                 </a>
             </div>
