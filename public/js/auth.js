@@ -609,7 +609,7 @@
             <div id="sondhi-auth-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
                 <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300 text-atelier-cream">
                     <!-- Close button -->
-                    <button id="auth-modal-close-btn" class="absolute top-5 right-5 text-atelier-muted hover:text-white transition p-1" aria-label="Close modal">
+                    <button id="auth-modal-close-btn" type="button" onclick="window.sondhiAuth.closeAuthModal()" class="absolute top-5 right-5 text-atelier-muted hover:text-white transition p-1 cursor-pointer" aria-label="Close modal">
                         <i class="fa-solid fa-xmark text-base"></i>
                     </button>
 
@@ -715,7 +715,7 @@
             <!-- PORTAL CREDENTIALS CHALLENGE MODAL (USER ID + PASSWORD) -->
             <div id="sondhi-section-pass-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
                 <div class="relative w-full max-w-md rounded-2xl bg-atelier-surface border border-flame-glow/50 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300 text-atelier-cream">
-                    <button id="section-modal-close-btn" class="absolute top-5 right-5 text-atelier-muted hover:text-white transition p-1" aria-label="Close modal">
+                    <button id="section-modal-close-btn" type="button" onclick="window.sondhiAuth.closeSectionPassModal()" class="absolute top-5 right-5 text-atelier-muted hover:text-white transition p-1 cursor-pointer" aria-label="Close modal">
                         <i class="fa-solid fa-xmark text-base"></i>
                     </button>
 
@@ -804,14 +804,22 @@
 
             document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-            // Bind events for tabs
+            // Bind events for tabs & buttons
             const tabSignIn = document.getElementById('auth-tab-signin');
             const tabSignUp = document.getElementById('auth-tab-signup');
+            const closeAuthBtn = document.getElementById('auth-modal-close-btn');
             const closeSecBtn = document.getElementById('section-modal-close-btn');
+            const authModal = document.getElementById('sondhi-auth-modal');
+            const secModal = document.getElementById('sondhi-section-pass-modal');
 
             if (tabSignIn) tabSignIn.addEventListener('click', () => this.switchAuthTab('signin'));
             if (tabSignUp) tabSignUp.addEventListener('click', () => this.switchAuthTab('signup'));
             if (closeAuthBtn) closeAuthBtn.addEventListener('click', () => this.closeAuthModal());
+            if (authModal) {
+                authModal.addEventListener('click', (e) => {
+                    if (e.target === authModal) this.closeAuthModal();
+                });
+            }
             if (closeSecBtn) closeSecBtn.addEventListener('click', () => {
                 this.closeSectionPassModal();
                 if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/superadmin')) {
@@ -819,6 +827,25 @@
                     if (!this.isSectionUnlocked(sec)) {
                         window.location.href = '/';
                     }
+                }
+            });
+            if (secModal) {
+                secModal.addEventListener('click', (e) => {
+                    if (e.target === secModal) {
+                        this.closeSectionPassModal();
+                        if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/superadmin')) {
+                            const sec = this._pendingSection || (window.location.pathname.includes('superadmin') ? 'superadmin' : 'admin');
+                            if (!this.isSectionUnlocked(sec)) {
+                                window.location.href = '/';
+                            }
+                        }
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.closeAuthModal();
                 }
             });
         },
