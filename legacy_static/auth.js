@@ -709,18 +709,6 @@
                             Create Patron Account
                         </button>
                     </form>
-
-                    <!-- Quick Demo Account for Patron -->
-                    <div class="mt-6 pt-4 border-t border-white/10 text-center">
-                        <div class="text-[10px] uppercase tracking-widest text-atelier-dim font-bold mb-2.5">
-                            Quick Demo Sign-In (1-Click Fill)
-                        </div>
-                        <div class="flex flex-wrap gap-2 justify-center">
-                            <button type="button" onclick="window.sondhiAuth.fillDemoAccount('arya', 'arya123')" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-luxe-gold text-atelier-cream hover:text-luxe-gold text-[10px] font-semibold transition">
-                                <i class="fa-solid fa-user text-[9px] text-luxe-gold mr-1"></i> Patron Account (arya)
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
 
