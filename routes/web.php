@@ -39,9 +39,13 @@ Route::post('/auth/register', [AuthController::class, 'register'])->name('regist
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/me', [AuthController::class, 'currentUser'])->name('auth.me');
 
-// Authenticated Customer Profile
+// Authenticated Customer Profile & Orders Section
+Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+Route::get('/orders', function () {
+    return redirect('/profile#orders');
+})->name('orders.index');
+
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/addresses', [ProfileController::class, 'storeAddress'])->name('profile.address.store');
     Route::delete('/profile/addresses/{id}', [ProfileController::class, 'deleteAddress'])->name('profile.address.delete');

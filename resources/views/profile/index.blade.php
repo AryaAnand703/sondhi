@@ -168,6 +168,22 @@
             background: var(--tab-active-bg);
         }
 
+        .order-filter-btn {
+            color: rgb(var(--atelier-muted-rgb));
+            background: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .order-filter-btn:hover {
+            color: rgb(var(--atelier-cream-rgb));
+            background: rgba(var(--atelier-hover-rgb), 0.6);
+        }
+        .order-filter-btn.active {
+            color: rgb(var(--luxe-gold-rgb));
+            background: var(--tab-active-bg);
+            border-color: rgba(var(--luxe-gold-rgb), 0.35) !important;
+        }
+
         .portal-pill {
             transition: all 0.2s ease;
         }
@@ -599,17 +615,68 @@
 
         <!-- TAB 3: ORDER HISTORY & TRACKING -->
         <section id="section-orders" class="tab-content hidden space-y-6">
-            <div class="glass-card rounded-2xl p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+            <div class="glass-card rounded-2xl p-6 sm:p-8">
+                <!-- Section Header with Title and Quick Metric Chips -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6 mb-6">
                     <div>
-                        <h2 class="font-display text-xl font-semibold text-atelier-cream">Atelier Commission History</h2>
-                        <p class="text-xs text-atelier-muted">Track artisan hand-pouring, curing, and white-glove dispatch</p>
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-luxe-gold/15 border border-luxe-gold/30 flex items-center justify-center text-luxe-gold text-sm">
+                                <i class="fa-solid fa-box-archive"></i>
+                            </span>
+                            <h2 class="font-display text-2xl font-semibold text-atelier-cream">My Orders</h2>
+                        </div>
+                        <p class="text-xs text-atelier-muted mt-1">Track artisan hand-pouring, curing, and white-glove courier deliveries to your sanctuary.</p>
                     </div>
-                    <span class="text-xs text-luxe-gold font-semibold" id="orders-count-label">8 Commissions</span>
+
+                    <!-- Quick Metric Chips -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="px-3.5 py-1.5 rounded-xl bg-atelier-surface/90 border border-white/10 flex items-center gap-2 text-xs">
+                            <span class="text-atelier-dim text-[11px] uppercase tracking-wider font-semibold">Total:</span>
+                            <span id="order-stat-total" class="font-bold text-atelier-cream">3</span>
+                        </div>
+                        <div class="px-3.5 py-1.5 rounded-xl bg-flame-soft/30 border border-flame-glow/30 flex items-center gap-2 text-xs">
+                            <span class="w-1.5 h-1.5 rounded-full bg-flame-glow animate-pulse"></span>
+                            <span class="text-atelier-dim text-[11px] uppercase tracking-wider font-semibold">In Progress:</span>
+                            <span id="order-stat-active" class="font-bold text-flame-glow">1</span>
+                        </div>
+                        <div class="px-3.5 py-1.5 rounded-xl bg-luxe-sage/15 border border-luxe-sage/30 flex items-center gap-2 text-xs">
+                            <i class="fa-solid fa-check text-[10px] text-luxe-sage"></i>
+                            <span class="text-atelier-dim text-[11px] uppercase tracking-wider font-semibold">Delivered:</span>
+                            <span id="order-stat-delivered" class="font-bold text-luxe-sage">2</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="orders-list-container" class="space-y-4">
-                    <!-- Orders will be injected by profile.js -->
+                <!-- Filter & Search Toolbar -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
+                    <!-- Status Filter Tabs (Segmented control) -->
+                    <div class="inline-flex p-1 rounded-xl bg-atelier-surface border border-white/10 text-xs overflow-x-auto no-scrollbar gap-1" id="order-filter-tabs">
+                        <button type="button" onclick="setOrderFilter('all')" id="order-filter-all" class="order-filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition">
+                            All (<span id="count-filter-all">3</span>)
+                        </button>
+                        <button type="button" onclick="setOrderFilter('active')" id="order-filter-active" class="order-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition">
+                            In Progress (<span id="count-filter-active">1</span>)
+                        </button>
+                        <button type="button" onclick="setOrderFilter('delivered')" id="order-filter-delivered" class="order-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition">
+                            Delivered (<span id="count-filter-delivered">2</span>)
+                        </button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="flex items-center gap-2 flex-1 sm:max-w-xs">
+                        <div class="relative w-full">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-atelier-dim text-xs"></i>
+                            <input type="text" id="order-search-input" oninput="handleOrderSearch(this.value)" placeholder="Search order # or candle..." class="w-full bg-atelier-surface border border-white/10 rounded-xl pl-9 pr-8 py-2 text-xs text-atelier-cream focus:border-luxe-gold outline-none transition placeholder:text-atelier-dim">
+                            <button type="button" id="order-search-clear" onclick="clearOrderSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-atelier-dim hover:text-white text-xs" aria-label="Clear search">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders List Container -->
+                <div id="orders-list-container" class="space-y-5">
+                    <!-- Populated dynamically by profile.js -->
                 </div>
             </div>
         </section>
@@ -779,11 +846,55 @@
         </div>
     </div>
 
+    <!-- Modal: Live Order Tracking -->
+    <div id="modal-order-track" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4" onclick="if(event.target === this) closeModal('modal-order-track')">
+        <div class="relative w-full max-w-xl rounded-2xl bg-atelier-surface border border-luxe-gold/30 p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-start justify-between border-b border-white/10 pb-4 mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-luxe-gold/15 border border-luxe-gold/30 flex items-center justify-center text-luxe-gold text-lg">
+                        <i class="fa-solid fa-route"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-display text-xl font-semibold text-atelier-cream" id="track-modal-title">Commission Tracking</h3>
+                            <span id="track-modal-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-flame-soft text-flame-glow border border-flame-glow/30">Active</span>
+                        </div>
+                        <p class="text-xs text-atelier-muted" id="track-modal-subtitle">Real-time artisan progress & courier tracking</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-order-track')" class="text-atelier-muted hover:text-white transition p-1.5" aria-label="Close tracking modal">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Dynamically injected) -->
+            <div id="track-modal-content" class="space-y-6">
+                <!-- Injected by profile.js -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <a id="track-modal-whatsapp" href="https://wa.me/919876543210?text=Hi%20Sondhi%20Atelier,%20inquiring%20about%20my%20commission" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-atelier-card hover:bg-white/10 border border-white/10 text-xs font-semibold text-atelier-cream hover:text-luxe-gold transition">
+                    <i class="fa-brands fa-whatsapp text-emerald-400"></i> Atelier Concierge Support
+                </a>
+                <button onclick="closeModal('modal-order-track')" class="w-full sm:w-auto px-5 py-2 rounded-lg bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-atelier-surface border border-luxe-gold px-4 py-3 shadow-2xl text-xs text-atelier-cream opacity-0 pointer-events-none transition-all duration-300">
         <i class="fa-solid fa-circle-check text-luxe-gold text-sm" id="toast-icon"></i>
         <span id="toast-message">Action completed successfully</span>
     </div>
+
+    <!-- Server Provided Initial Data -->
+    <script>
+        window.serverOrders = @json($orders ?? []);
+    </script>
 
     <!-- Core Auth & Client Logic -->
     <script src="{{ asset('js/auth.js') }}"></script>

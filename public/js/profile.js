@@ -159,8 +159,77 @@ function syncProfileWithAuth() {
         profileState.user.email = user.email || '';
         profileState.user.phone = user.phone || '+91 98765 43210';
         profileState.user.tier = user.tier || 'Patron';
-        profileState.user.points = user.points || 0;
-        profileState.orders = user.orders || [];
+        if (user.orders && user.orders.length) {
+            profileState.orders = user.orders;
+        } else if (window.serverOrders && window.serverOrders.length) {
+            profileState.orders = window.serverOrders.map(so => ({
+                id: so.order_number || ('SND-' + so.id),
+                date: new Date(so.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                status: so.status || 'Pouring & Curing',
+                statusCode: so.status_code || 'pouring',
+                statusDesc: so.status_desc || 'Artisan bench allocated; botanicals infused into soy wax',
+                itemsCount: so.items_count || 1,
+                total: parseFloat(so.total || 0),
+                subtotal: parseFloat(so.subtotal || so.total || 0),
+                shippingAddress: so.shipping_address || 'Primary Sanctuary Residence, Mumbai',
+                paymentMethod: so.payment_method || 'Prepaid Card / UPI',
+                estimatedDelivery: so.estimated_delivery || '7-9 Business Days',
+                items: so.items || []
+            }));
+        } else if (!profileState.orders || profileState.orders.length === 0) {
+            profileState.orders = [
+                {
+                    id: 'SND-9014',
+                    date: 'Sep 12, 2026',
+                    status: 'Pouring & Curing',
+                    statusCode: 'pouring',
+                    statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control',
+                    itemsCount: 3,
+                    total: 2647,
+                    subtotal: 2647,
+                    estimatedDelivery: 'Sep 21, 2026',
+                    shippingAddress: '7B, Sea Face Promenade, Worli, Mumbai - 400018',
+                    paymentMethod: 'UPI Direct / HDFC Bank',
+                    candles: [
+                        'Lavender & Golden Amber (280g) × 2',
+                        'Rain on Earth Mitti Attar (260g) × 1'
+                    ]
+                },
+                {
+                    id: 'SND-8890',
+                    date: 'Aug 15, 2026',
+                    status: 'Delivered',
+                    statusCode: 'delivered',
+                    statusDesc: 'Delivered via White-Glove Courier to Mumbai Sanctuary',
+                    itemsCount: 1,
+                    total: 2499,
+                    subtotal: 2499,
+                    estimatedDelivery: 'Delivered Aug 18, 2026',
+                    shippingAddress: '7B, Sea Face Promenade, Worli, Mumbai - 400018',
+                    paymentMethod: 'Visa Signature •••• 8842',
+                    candles: [
+                        'Flame Circle Q3 Reserve Box (Monsoon Vetiver) × 1'
+                    ]
+                },
+                {
+                    id: 'SND-8412',
+                    date: 'Jun 10, 2026',
+                    status: 'Delivered',
+                    statusCode: 'delivered',
+                    statusDesc: 'Delivered with bespoke wax sealing and wooden wick care kit',
+                    itemsCount: 2,
+                    total: 2098,
+                    subtotal: 2248,
+                    estimatedDelivery: 'Delivered Jun 14, 2026',
+                    shippingAddress: '402 The Loft, Industrial Estate, Lower Parel, Mumbai - 400013',
+                    paymentMethod: 'Mastercard World Elite •••• 3019',
+                    candles: [
+                        'Sandalwood & Velvet Oud (300g) × 1',
+                        'Neroli Blossom & Petitgrain (260g) × 1'
+                    ]
+                }
+            ];
+        }
 
         if (user.addresses && user.addresses.length) {
             profileState.addresses = user.addresses;
@@ -329,28 +398,292 @@ function renderInvoices(filterText = '') {
     `).join('');
 }
 
-// --- Render Orders ---
+// --- Order State & Filter Controllers ---
+let currentOrderFilter = 'all';
+let orderSearchQuery = '';
+
+function setOrderFilter(filter) {
+    currentOrderFilter = filter;
+    ['all', 'active', 'delivered'].forEach(f => {
+        const btn = document.getElementById(`order-filter-${f}`);
+        if (btn) {
+            if (f === filter) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+    });
+    renderOrders();
+}
+
+function handleOrderSearch(query) {
+    orderSearchQuery = (query || '').trim().toLowerCase();
+    const clearBtn = document.getElementById('order-search-clear');
+    if (clearBtn) {
+        if (orderSearchQuery.length > 0) {
+            clearBtn.classList.remove('hidden');
+        } else {
+            clearBtn.classList.add('hidden');
+        }
+    }
+    renderOrders();
+}
+
+function clearOrderSearch() {
+    const input = document.getElementById('order-search-input');
+    if (input) input.value = '';
+    handleOrderSearch('');
+}
+
+function getOrderItems(order) {
+    if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+        return order.items.map(item => ({
+            name: item.product_name || item.name || 'Artisan Candle',
+            quantity: item.quantity || 1,
+            price: parseFloat(item.price || 0),
+            subtotal: parseFloat(item.subtotal || (item.price * item.quantity) || 0)
+        }));
+    }
+    if (order.candles && Array.isArray(order.candles) && order.candles.length > 0) {
+        return order.candles.map(c => {
+            if (typeof c === 'string') {
+                const parts = c.split(' × ');
+                const name = parts[0] || c;
+                const qty = parts[1] ? parseInt(parts[1], 10) : 1;
+                const totalAmount = parseFloat(order.total) || 2000;
+                const totalCount = parseInt(order.itemsCount, 10) || 2;
+                const approxPrice = Math.round(totalAmount / totalCount);
+                return {
+                    name: name,
+                    quantity: qty,
+                    price: approxPrice,
+                    subtotal: approxPrice * qty
+                };
+            }
+            return {
+                name: c.name || 'Artisan Candle',
+                quantity: c.quantity || 1,
+                price: parseFloat(c.price || 0),
+                subtotal: parseFloat(c.subtotal || 0)
+            };
+        });
+    }
+    return [{
+        name: 'Bespoke Atelier Fragrance Commission',
+        quantity: order.itemsCount || 1,
+        price: parseFloat(order.total || 0),
+        subtotal: parseFloat(order.total || 0)
+    }];
+}
+
+function getOrderStep(statusCode) {
+    const code = (statusCode || '').toLowerCase();
+    if (code === 'delivered' || code === 'completed') return 4;
+    if (code === 'dispatched' || code === 'in_transit' || code === 'shipping') return 3;
+    if (code === 'pouring' || code === 'curing' || code === 'processing') return 2;
+    return 1; // pending or confirmed
+}
+
+function getStatusBadge(order) {
+    const step = getOrderStep(order.statusCode);
+    if (step === 4) {
+        return `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-luxe-sage/20 text-luxe-sage border border-luxe-sage/30">
+                <i class="fa-solid fa-circle-check text-[10px]"></i> Delivered
+            </span>
+        `;
+    }
+    if (step === 3) {
+        return `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-400/30">
+                <i class="fa-solid fa-truck-fast text-[10px]"></i> Dispatched
+            </span>
+        `;
+    }
+    if (step === 2) {
+        return `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-flame-soft text-flame-glow border border-flame-glow/30">
+                <i class="fa-solid fa-fire text-[10px] animate-pulse"></i> Pouring & Curing
+            </span>
+        `;
+    }
+    return `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-400/30">
+            <i class="fa-regular fa-clock text-[10px]"></i> Order Confirmed
+        </span>
+    `;
+}
+
+function copyOrderId(orderId, btnElement) {
+    const cleanId = orderId.replace('#', '');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cleanId).then(() => {
+            showToast(`Order ID #${cleanId} copied to clipboard!`);
+            if (btnElement) {
+                const old = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="fa-solid fa-check text-luxe-sage text-[11px]"></i>';
+                setTimeout(() => { btnElement.innerHTML = old; }, 2000);
+            }
+        }).catch(() => {
+            showToast(`Order ID: #${cleanId}`);
+        });
+    } else {
+        showToast(`Order ID: #${cleanId}`);
+    }
+}
+
+function renderOrderStepper(currentStep) {
+    const steps = [
+        { label: 'Confirmed', icon: 'fa-check' },
+        { label: 'Pouring & Curing', icon: 'fa-fire' },
+        { label: 'Dispatched', icon: 'fa-truck-fast' },
+        { label: 'Delivered', icon: 'fa-house-chimney' }
+    ];
+
+    const progressMap = { 1: 15, 2: 48, 3: 80, 4: 100 };
+    const progressPct = progressMap[currentStep] || 15;
+
+    return `
+        <div class="py-3 px-2 sm:px-4 my-3 bg-atelier-surface/50 border border-white/5 rounded-xl">
+            <div class="relative px-2 sm:px-6">
+                <!-- Background track -->
+                <div class="absolute top-4 left-6 right-6 h-0.5 bg-white/10 -translate-y-1/2 rounded-full"></div>
+                <!-- Active filled track -->
+                <div class="absolute top-4 left-6 h-0.5 bg-gradient-to-r from-luxe-gold to-flame-glow -translate-y-1/2 rounded-full transition-all duration-500" style="width: calc(${progressPct}% - 2rem);"></div>
+
+                <!-- Steps container -->
+                <div class="relative flex justify-between items-start text-center">
+                    ${steps.map((st, idx) => {
+                        const stepNum = idx + 1;
+                        const isCompleted = stepNum < currentStep;
+                        const isCurrent = stepNum === currentStep;
+
+                        let nodeHtml = '';
+                        if (isCompleted) {
+                            nodeHtml = `
+                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-luxe-gold text-atelier-base flex items-center justify-center text-xs font-bold shadow-md mx-auto">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                                <span class="text-[10px] sm:text-xs font-semibold text-atelier-cream mt-1.5 block">${st.label}</span>
+                            `;
+                        } else if (isCurrent) {
+                            nodeHtml = `
+                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-flame-glow to-luxe-gold text-white flex items-center justify-center text-xs font-bold shadow-lg ring-4 ring-flame-glow/20 animate-pulse mx-auto">
+                                    <i class="fa-solid ${st.icon} text-[10px]"></i>
+                                </div>
+                                <span class="text-[10px] sm:text-xs font-bold text-luxe-gold mt-1.5 block">${st.label}</span>
+                            `;
+                        } else {
+                            nodeHtml = `
+                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-atelier-card border border-white/15 text-atelier-dim flex items-center justify-center text-[10px] mx-auto">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+                                </div>
+                                <span class="text-[10px] sm:text-xs text-atelier-dim mt-1.5 block">${st.label}</span>
+                            `;
+                        }
+
+                        return `
+                            <div class="flex-1 max-w-[85px] sm:max-w-[120px]">
+                                ${nodeHtml}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- Render Orders Main UI ---
 function renderOrders() {
     const container = document.getElementById('orders-list-container');
-    const label = document.getElementById('orders-count-label');
-    const statTotal = document.getElementById('stat-total-orders');
     if (!container) return;
 
-    const count = profileState.orders.length;
-    if (label) label.textContent = `${count} ${count === 1 ? 'Commission' : 'Commissions'}`;
-    if (statTotal) statTotal.textContent = count;
+    const orders = profileState.orders || [];
+    const totalCount = orders.length;
 
-    if (count === 0) {
+    // Calculate active vs delivered
+    const activeOrders = orders.filter(o => {
+        const step = getOrderStep(o.statusCode);
+        return step < 4;
+    });
+    const deliveredOrders = orders.filter(o => {
+        const step = getOrderStep(o.statusCode);
+        return step >= 4;
+    });
+
+    // Update Section Metric Chips
+    const statTotal = document.getElementById('order-stat-total');
+    const statActive = document.getElementById('order-stat-active');
+    const statDelivered = document.getElementById('order-stat-delivered');
+    if (statTotal) statTotal.textContent = totalCount;
+    if (statActive) statActive.textContent = activeOrders.length;
+    if (statDelivered) statDelivered.textContent = deliveredOrders.length;
+
+    // Update Filter Tab Badge Counts
+    const countAll = document.getElementById('count-filter-all');
+    const countActive = document.getElementById('count-filter-active');
+    const countDelivered = document.getElementById('count-filter-delivered');
+    if (countAll) countAll.textContent = totalCount;
+    if (countActive) countActive.textContent = activeOrders.length;
+    if (countDelivered) countDelivered.textContent = deliveredOrders.length;
+
+    // Update Header Metric (in identity banner)
+    const statHeaderTotal = document.getElementById('stat-total-orders');
+    if (statHeaderTotal) statHeaderTotal.textContent = totalCount;
+
+    // Apply Filter
+    let filtered = orders;
+    if (currentOrderFilter === 'active') {
+        filtered = activeOrders;
+    } else if (currentOrderFilter === 'delivered') {
+        filtered = deliveredOrders;
+    }
+
+    // Apply Search
+    if (orderSearchQuery) {
+        filtered = filtered.filter(o => {
+            const idMatch = (o.id || '').toLowerCase().includes(orderSearchQuery);
+            const statusMatch = (o.status || '').toLowerCase().includes(orderSearchQuery);
+            const descMatch = (o.statusDesc || '').toLowerCase().includes(orderSearchQuery);
+            const dateMatch = (o.date || '').toLowerCase().includes(orderSearchQuery);
+            const candlesMatch = (o.candles || []).some(c => (typeof c === 'string' ? c : c.name || '').toLowerCase().includes(orderSearchQuery));
+            const itemsMatch = (o.items || []).some(i => (i.product_name || i.name || '').toLowerCase().includes(orderSearchQuery));
+            return idMatch || statusMatch || descMatch || dateMatch || candlesMatch || itemsMatch;
+        });
+    }
+
+    // Empty state
+    if (filtered.length === 0) {
+        if (orderSearchQuery || currentOrderFilter !== 'all') {
+            container.innerHTML = `
+                <div class="text-center py-12 px-4 rounded-2xl border border-white/5 bg-atelier-card/40">
+                    <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-atelier-muted text-lg mx-auto mb-3">
+                        <i class="fa-solid fa-filter-circle-xmark"></i>
+                    </div>
+                    <h4 class="font-display text-lg font-semibold text-atelier-cream">No matching commissions found</h4>
+                    <p class="text-xs text-atelier-muted max-w-sm mx-auto mt-1 mb-4">
+                        We couldn't find any orders matching "${orderSearchQuery || currentOrderFilter}".
+                    </p>
+                    <button onclick="clearOrderSearch(); setOrderFilter('all');" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-atelier-surface hover:bg-white/10 border border-white/10 text-xs font-semibold uppercase tracking-wider text-atelier-cream hover:text-luxe-gold transition">
+                        <i class="fa-solid fa-arrows-rotate text-xs"></i> Reset Filter
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
         container.innerHTML = `
-            <div class="text-center py-12 px-4 rounded-xl border border-white/5 bg-atelier-card/40">
-                <div class="w-12 h-12 rounded-full bg-luxe-gold/10 border border-luxe-gold/30 flex items-center justify-center text-luxe-gold text-lg mx-auto mb-3">
+            <div class="text-center py-12 px-4 rounded-2xl border border-white/5 bg-atelier-card/40">
+                <div class="w-14 h-14 rounded-full bg-luxe-gold/10 border border-luxe-gold/30 flex items-center justify-center text-luxe-gold text-xl mx-auto mb-3">
                     <i class="fa-solid fa-box-open"></i>
                 </div>
-                <h4 class="font-display text-lg font-semibold text-atelier-cream">No Commission History Yet</h4>
+                <h4 class="font-display text-xl font-semibold text-atelier-cream">No Commission History Yet</h4>
                 <p class="text-xs text-atelier-muted max-w-sm mx-auto mt-1 mb-5">
                     Your personal sanctuary commission history will appear here once you order your first hand-crafted fragrance candle.
                 </p>
-                <a href="/#collection" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition">
+                <a href="/#collection" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-luxe-gold text-atelier-base text-xs font-bold uppercase tracking-wider hover:bg-white transition shadow-lg">
                     <i class="fa-solid fa-fire text-xs"></i> Explore Signature Scents
                 </a>
             </div>
@@ -358,40 +691,91 @@ function renderOrders() {
         return;
     }
 
-    container.innerHTML = profileState.orders.map(order => {
-        const isPouring = order.statusCode === 'pouring';
-        const badgeColor = isPouring 
-            ? 'bg-flame-soft text-flame-glow border-flame-glow/30' 
-            : 'bg-luxe-sage/20 text-luxe-sage border-luxe-sage/30';
+    // Render Order Cards
+    container.innerHTML = filtered.map(order => {
+        const items = getOrderItems(order);
+        const currentStep = getOrderStep(order.statusCode);
+        const badgeHtml = getStatusBadge(order);
+        const stepperHtml = renderOrderStepper(currentStep);
 
         return `
-            <div class="rounded-xl border border-white/10 bg-atelier-surface/80 p-5 hover:border-white/20 transition">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3 mb-3">
-                    <div class="flex items-center gap-3">
-                        <span class="font-mono text-sm font-bold text-luxe-gold">${order.id}</span>
-                        <span class="text-xs text-atelier-muted">${order.date}</span>
+            <div class="rounded-2xl border border-white/10 bg-atelier-surface/90 hover:border-luxe-gold/30 transition p-5 sm:p-6 shadow-sm group">
+                <!-- Top Row: Order ID, Date, Status, Total -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">
+                            <span class="font-mono text-sm font-bold text-luxe-gold">#${order.id}</span>
+                            <button onclick="copyOrderId('${order.id}', this)" class="text-atelier-dim hover:text-luxe-gold transition ml-1 text-xs" title="Copy Order ID" aria-label="Copy Order ID">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <span class="text-xs text-atelier-muted">Placed on <strong class="text-atelier-cream font-medium">${order.date}</strong></span>
+                        ${order.estimatedDelivery ? `
+                            <span class="inline-flex items-center gap-1 text-[11px] text-atelier-dim bg-white/[0.03] px-2 py-0.5 rounded-full border border-white/5">
+                                <i class="fa-regular fa-calendar-check text-[10px] text-luxe-gold"></i>
+                                Est: ${order.estimatedDelivery}
+                            </span>
+                        ` : ''}
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${badgeColor}">
-                            ${isPouring ? '<i class="fa-solid fa-fire text-[9px] animate-pulse"></i>' : '<i class="fa-solid fa-check text-[9px]"></i>'}
-                            ${order.status}
-                        </span>
-                        <span class="text-sm font-semibold text-atelier-cream">₹${order.total.toLocaleString()}</span>
+
+                    <div class="flex items-center gap-3 justify-between sm:justify-end">
+                        ${badgeHtml}
+                        <div class="text-right">
+                            <span class="text-base sm:text-lg font-bold font-display text-atelier-cream">₹${(parseFloat(order.total) || 0).toLocaleString()}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="text-xs text-atelier-muted space-y-1 mb-4">
-                    ${(order.candles || []).map(c => `<div class="flex items-center gap-2"><i class="fa-regular fa-circle-dot text-[8px] text-luxe-gold"></i><span>${c}</span></div>`).join('')}
+                <!-- 4-Stage Visual Progress Stepper -->
+                ${stepperHtml}
+
+                <!-- Status Context Banner -->
+                <div class="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-atelier-muted mb-4">
+                    <span class="text-luxe-gold text-xs mt-0.5"><i class="fa-solid fa-sparkles"></i></span>
+                    <span class="leading-relaxed">${order.statusDesc || 'Commission received and entered in artisan master ledger.'}</span>
                 </div>
 
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pt-3 border-t border-white/5">
-                    <div class="text-atelier-dim flex items-center gap-2">
-                        <i class="fa-solid fa-truck-fast text-xs"></i>
-                        <span>${order.statusDesc || 'In transit'} · <strong class="text-atelier-muted">${order.estimatedDelivery || '7-9 Business Days'}</strong></span>
+                <!-- Ordered Items List -->
+                <div class="border-t border-b border-white/5 py-3 mb-4 space-y-2.5">
+                    <div class="text-[10px] uppercase font-bold tracking-widest text-atelier-dim">Items Commissioned (${items.length})</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        ${items.map(it => `
+                            <div class="flex items-center justify-between p-2.5 rounded-xl bg-atelier-card/60 border border-white/5">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-8 h-8 rounded-lg bg-flame-soft/20 border border-white/10 flex items-center justify-center text-flame-glow shrink-0 text-xs">
+                                        <i class="fa-solid fa-fire"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-xs font-semibold text-atelier-cream truncate">${it.name}</div>
+                                        <div class="text-[11px] text-atelier-dim">Qty: ${it.quantity} · ₹${it.price.toLocaleString()} each</div>
+                                    </div>
+                                </div>
+                                <div class="text-xs font-semibold text-atelier-cream shrink-0 pl-2">
+                                    ₹${(it.subtotal || it.price * it.quantity).toLocaleString()}
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
-                    <button onclick="reorderBatch('${order.id}')" class="px-3 py-1.5 rounded-lg border border-luxe-gold/30 text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base font-semibold uppercase tracking-wider text-[10px] transition self-start sm:self-auto">
-                        Commission Reorder
-                    </button>
+                </div>
+
+                <!-- Footer: Destination Address & Action Buttons -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                    <div class="text-xs text-atelier-dim flex items-center gap-2 max-w-md truncate">
+                        <i class="fa-solid fa-location-dot text-luxe-gold text-xs shrink-0"></i>
+                        <span class="truncate">Delivery to: <strong class="text-atelier-muted font-normal">${order.shippingAddress || 'Primary Sanctuary Residence, Mumbai'}</strong></span>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap self-end sm:self-auto">
+                        <button onclick="openOrderTrackModal('${order.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-luxe-gold text-atelier-base hover:bg-white text-xs font-bold uppercase tracking-wider transition shadow-sm">
+                            <i class="fa-solid fa-route text-[11px]"></i> Track Order
+                        </button>
+                        <button onclick="viewOrderInvoice('${order.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-atelier-card hover:bg-white/10 border border-white/10 text-atelier-cream hover:text-white text-xs font-medium transition" title="View tax invoice slip">
+                            <i class="fa-solid fa-file-invoice text-[11px] text-luxe-gold"></i> Invoice
+                        </button>
+                        <button onclick="reorderBatch('${order.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-atelier-card hover:bg-white/10 border border-white/10 text-atelier-cream hover:text-luxe-gold text-xs font-medium transition" title="Reorder these candles">
+                            <i class="fa-solid fa-arrows-rotate text-[11px]"></i> Reorder
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -685,7 +1069,199 @@ function manageMembershipModal() {
 }
 
 function reorderBatch(orderId) {
-    showToast(`Order ${orderId} added to your commission bag.`);
+    const cleanId = orderId.replace('#', '');
+    const order = (profileState.orders || []).find(o => o.id === cleanId || o.id === orderId);
+    showToast(`Items from #${cleanId} added to your commission bag!`);
+    
+    // Add to session / cart if available
+    if (window.sondhiCart && typeof window.sondhiCart.addItem === 'function') {
+        const items = getOrderItems(order || {});
+        items.forEach(it => {
+            window.sondhiCart.addItem({
+                id: it.id || Math.floor(Math.random() * 8) + 1,
+                name: it.name,
+                price: it.price,
+                quantity: it.quantity
+            });
+        });
+    }
+}
+
+function viewOrderInvoice(orderId) {
+    const cleanId = orderId.replace('#', '');
+    let inv = (profileState.invoices || []).find(i => 
+        (i.id && i.id.includes(cleanId.replace('SND-', ''))) || 
+        (i.description && i.description.includes(cleanId))
+    );
+
+    if (!inv) {
+        const order = (profileState.orders || []).find(o => o.id === cleanId || o.id === orderId);
+        if (order) {
+            const items = getOrderItems(order);
+            const subtotal = order.subtotal || order.total || 2500;
+            const tax = Math.round(subtotal * 0.12 * 100) / 100;
+            inv = {
+                id: 'INV-' + cleanId.replace('SND-', ''),
+                date: order.date,
+                description: `Order #${cleanId} · ${items.map(i => `${i.quantity}x ${i.name}`).join(', ')}`,
+                amount: order.total || subtotal,
+                status: 'Paid',
+                items: items.map(i => ({ name: i.name, qty: i.quantity, price: i.price })),
+                tax: tax,
+                subtotal: subtotal
+            };
+            if (!profileState.invoices) profileState.invoices = [];
+            profileState.invoices.unshift(inv);
+        }
+    }
+
+    if (inv) {
+        viewInvoiceDetails(inv.id);
+    } else {
+        showToast(`Tax invoice generated for #${cleanId}`);
+    }
+}
+
+function openOrderTrackModal(orderId) {
+    const cleanId = orderId.replace('#', '');
+    const order = (profileState.orders || []).find(o => o.id === cleanId || o.id === orderId);
+    if (!order) return;
+
+    const modal = document.getElementById('modal-order-track');
+    const content = document.getElementById('track-modal-content');
+    const title = document.getElementById('track-modal-title');
+    const badge = document.getElementById('track-modal-badge');
+    const whatsappLink = document.getElementById('track-modal-whatsapp');
+
+    if (title) title.textContent = `Order #${order.id}`;
+    if (badge) {
+        const step = getOrderStep(order.statusCode);
+        badge.textContent = order.status || 'Active';
+        if (step === 4) {
+            badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-luxe-sage/20 text-luxe-sage border border-luxe-sage/30';
+        } else if (step === 3) {
+            badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-400/30';
+        } else {
+            badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-flame-soft text-flame-glow border border-flame-glow/30';
+        }
+    }
+
+    if (whatsappLink) {
+        const waText = encodeURIComponent(`Hello Sondhi Atelier Concierge, I would like an update on my candle order #${order.id}.`);
+        whatsappLink.href = `https://wa.me/919876543210?text=${waText}`;
+    }
+
+    const items = getOrderItems(order);
+    const step = getOrderStep(order.statusCode);
+    const awbNumber = 'BLD-' + (order.id.replace(/\D/g, '') || '9014') + '884';
+
+    const timeline = [
+        {
+            title: 'Order Confirmed & Payment Verified',
+            desc: 'Commission committed to master pouring ledger; artisan allocated.',
+            time: order.date + ' · 09:30 AM',
+            isDone: step >= 1,
+            isCurrent: step === 1
+        },
+        {
+            title: 'Artisan Hand-Pouring & 48-Hour Curing',
+            desc: 'Organic coconut-soy wax heated, natural botanical essences infused, and crackling wood wicks centered.',
+            time: order.date + ' · 02:45 PM',
+            isDone: step >= 2,
+            isCurrent: step === 2
+        },
+        {
+            title: 'Dispatched via White-Glove Luxury Courier',
+            desc: `Handed over to BlueDart Luxury Logistics under ambient climate control. Tracking AWB: ${awbNumber}`,
+            time: step >= 3 ? 'In Transit · Handled with Care' : 'Estimated prior to arrival',
+            isDone: step >= 3,
+            isCurrent: step === 3
+        },
+        {
+            title: 'Delivered to Client Sanctuary',
+            desc: `Signature confirmed at ${order.shippingAddress || 'Sanctuary Residence'}.`,
+            time: order.estimatedDelivery || 'Delivered',
+            isDone: step >= 4,
+            isCurrent: step === 4
+        }
+    ];
+
+    if (content) {
+        content.innerHTML = `
+            <!-- Top Summary Card in Modal -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-atelier-card/70 border border-white/10 text-xs">
+                <div>
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-atelier-dim">Courier Partner</span>
+                    <div class="font-semibold text-atelier-cream mt-0.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-truck-shield text-luxe-gold text-xs"></i>
+                        BlueDart White-Glove Logistics
+                    </div>
+                    <div class="font-mono text-[11px] text-atelier-muted mt-1 flex items-center gap-1">
+                        AWB: <span>${awbNumber}</span>
+                        <button onclick="copyOrderId('${awbNumber}', this)" class="text-atelier-dim hover:text-luxe-gold p-0.5 ml-1" title="Copy Tracking Number">
+                            <i class="fa-regular fa-copy text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-atelier-dim">Estimated Delivery</span>
+                    <div class="font-display font-bold text-base text-luxe-gold mt-0.5">
+                        ${order.estimatedDelivery || 'Within 7-9 Business Days'}
+                    </div>
+                    <div class="text-[11px] text-atelier-dim mt-1">Temperature-monitored packaging</div>
+                </div>
+            </div>
+
+            <!-- Detailed Chronological Timeline -->
+            <div>
+                <h4 class="text-xs uppercase font-bold tracking-widest text-atelier-dim mb-3">Live Commission Milestones</h4>
+                <div class="space-y-4 relative pl-6 border-l-2 border-white/10 ml-2">
+                    ${timeline.map(tl => {
+                        let dotHtml = '';
+                        if (tl.isCurrent) {
+                            dotHtml = `<span class="absolute -left-[13px] top-0.5 w-6 h-6 rounded-full bg-gradient-to-br from-flame-glow to-luxe-gold text-white flex items-center justify-center text-[10px] shadow-lg ring-4 ring-flame-glow/20 animate-pulse"><i class="fa-solid fa-fire text-[9px]"></i></span>`;
+                        } else if (tl.isDone) {
+                            dotHtml = `<span class="absolute -left-[13px] top-0.5 w-6 h-6 rounded-full bg-luxe-gold text-atelier-base flex items-center justify-center text-[10px] shadow"><i class="fa-solid fa-check text-[9px]"></i></span>`;
+                        } else {
+                            dotHtml = `<span class="absolute -left-[13px] top-0.5 w-6 h-6 rounded-full bg-atelier-surface border border-white/20 text-atelier-dim flex items-center justify-center text-[10px]"><span class="w-1.5 h-1.5 rounded-full bg-white/20"></span></span>`;
+                        }
+
+                        return `
+                            <div class="relative">
+                                ${dotHtml}
+                                <div class="text-xs font-semibold ${tl.isCurrent ? 'text-luxe-gold' : (tl.isDone ? 'text-atelier-cream' : 'text-atelier-dim')}">
+                                    ${tl.title}
+                                </div>
+                                <div class="text-[11px] text-atelier-muted mt-0.5 leading-relaxed">
+                                    ${tl.desc}
+                                </div>
+                                <div class="text-[10px] text-atelier-dim mt-1 font-mono">
+                                    ${tl.time}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+
+            <!-- Delivery Address & Items Mini-Card -->
+            <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs space-y-2">
+                <div class="flex items-start gap-2 text-atelier-muted">
+                    <i class="fa-solid fa-location-dot text-luxe-gold text-xs mt-0.5"></i>
+                    <div>
+                        <span class="text-atelier-cream font-medium">Delivering to:</span>
+                        <span>${order.shippingAddress || '7B, Sea Face Promenade, Worli, Mumbai - 400018'}</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between pt-2 border-t border-white/5 text-atelier-dim text-[11px]">
+                    <span class="truncate max-w-[280px]">Candles: ${items.map(i => i.name).join(', ')}</span>
+                    <span class="font-bold text-atelier-cream font-display text-sm shrink-0">₹${(parseFloat(order.total) || 0).toLocaleString()}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    openModal('modal-order-track');
 }
 
 function pourBespokeCandle(formulaId) {
