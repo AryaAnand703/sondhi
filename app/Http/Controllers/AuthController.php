@@ -22,8 +22,14 @@ class AuthController extends Controller
         ]);
 
         $login = $credentials['login'];
+        $cleanPhone = preg_replace('/\D/', '', $login);
         $user = User::where('email', $login)
             ->orWhere('username', $login)
+            ->orWhere('phone', $login)
+            ->when(!empty($cleanPhone) && strlen($cleanPhone) >= 7, function ($q) use ($cleanPhone) {
+                $lastDigits = substr($cleanPhone, -10);
+                $q->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(phone, ''), ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?", ["%{$lastDigits}%"]);
+            })
             ->first();
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
@@ -65,6 +71,7 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'username' => $user->username,
                     'email' => $user->email,
+                    'phone' => $user->phone,
                     'role' => $user->role,
                     'tier' => $user->tier,
                     'points' => $user->points,
@@ -83,21 +90,28 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|string|max:255',
             'username' => 'nullable|string|max:50|unique:users',
             'password' => 'required|string|min:6',
-            'phone' => 'nullable|string|max:20',
         ]);
+
+        $username = $validated['username'] ?? strtolower(explode(' ', $validated['name'])[0]) . rand(100, 999);
+        $phone = $validated['phone'] ?? null;
+        $email = $validated['email'] ?? ($username . '@sanctuary.in');
+        if (User::where('email', $email)->exists()) {
+            $email = $username . '.' . rand(100, 999) . '@sanctuary.in';
+        }
 
         $user = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
-            'username' => $validated['username'] ?? strtolower(explode(' ', $validated['name'])[0]) . rand(100, 999),
+            'email' => $email,
+            'username' => $username,
             'password' => Hash::make($validated['password']),
             'role' => 'customer',
             'tier' => 'VIP Collector',
             'points' => 100, // Welcome reward points
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $phone,
         ]);
 
         Auth::login($user);

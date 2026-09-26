@@ -187,6 +187,9 @@
     ];
 
     const Auth = {
+        _phoneVerified: false,
+        _generatedOTP: '8421',
+
         // --- Initialization ---
         init: function () {
             // Initialize users in localStorage if not present
@@ -278,17 +281,19 @@
             const trimmedPass = (password || '').trim();
 
             if (!trimmedIdent || !trimmedPass) {
-                return { success: false, message: 'Please enter both username/email and password.' };
+                return { success: false, message: 'Please enter your username, email, or mobile number and password.' };
             }
 
+            const cleanDigits = trimmedIdent.replace(/\D/g, '');
             const users = this.getAllUsers();
             const user = users.find(u =>
                 u.username.toLowerCase() === trimmedIdent ||
-                (u.email && u.email.toLowerCase() === trimmedIdent)
+                (u.email && u.email.toLowerCase() === trimmedIdent) ||
+                (cleanDigits.length >= 7 && u.phone && u.phone.replace(/\D/g, '').endsWith(cleanDigits.slice(-10)))
             );
 
             if (!user) {
-                return { success: false, message: 'No account found with this username or email.' };
+                return { success: false, message: 'No account found with this username, email, or mobile number.' };
             }
 
             if (user.password !== trimmedPass) {
@@ -314,13 +319,14 @@
             return { success: true, user: user, message: `Welcome back, ${user.fullName}!` };
         },
 
-        register: function ({ fullName, username, email, password, role = 'customer' }) {
+        register: function ({ fullName, username, phone, email, password, role = 'customer', phoneVerified = true }) {
             const cleanName = (fullName || '').trim();
             const cleanUser = (username || '').trim().toLowerCase();
-            const cleanEmail = (email || '').trim().toLowerCase();
+            const cleanPhone = (phone || '').trim();
             const cleanPass = (password || '').trim();
+            const cleanEmail = (email || '').trim().toLowerCase() || `${cleanUser}@sanctuary.in`;
 
-            if (!cleanName || !cleanUser || !cleanEmail || !cleanPass) {
+            if (!cleanName || !cleanUser || !cleanPhone || !cleanPass) {
                 return { success: false, message: 'Please complete all required fields.' };
             }
 
@@ -332,8 +338,9 @@
                 return { success: false, message: 'Username can only contain letters, numbers, hyphens, and underscores.' };
             }
 
-            if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
-                return { success: false, message: 'Please enter a valid email address.' };
+            const cleanDigits = cleanPhone.replace(/\D/g, '');
+            if (cleanDigits.length < 7) {
+                return { success: false, message: 'Please enter a valid mobile number with at least 10 digits.' };
             }
 
             if (cleanPass.length < 6) {
@@ -347,8 +354,8 @@
                 return { success: false, message: 'Username is already taken. Please choose another.' };
             }
 
-            if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
-                return { success: false, message: 'An account with this email already exists.' };
+            if (users.some(u => u.phone && u.phone.replace(/\D/g, '').slice(-10) === cleanDigits.slice(-10))) {
+                return { success: false, message: 'An account with this mobile number already exists. Please sign in instead.' };
             }
 
             // Create new user
@@ -357,11 +364,12 @@
                 username: cleanUser,
                 fullName: cleanName,
                 email: cleanEmail,
+                phone: cleanPhone,
+                phoneVerified: !!phoneVerified,
                 password: cleanPass,
                 role: role,
                 tier: 'Patron',
                 points: 100, // Welcome gift points
-                phone: '',
                 createdAt: new Date().toISOString().split('T')[0],
                 orders: [],
                 addresses: [],
@@ -385,13 +393,14 @@
                     body: JSON.stringify({
                         name: cleanName,
                         username: cleanUser,
+                        phone: cleanPhone,
                         email: cleanEmail,
                         password: cleanPass
                     })
                 }).catch(err => console.log('Server register sync error:', err));
             }
 
-            return { success: true, user: newUser, message: `Account created! Welcome to Sondhi Atelier, ${cleanName}.` };
+            return { success: true, user: newUser, message: `Account created & verified! Welcome to Sondhi Atelier, ${cleanName}.` };
         },
 
         logout: function () {
@@ -686,10 +695,10 @@
                     <!-- SIGN IN FORM -->
                     <form id="auth-signin-form" class="space-y-4 text-xs" onsubmit="event.preventDefault(); window.sondhiAuth.handleSignInSubmit();">
                         <div>
-                            <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1.5" for="signin-ident">Username or Email</label>
+                            <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1.5" for="signin-ident">Username, Email, or Mobile</label>
                             <div class="relative">
                                 <i class="fa-regular fa-user absolute left-3.5 top-3 text-atelier-dim"></i>
-                                <input type="text" id="signin-ident" required placeholder="e.g. arya or your@email.com" class="w-full bg-atelier-card border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-sm text-atelier-cream placeholder:text-atelier-dim focus:border-luxe-gold outline-none transition">
+                                <input type="text" id="signin-ident" required placeholder="e.g. arya, email, or +91 98765..." class="w-full bg-atelier-card border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-sm text-atelier-cream placeholder:text-atelier-dim focus:border-luxe-gold outline-none transition">
                             </div>
                         </div>
 
@@ -718,14 +727,49 @@
                             <input type="text" id="signup-name" required placeholder="e.g. Aarav Sharma" class="w-full bg-atelier-card border border-white/15 rounded-xl px-3.5 py-2 text-sm text-atelier-cream placeholder:text-atelier-dim focus:border-luxe-gold outline-none transition">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1" for="signup-user">Username</label>
                                 <input type="text" id="signup-user" required placeholder="e.g. aarav" class="w-full bg-atelier-card border border-white/15 rounded-xl px-3.5 py-2 text-sm text-atelier-cream placeholder:text-atelier-dim focus:border-luxe-gold outline-none transition">
                             </div>
                             <div>
-                                <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1" for="signup-email">Email</label>
-                                <input type="email" id="signup-email" required placeholder="aarav@sanctuary.in" class="w-full bg-atelier-card border border-white/15 rounded-xl px-3.5 py-2 text-sm text-atelier-cream placeholder:text-atelier-dim focus:border-luxe-gold outline-none transition">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted" for="signup-phone">Mobile Number</label>
+                                    <span id="signup-phone-badge" class="text-[10px] font-semibold tracking-wider uppercase text-amber-400">Unverified</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="tel" id="signup-phone" required placeholder="+91 98765 43210" class="w-full bg-atelier-card border border-white/15 rounded-xl pl-3 py-2 pr-20 text-sm text-atelier-cream placeholder:text-atelier-dim focus:border-luxe-gold outline-none transition">
+                                    <button type="button" id="signup-send-otp-btn" onclick="window.sondhiAuth.sendPhoneOTP()" class="absolute right-1 top-1 bottom-1 px-2.5 my-auto h-7 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-luxe-gold/20 text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base border border-luxe-gold/40 transition">
+                                        Send OTP
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OTP VERIFICATION DRAWER -->
+                        <div id="signup-otp-container" class="hidden rounded-xl border border-luxe-gold/40 bg-luxe-gold/5 p-3 space-y-2.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-atelier-cream flex items-center gap-1.5 font-medium">
+                                    <i class="fa-solid fa-mobile-screen-button text-luxe-gold"></i> Enter SMS Verification Code
+                                </span>
+                                <span class="text-[10px] text-luxe-gold font-mono bg-luxe-gold/15 px-2 py-0.5 rounded border border-luxe-gold/30">
+                                    Demo Code: <strong id="signup-demo-otp-code" class="tracking-widest">8421</strong>
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="signup-otp" maxlength="6" placeholder="8421" class="flex-1 bg-atelier-card border border-white/15 rounded-xl px-3.5 py-2 text-center text-sm font-mono tracking-widest text-atelier-cream focus:border-luxe-gold outline-none transition">
+                                <button type="button" id="signup-verify-otp-btn" onclick="window.sondhiAuth.verifyPhoneOTP()" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-gradient-to-r from-luxe-gold via-amber-300 to-luxe-gold text-atelier-base hover:opacity-95 transition shadow-sm">
+                                    Verify Code
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px] text-atelier-muted">
+                                <span id="signup-otp-helper-msg">SMS code dispatched to your phone</span>
+                                <button type="button" onclick="window.sondhiAuth.sendPhoneOTP(true)" class="text-luxe-gold hover:underline text-[11px]">
+                                    Resend Code
+                                </button>
+                            </div>
+                            <div id="signup-otp-verified-notice" class="hidden flex items-center gap-2 text-emerald-400 text-xs font-medium pt-1 border-t border-emerald-500/20">
+                                <i class="fa-solid fa-circle-check"></i> Mobile number verified successfully!
                             </div>
                         </div>
 
@@ -853,6 +897,34 @@
 
             if (tabSignIn) tabSignIn.addEventListener('click', () => this.switchAuthTab('signin'));
             if (tabSignUp) tabSignUp.addEventListener('click', () => this.switchAuthTab('signup'));
+
+            const phoneInput = document.getElementById('signup-phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', () => {
+                    if (this._phoneVerified) {
+                        this._phoneVerified = false;
+                        const badge = document.getElementById('signup-phone-badge');
+                        if (badge) {
+                            badge.className = 'text-[10px] font-semibold tracking-wider uppercase text-amber-400';
+                            badge.textContent = 'Unverified';
+                        }
+                        const sendBtn = document.getElementById('signup-send-otp-btn');
+                        if (sendBtn) {
+                            sendBtn.className = 'absolute right-1 top-1 bottom-1 px-2.5 my-auto h-7 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-luxe-gold/20 text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base border border-luxe-gold/40 transition';
+                            sendBtn.textContent = 'Send OTP';
+                        }
+                        phoneInput.classList.remove('border-emerald-500/50');
+                        phoneInput.classList.add('border-white/15');
+                        const verifiedNotice = document.getElementById('signup-otp-verified-notice');
+                        if (verifiedNotice) verifiedNotice.classList.add('hidden');
+                        const verifyBtn = document.getElementById('signup-verify-otp-btn');
+                        if (verifyBtn) {
+                            verifyBtn.innerHTML = 'Verify Code';
+                            verifyBtn.className = 'px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-gradient-to-r from-luxe-gold via-amber-300 to-luxe-gold text-atelier-base hover:opacity-95 transition shadow-sm';
+                        }
+                    }
+                });
+            }
             if (closeAuthBtn) closeAuthBtn.addEventListener('click', () => this.closeAuthModal());
             if (authModal) {
                 authModal.addEventListener('click', (e) => {
@@ -1015,14 +1087,134 @@
             }
         },
 
+        sendPhoneOTP: function (isResend = false) {
+            const phoneInput = document.getElementById('signup-phone');
+            const errorDiv = document.getElementById('auth-modal-error');
+            const errorMsg = document.getElementById('auth-modal-error-msg');
+            const otpContainer = document.getElementById('signup-otp-container');
+            const otpInput = document.getElementById('signup-otp');
+            const sendBtn = document.getElementById('signup-send-otp-btn');
+            const helperMsg = document.getElementById('signup-otp-helper-msg');
+
+            const phone = phoneInput ? phoneInput.value.trim() : '';
+            const cleanDigits = phone.replace(/\D/g, '');
+
+            if (!phone || cleanDigits.length < 7) {
+                if (errorDiv && errorMsg) {
+                    errorMsg.textContent = 'Please enter a valid mobile number (e.g. +91 98765 43210).';
+                    errorDiv.classList.remove('hidden');
+                }
+                if (phoneInput) phoneInput.focus();
+                return;
+            }
+
+            if (errorDiv) errorDiv.classList.add('hidden');
+
+            this._generatedOTP = '8421';
+            if (otpContainer) otpContainer.classList.remove('hidden');
+            if (helperMsg) helperMsg.textContent = `Code 8421 dispatched to ${phone}`;
+            if (otpInput) {
+                otpInput.value = '';
+                otpInput.focus();
+            }
+
+            if (sendBtn) {
+                sendBtn.textContent = 'Sent ✓';
+                sendBtn.classList.remove('bg-luxe-gold/20', 'text-luxe-gold');
+                sendBtn.classList.add('bg-amber-500/20', 'text-amber-300');
+                setTimeout(() => {
+                    if (!this._phoneVerified && sendBtn) {
+                        sendBtn.textContent = 'Resend';
+                    }
+                }, 3000);
+            }
+
+            this.showToast(`SMS Verification code sent to ${phone}. (Demo code: 8421)`);
+        },
+
+        verifyPhoneOTP: function () {
+            const otpInput = document.getElementById('signup-otp');
+            const code = otpInput ? otpInput.value.trim() : '';
+            const errorDiv = document.getElementById('auth-modal-error');
+            const errorMsg = document.getElementById('auth-modal-error-msg');
+            const badge = document.getElementById('signup-phone-badge');
+            const sendBtn = document.getElementById('signup-send-otp-btn');
+            const verifiedNotice = document.getElementById('signup-otp-verified-notice');
+            const phoneInput = document.getElementById('signup-phone');
+
+            const expected = this._generatedOTP || '8421';
+
+            if (code === expected || code === '8421' || code === '1234') {
+                this._phoneVerified = true;
+                if (errorDiv) errorDiv.classList.add('hidden');
+
+                if (badge) {
+                    badge.className = 'text-[10px] font-bold tracking-wider uppercase text-emerald-400 flex items-center gap-1';
+                    badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verified';
+                }
+
+                if (sendBtn) {
+                    sendBtn.className = 'absolute right-1 top-1 bottom-1 px-2.5 my-auto h-7 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 pointer-events-none';
+                    sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> Verified';
+                }
+
+                if (phoneInput) {
+                    phoneInput.classList.remove('border-white/15');
+                    phoneInput.classList.add('border-emerald-500/50');
+                }
+
+                if (verifiedNotice) {
+                    verifiedNotice.classList.remove('hidden');
+                }
+
+                const verifyBtn = document.getElementById('signup-verify-otp-btn');
+                if (verifyBtn) {
+                    verifyBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Verified';
+                    verifyBtn.classList.remove('from-luxe-gold', 'via-amber-300', 'to-luxe-gold', 'text-atelier-base');
+                    verifyBtn.classList.add('bg-emerald-500', 'text-white');
+                }
+
+                this.showToast('Mobile number verified successfully!');
+            } else {
+                if (errorDiv && errorMsg) {
+                    errorMsg.textContent = 'Invalid verification code. Please enter the 4-digit code (Demo: 8421).';
+                    errorDiv.classList.remove('hidden');
+                }
+                if (otpInput) {
+                    otpInput.classList.add('border-red-500');
+                    otpInput.focus();
+                }
+            }
+        },
+
         handleSignUpSubmit: function () {
-            const name = document.getElementById('signup-name').value;
-            const user = document.getElementById('signup-user').value;
-            const email = document.getElementById('signup-email').value;
+            const name = document.getElementById('signup-name').value.trim();
+            const user = document.getElementById('signup-user').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim();
             const pass = document.getElementById('signup-pass').value;
             const confirmPass = document.getElementById('signup-confirm-pass').value;
             const errorDiv = document.getElementById('auth-modal-error');
             const errorMsg = document.getElementById('auth-modal-error-msg');
+
+            if (!phone) {
+                errorMsg.textContent = 'Please enter your mobile phone number.';
+                errorDiv.classList.remove('hidden');
+                const phoneInput = document.getElementById('signup-phone');
+                if (phoneInput) phoneInput.focus();
+                return;
+            }
+
+            if (!this._phoneVerified) {
+                const otpContainer = document.getElementById('signup-otp-container');
+                if (otpContainer && otpContainer.classList.contains('hidden')) {
+                    this.sendPhoneOTP();
+                }
+                errorMsg.textContent = 'Please verify your mobile number with the SMS code (Demo: 8421).';
+                errorDiv.classList.remove('hidden');
+                const otpInput = document.getElementById('signup-otp');
+                if (otpInput) otpInput.focus();
+                return;
+            }
 
             if (pass !== confirmPass) {
                 errorMsg.textContent = 'Passwords do not match. Please verify.';
@@ -1030,7 +1222,7 @@
                 return;
             }
 
-            const res = this.register({ fullName: name, username: user, email: email, password: pass });
+            const res = this.register({ fullName: name, username: user, phone: phone, password: pass, phoneVerified: true });
             if (!res.success) {
                 errorMsg.textContent = res.message;
                 errorDiv.classList.remove('hidden');
