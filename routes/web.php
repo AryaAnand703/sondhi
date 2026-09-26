@@ -38,6 +38,10 @@ Route::post('/auth/login', [AuthController::class, 'login'])->name('login');
 Route::post('/auth/register', [AuthController::class, 'register'])->name('register');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/me', [AuthController::class, 'currentUser'])->name('auth.me');
+Route::post('/api/auth/send-otp', [AuthController::class, 'sendOtp'])->name('api.auth.send_otp');
+Route::post('/api/auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('api.auth.verify_otp');
+Route::post('/auth/send-otp', [AuthController::class, 'sendOtp']);
+Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
 
 // Authenticated Customer Profile & Orders Section
 Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');

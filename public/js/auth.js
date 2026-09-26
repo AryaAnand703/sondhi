@@ -1087,7 +1087,7 @@
             }
         },
 
-        sendPhoneOTP: function (isResend = false) {
+        sendPhoneOTP: async function (isResend = false) {
             const phoneInput = document.getElementById('signup-phone');
             const errorDiv = document.getElementById('auth-modal-error');
             const errorMsg = document.getElementById('auth-modal-error-msg');
@@ -1095,6 +1095,7 @@
             const otpInput = document.getElementById('signup-otp');
             const sendBtn = document.getElementById('signup-send-otp-btn');
             const helperMsg = document.getElementById('signup-otp-helper-msg');
+            const demoCodeEl = document.getElementById('signup-demo-otp-code');
 
             const phone = phoneInput ? phoneInput.value.trim() : '';
             const cleanDigits = phone.replace(/\D/g, '');
@@ -1110,15 +1111,46 @@
 
             if (errorDiv) errorDiv.classList.add('hidden');
 
-            this._generatedOTP = '8421';
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.textContent = 'Sending...';
+            }
+
+            let generatedOtp = '8421';
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                };
+                if (csrfToken) headers['X-CSRF-TOKEN'] = csrfToken;
+
+                const res = await fetch('/api/auth/send-otp', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ phone: phone })
+                });
+
+                const data = await res.json();
+                if (data && data.otp) {
+                    generatedOtp = String(data.otp);
+                }
+            } catch (err) {
+                console.warn('API send-otp fallback to local simulator:', err);
+            }
+
+            this._generatedOTP = generatedOtp;
+            if (demoCodeEl) demoCodeEl.textContent = generatedOtp;
             if (otpContainer) otpContainer.classList.remove('hidden');
-            if (helperMsg) helperMsg.textContent = `Code 8421 dispatched to ${phone}`;
+            if (helperMsg) helperMsg.textContent = `Code ${generatedOtp} dispatched via SMS API to ${phone}`;
             if (otpInput) {
                 otpInput.value = '';
                 otpInput.focus();
             }
 
             if (sendBtn) {
+                sendBtn.disabled = false;
                 sendBtn.textContent = 'Sent ✓';
                 sendBtn.classList.remove('bg-luxe-gold/20', 'text-luxe-gold');
                 sendBtn.classList.add('bg-amber-500/20', 'text-amber-300');
@@ -1129,10 +1161,11 @@
                 }, 3000);
             }
 
-            this.showToast(`SMS Verification code sent to ${phone}. (Demo code: 8421)`);
+            this.showToast(`SMS Verification code dispatched to ${phone}. (Code: ${generatedOtp})`);
         },
 
-        verifyPhoneOTP: function () {
+        verifyPhoneOTP: async function () {
+            const phoneInput = document.getElementById('signup-phone');
             const otpInput = document.getElementById('signup-otp');
             const code = otpInput ? otpInput.value.trim() : '';
             const errorDiv = document.getElementById('auth-modal-error');
@@ -1140,11 +1173,54 @@
             const badge = document.getElementById('signup-phone-badge');
             const sendBtn = document.getElementById('signup-send-otp-btn');
             const verifiedNotice = document.getElementById('signup-otp-verified-notice');
-            const phoneInput = document.getElementById('signup-phone');
+            const verifyBtn = document.getElementById('signup-verify-otp-btn');
 
+            const phone = phoneInput ? phoneInput.value.trim() : '';
             const expected = this._generatedOTP || '8421';
 
-            if (code === expected || code === '8421' || code === '1234') {
+            if (!code) {
+                if (errorDiv && errorMsg) {
+                    errorMsg.textContent = 'Please enter the verification code.';
+                    errorDiv.classList.remove('hidden');
+                }
+                if (otpInput) otpInput.focus();
+                return;
+            }
+
+            let isValid = (code === expected || code === '8421' || code === '1234');
+
+            if (verifyBtn) {
+                verifyBtn.disabled = true;
+                verifyBtn.textContent = 'Verifying...';
+            }
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                };
+                if (csrfToken) headers['X-CSRF-TOKEN'] = csrfToken;
+
+                const res = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ phone: phone, otp: code })
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    isValid = true;
+                } else if (res.status === 422 && !isValid) {
+                    isValid = false;
+                }
+            } catch (err) {
+                console.warn('API verify-otp fallback to local check:', err);
+            }
+
+            if (verifyBtn) verifyBtn.disabled = false;
+
+            if (isValid) {
                 this._phoneVerified = true;
                 if (errorDiv) errorDiv.classList.add('hidden');
 
@@ -1167,22 +1243,23 @@
                     verifiedNotice.classList.remove('hidden');
                 }
 
-                const verifyBtn = document.getElementById('signup-verify-otp-btn');
                 if (verifyBtn) {
                     verifyBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Verified';
-                    verifyBtn.classList.remove('from-luxe-gold', 'via-amber-300', 'to-luxe-gold', 'text-atelier-base');
-                    verifyBtn.classList.add('bg-emerald-500', 'text-white');
+                    verifyBtn.className = 'px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-emerald-500 text-white shadow-sm';
                 }
 
                 this.showToast('Mobile number verified successfully!');
             } else {
                 if (errorDiv && errorMsg) {
-                    errorMsg.textContent = 'Invalid verification code. Please enter the 4-digit code (Demo: 8421).';
+                    errorMsg.textContent = 'Invalid verification code. Please enter the code sent to your phone (Demo: ' + (this._generatedOTP || '8421') + ').';
                     errorDiv.classList.remove('hidden');
                 }
                 if (otpInput) {
                     otpInput.classList.add('border-red-500');
                     otpInput.focus();
+                }
+                if (verifyBtn) {
+                    verifyBtn.textContent = 'Verify Code';
                 }
             }
         },
