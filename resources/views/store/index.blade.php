@@ -791,7 +791,7 @@
 
                 <!-- Subtitle -->
                 <p class="reveal-node mx-auto mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-atelier-muted">
-                    Formulated in small numbered batches using pure golden soy wax, organic unbleached cotton wicks, and
+                    Formulated in small batches using pure golden soy wax, organic unbleached cotton wicks, and
                     cold-extracted botanicals. Designed to transform the emotional temperature of your sanctuary.
                 </p>
 
@@ -812,7 +812,7 @@
 
                 <!-- Trust Metrics Bar -->
                 <div
-                    class="reveal-node mt-16 grid grid-cols-2 gap-4 border-t border-white/10 pt-8 sm:grid-cols-4 max-w-3xl mx-auto text-center">
+                    class="reveal-node mt-16 grid grid-cols-3 gap-4 border-t border-white/10 pt-8 max-w-2xl mx-auto text-center">
                     <div>
                         <span class="block font-display text-2xl font-bold text-luxe-gold">100%</span>
                         <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Botanical Soy</span>
@@ -825,10 +825,6 @@
                         <span class="block font-display text-2xl font-bold text-luxe-gold">0%</span>
                         <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Toxins &
                             Phthalates</span>
-                    </div>
-                    <div>
-                        <span class="block font-display text-2xl font-bold text-luxe-gold">Numbered</span>
-                        <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Artisan Batches</span>
                     </div>
                 </div>
             </div>
