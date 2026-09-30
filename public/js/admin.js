@@ -7,6 +7,12 @@ const ADMIN_PRODUCT_REQUESTS_KEY = 'sondhi_admin_product_requests';
 
 const adminState = {
     payoutBalance: 184520,
+    gateway: {
+        provider: 'Razorpay / Stripe',
+        apiKey: 'UqMzOjcFVeDzYgPKFBx1QHVg',
+        secretKey: 'UqMzOjcFVeDzYgPKFBx1QHVg',
+        status: 'Operational'
+    },
     orders: [
         {
             id: 'SND-9014',

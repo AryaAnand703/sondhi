@@ -423,6 +423,7 @@
                         <div class="space-y-1.5 text-xs text-atelier-muted">
                             <div>Stripe Public: <code class="text-atelier-cream bg-black/40 px-1 py-0.5 rounded">pk_live_••••8932</code></div>
                             <div>Razorpay Key: <code class="text-atelier-cream bg-black/40 px-1 py-0.5 rounded">rzp_live_••••1102</code></div>
+                            <div>Razorpay Secret: <code class="text-atelier-cream bg-black/40 px-1 py-0.5 rounded font-mono" id="gateway-razorpay-display">UqMzOj••••QHVg</code></div>
                             <div>Webhook Status: <strong class="text-luxe-sage">Listening (HTTP 200)</strong></div>
                         </div>
                     </div>
@@ -603,15 +604,18 @@
             <div class="space-y-4 text-xs">
                 <div>
                     <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Stripe Secret Key</label>
-                    <input type="password" value="••••••••••••••••••••••••••••••••••••••••" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream font-mono">
+                    <input type="password" id="gateway-stripe-secret" value="sk_live_51M0••••••••••••••••••••••••" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream font-mono">
                 </div>
                 <div>
-                    <label class="block uppercase font-semibold tracking-wider text-atelier-muted mb-1">Razorpay Key Secret</label>
-                    <input type="password" value="••••••••••••••••••••••••" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream font-mono">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block uppercase font-semibold tracking-wider text-atelier-muted">Razorpay Key Secret / API Key</label>
+                        <button type="button" onclick="toggleGatewayKeyVisibility()" class="text-luxe-gold text-[10px] hover:underline">Show/Hide</button>
+                    </div>
+                    <input type="password" id="gateway-razorpay-secret" value="{{ config('services.razorpay.secret', 'UqMzOjcFVeDzYgPKFBx1QHVg') }}" class="w-full bg-atelier-card border border-white/10 rounded-lg px-3 py-2 text-sm text-atelier-cream font-mono">
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('modal-gateway')" class="flex-1 py-2.5 rounded-lg border border-white/10 text-atelier-muted hover:text-white uppercase font-semibold tracking-wider">Cancel</button>
-                    <button type="button" onclick="closeModal('modal-gateway'); showToast('Gateway credentials synchronized and encrypted.');" class="flex-1 py-2.5 rounded-lg bg-luxe-gold text-atelier-base font-bold uppercase tracking-wider hover:bg-white transition">Save Keys</button>
+                    <button type="button" onclick="saveGatewayKeys()" class="flex-1 py-2.5 rounded-lg bg-luxe-gold text-atelier-base font-bold uppercase tracking-wider hover:bg-white transition">Save Keys</button>
                 </div>
             </div>
         </div>

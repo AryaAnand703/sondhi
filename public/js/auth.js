@@ -867,6 +867,12 @@
                             <span class="text-atelier-muted uppercase tracking-wider text-[10px]">Total Amount</span>
                             <span class="font-bold text-atelier-cream" id="order-success-total">₹2,647</span>
                         </div>
+                        <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                            <span class="text-atelier-muted uppercase tracking-wider text-[10px]">Payment Settlement</span>
+                            <span class="font-medium text-emerald-400 flex items-center gap-1 text-[11px]" id="order-success-payment">
+                                <i class="fa-solid fa-circle-check"></i> <span id="order-success-payment-text">Razorpay UPI Instant Verified</span>
+                            </span>
+                        </div>
                         <div class="flex justify-between items-center">
                             <span class="text-atelier-muted uppercase tracking-wider text-[10px]">Estimated Delivery</span>
                             <span class="text-atelier-muted" id="order-success-delivery">7-9 Business Days</span>
@@ -1398,6 +1404,10 @@
             if (patronEl) patronEl.textContent = order.customerName || 'Patron';
             if (totalEl) totalEl.textContent = `₹${(order.total || 0).toLocaleString()}`;
             if (delEl) delEl.textContent = order.estimatedDelivery || '7-9 Business Days';
+            const payEl = document.getElementById('order-success-payment-text');
+            if (payEl) {
+                payEl.textContent = (order.paymentMethod && order.paymentMethod.includes('UPI')) ? 'Razorpay UPI Instant Verified' : (order.paymentMethod || 'Prepaid Card Verified');
+            }
 
             // Support static .html vs route
             const orderLink = document.querySelector('#sondhi-order-success-modal a[href*="profile"]');

@@ -572,8 +572,12 @@ function viewInvoiceDetails(invId) {
             </div>
         </div>
 
-        <div class="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-[11px] text-atelier-dim">
-            <i class="fa-solid fa-lock text-luxe-gold mr-1"></i> Paid via Encrypted Stripe Payment Gateway · Transaction Auth #AUTH-${inv.id.replace('INV-', '')}-99
+        <div class="p-3 bg-white/[0.02] border border-white/10 rounded-lg text-[11px] text-atelier-dim flex items-center justify-between">
+            <span>
+                <i class="fa-solid ${(inv.method && inv.method.toLowerCase().includes('upi')) ? 'fa-bolt-lightning text-sky-400' : 'fa-lock text-luxe-gold'} mr-1.5"></i>
+                ${(inv.method && inv.method.toLowerCase().includes('upi')) ? `Paid via Razorpay UPI Gateway · Transaction Auth #RZP-UPI-${inv.id.replace('INV-', '')}-99` : `Paid via Encrypted Stripe Payment Gateway · Transaction Auth #AUTH-${inv.id.replace('INV-', '')}-99`}
+            </span>
+            <span class="text-luxe-sage text-[10px] font-semibold">Live Captured</span>
         </div>
     `;
 

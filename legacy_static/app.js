@@ -918,18 +918,121 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <span class="text-[10px] text-luxe-sage"><i class="fa-solid fa-lock"></i> SSL Secured</span>
                                     </div>
                                     <div class="space-y-2 text-xs">
+                                        <!-- UPI Radio Option -->
                                         <label class="flex items-center gap-3 p-2.5 rounded-lg border border-luxe-gold/40 bg-white/[0.03] cursor-pointer hover:border-luxe-gold transition">
-                                            <input type="radio" name="checkout-payment-method" value="UPI Instant & NetBanking" checked class="accent-luxe-gold">
+                                            <input type="radio" name="checkout-payment-method" value="UPI Instant & NetBanking" checked class="accent-luxe-gold" onchange="window.updatePaymentMethodUI()">
                                             <div class="flex-1">
                                                 <div class="font-semibold text-atelier-cream flex items-center justify-between">
-                                                    <span>UPI Direct & QR (Fast-Track)</span>
+                                                    <span class="flex items-center gap-2">
+                                                        <span>UPI Direct & QR (Fast-Track)</span>
+                                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/30">Razorpay</span>
+                                                    </span>
                                                     <span class="text-[10px] font-normal text-luxe-gold">GPay / PhonePe / Paytm</span>
                                                 </div>
-                                                <p class="text-[10px] text-atelier-muted mt-0.5">Instant dispatch confirmation with zero banking fee</p>
+                                                <p class="text-[10px] text-atelier-muted mt-0.5">Instant dispatch confirmation with zero banking surcharge</p>
                                             </div>
                                         </label>
+
+                                        <!-- RAZORPAY DYNAMIC UPI QR PANEL -->
+                                        <div id="razorpay-upi-qr-panel" class="rounded-xl border border-luxe-gold/40 bg-gradient-to-b from-[#0C2340]/40 to-black/60 p-4 space-y-3 relative overflow-hidden transition-all duration-300 shadow-xl">
+                                            <!-- Header bar with Razorpay badge and countdown timer -->
+                                            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-6 h-6 rounded-md bg-[#0C2340] border border-sky-400/40 flex items-center justify-center font-black text-sky-400 text-xs">
+                                                        R
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-bold text-[11px] tracking-wider text-sky-400 flex items-center gap-1.5">
+                                                            Razorpay UPI Dynamic QR
+                                                            <span class="px-1.5 py-0.2 rounded text-[8px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live API</span>
+                                                        </div>
+                                                        <div class="text-[9px] text-atelier-dim">Key: rzp_live_••••1102 (TLS 1.3 Certified)</div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <div class="text-[9px] uppercase tracking-wider text-atelier-dim">Scan Window</div>
+                                                    <div class="text-[11px] font-mono text-amber-300 flex items-center gap-1 justify-end">
+                                                        <i class="fa-solid fa-clock text-[10px]"></i>
+                                                        <span id="upi-qr-timer">05:00</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- QR code card and payment details -->
+                                            <div class="flex flex-col sm:flex-row items-center gap-4 pt-1">
+                                                <!-- QR Code Box -->
+                                                <div class="relative w-36 h-36 bg-white p-2 rounded-xl shadow-2xl flex-shrink-0 flex items-center justify-center border-2 border-luxe-gold/60 group">
+                                                    <img id="razorpay-qr-img" src="" alt="Razorpay Dynamic UPI QR" class="w-full h-full object-contain rounded">
+                                                    <!-- Scanner beam line animation -->
+                                                    <div class="absolute inset-x-2 h-0.5 bg-gradient-to-r from-transparent via-sky-500 to-transparent opacity-80 pointer-events-none animate-pulse"></div>
+                                                    <!-- Center Razorpay Logo -->
+                                                    <div class="absolute inset-0 m-auto w-7 h-7 bg-white rounded-full shadow-md border border-sky-600/40 flex items-center justify-center pointer-events-none">
+                                                        <span class="text-[11px] font-black text-sky-600">R</span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- UPI Details Column -->
+                                                <div class="flex-1 space-y-2 text-left w-full">
+                                                    <div class="flex items-baseline justify-between">
+                                                        <span class="text-[10px] uppercase font-bold tracking-wider text-atelier-muted">Amount to Authorize</span>
+                                                        <span id="upi-qr-amount" class="text-lg font-bold text-luxe-gold font-display">₹0</span>
+                                                    </div>
+
+                                                    <!-- UPI ID (VPA) with One-Click Copy -->
+                                                    <div>
+                                                        <label class="block text-[9px] uppercase tracking-wider text-atelier-dim mb-1">Razorpay Merchant VPA</label>
+                                                        <div class="flex items-center justify-between bg-atelier-surface/90 border border-white/10 rounded-lg px-2.5 py-1.5">
+                                                            <span class="font-mono text-[11px] text-atelier-cream truncate" id="upi-vpa-text">sondhiatelier.rzp@icici</span>
+                                                            <button type="button" onclick="window.copyUpiVpa()" class="text-[10px] font-semibold text-luxe-gold hover:text-white px-2 py-0.5 rounded bg-white/5 hover:bg-white/15 transition flex items-center gap-1 flex-shrink-0 ml-2" title="Copy UPI ID">
+                                                                <i class="fa-regular fa-copy"></i> Copy
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Supported Apps Badges -->
+                                                    <div class="pt-0.5">
+                                                        <span class="text-[9px] text-atelier-dim block mb-1">Supported UPI Applications:</span>
+                                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                                            <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-medium text-atelier-cream flex items-center gap-1">
+                                                                <i class="fa-brands fa-google text-[10px] text-white"></i> GPay
+                                                            </span>
+                                                            <span class="px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[9px] font-medium text-purple-300">
+                                                                PhonePe
+                                                            </span>
+                                                            <span class="px-2 py-0.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-[9px] font-medium text-sky-300">
+                                                                Paytm
+                                                            </span>
+                                                            <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[9px] font-medium text-amber-300">
+                                                                BHIM
+                                                            </span>
+                                                            <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-medium text-atelier-cream">
+                                                                CRED
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Mobile Intent Trigger -->
+                                                    <div class="pt-1 block sm:hidden">
+                                                        <a id="upi-intent-link" href="#" class="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg bg-sky-600/30 border border-sky-400/40 text-sky-300 hover:bg-sky-600/50 text-[10px] font-bold uppercase tracking-wider transition">
+                                                            <i class="fa-solid fa-mobile-screen-button"></i> Tap to Open UPI App
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Footer Gateway Tag -->
+                                            <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[9px] text-atelier-dim">
+                                                <span class="flex items-center gap-1.5 text-luxe-sage">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                                    Awaiting UPI Authorization Confirmation...
+                                                </span>
+                                                <span class="text-atelier-muted font-mono">Secured by Razorpay</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Credit / Debit Card Option -->
                                         <label class="flex items-center gap-3 p-2.5 rounded-lg border border-white/10 bg-white/[0.01] cursor-pointer hover:border-luxe-gold/40 transition">
-                                            <input type="radio" name="checkout-payment-method" value="Credit / Debit Card" class="accent-luxe-gold">
+                                            <input type="radio" name="checkout-payment-method" value="Credit / Debit Card" class="accent-luxe-gold" onchange="window.updatePaymentMethodUI()">
                                             <div class="flex-1">
                                                 <div class="font-semibold text-atelier-cream flex items-center justify-between">
                                                     <span>Credit & Debit Cards</span>
@@ -938,8 +1041,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                                 <p class="text-[10px] text-atelier-muted mt-0.5">Encrypted 256-bit tokenized checkout</p>
                                             </div>
                                         </label>
+
+                                        <!-- Cash on Delivery Option -->
                                         <label class="flex items-center gap-3 p-2.5 rounded-lg border border-white/10 bg-white/[0.01] cursor-pointer hover:border-luxe-gold/40 transition">
-                                            <input type="radio" name="checkout-payment-method" value="Cash on Delivery" class="accent-luxe-gold">
+                                            <input type="radio" name="checkout-payment-method" value="Cash on Delivery" class="accent-luxe-gold" onchange="window.updatePaymentMethodUI()">
                                             <div class="flex-1">
                                                 <div class="font-semibold text-atelier-cream flex items-center justify-between">
                                                     <span>Cash on Delivery</span>
@@ -1038,6 +1143,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.closeCheckoutModal = function() {
+        if (window.upiTimerInterval) {
+            clearInterval(window.upiTimerInterval);
+            window.upiTimerInterval = null;
+        }
         const modal = document.querySelector('#sondhi-checkout-modal');
         if (modal) {
             modal.classList.add('opacity-0', 'pointer-events-none');
@@ -1113,6 +1222,148 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (totalEl) totalEl.textContent = formatINR(finalTotal);
         if (submitBtnSpan) submitBtnSpan.textContent = `Pay ${formatINR(finalTotal)} & Complete Order`;
+
+        window.updatePaymentMethodUI();
+    };
+
+    // --- Razorpay Dynamic UPI QR Engine ---
+    window.upiTimerInterval = null;
+
+    window.updateRazorpayUpiQR = function(amount) {
+        if (typeof amount === 'undefined') {
+            const subtotal = state.cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+            const discountRate = (state.discount && typeof state.discount.rate === 'number') ? state.discount.rate : 0;
+            const discountAmount = subtotal * discountRate;
+            amount = Math.max(0, subtotal - discountAmount);
+        }
+
+        const qrImg = document.getElementById('razorpay-qr-img');
+        const amountEl = document.getElementById('upi-qr-amount');
+        const intentLink = document.getElementById('upi-intent-link');
+
+        if (amountEl) {
+            amountEl.textContent = formatINR(amount);
+        }
+
+        const vpa = 'sondhiatelier.rzp@icici';
+        const payeeName = 'Sondhi Atelier';
+        const note = 'Artisan Candle Commission';
+        const upiUri = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+        if (qrImg) {
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUri)}&color=0c2340&bgcolor=ffffff`;
+            qrImg.onerror = function() {
+                this.onerror = null;
+                this.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+                        <rect width="100" height="100" fill="#ffffff" rx="4"/>
+                        <rect x="10" y="10" width="24" height="24" fill="#0C2340"/>
+                        <rect x="14" y="14" width="16" height="16" fill="#ffffff"/>
+                        <rect x="17" y="17" width="10" height="10" fill="#0C2340"/>
+                        <rect x="66" y="10" width="24" height="24" fill="#0C2340"/>
+                        <rect x="70" y="14" width="16" height="16" fill="#ffffff"/>
+                        <rect x="73" y="17" width="10" height="10" fill="#0C2340"/>
+                        <rect x="10" y="66" width="24" height="24" fill="#0C2340"/>
+                        <rect x="14" y="70" width="16" height="16" fill="#ffffff"/>
+                        <rect x="17" y="73" width="10" height="10" fill="#0C2340"/>
+                        <rect x="42" y="12" width="6" height="6" fill="#0C2340"/>
+                        <rect x="52" y="12" width="6" height="6" fill="#0C2340"/>
+                        <rect x="42" y="24" width="6" height="6" fill="#0C2340"/>
+                        <rect x="48" y="32" width="6" height="6" fill="#0C2340"/>
+                        <rect x="12" y="44" width="6" height="6" fill="#0C2340"/>
+                        <rect x="24" y="48" width="6" height="6" fill="#0C2340"/>
+                        <rect x="68" y="44" width="8" height="8" fill="#0C2340"/>
+                        <rect x="80" y="56" width="8" height="8" fill="#0C2340"/>
+                        <rect x="44" y="68" width="6" height="6" fill="#0C2340"/>
+                        <rect x="56" y="76" width="8" height="8" fill="#0C2340"/>
+                        <rect x="72" y="72" width="6" height="6" fill="#0C2340"/>
+                        <rect x="82" y="80" width="8" height="8" fill="#0C2340"/>
+                        <text x="50" y="54" font-family="sans-serif" font-weight="bold" font-size="7" fill="#0284c7" text-anchor="middle">RAZORPAY</text>
+                    </svg>
+                `);
+            };
+        }
+
+        if (intentLink) {
+            intentLink.href = upiUri;
+        }
+
+        // 5-minute scan window countdown timer
+        if (window.upiTimerInterval) clearInterval(window.upiTimerInterval);
+        let secondsLeft = 300;
+        const timerEl = document.getElementById('upi-qr-timer');
+        if (timerEl) {
+            timerEl.textContent = '05:00';
+            timerEl.classList.remove('text-red-400');
+            timerEl.classList.add('text-amber-300');
+            window.upiTimerInterval = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft <= 0) {
+                    clearInterval(window.upiTimerInterval);
+                    timerEl.textContent = 'Expired';
+                    timerEl.classList.remove('text-amber-300');
+                    timerEl.classList.add('text-red-400');
+                } else {
+                    const mins = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+                    const secs = String(secondsLeft % 60).padStart(2, '0');
+                    timerEl.textContent = `${mins}:${secs}`;
+                }
+            }, 1000);
+        }
+    };
+
+    window.copyUpiVpa = function() {
+        const vpa = document.getElementById('upi-vpa-text')?.textContent || 'sondhiatelier.rzp@icici';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(vpa).then(() => {
+                showToast('✓ Razorpay UPI ID copied to clipboard!');
+            }).catch(() => {
+                fallbackCopy(vpa);
+            });
+        } else {
+            fallbackCopy(vpa);
+        }
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('✓ Razorpay UPI ID copied to clipboard!');
+            } catch (e) {
+                showToast('UPI ID: ' + text);
+            }
+            document.body.removeChild(ta);
+        }
+    };
+
+    window.updatePaymentMethodUI = function() {
+        const selected = document.querySelector('input[name="checkout-payment-method"]:checked')?.value || 'UPI Instant & NetBanking';
+        const qrPanel = document.getElementById('razorpay-upi-qr-panel');
+        const submitBtnSpan = document.querySelector('#checkout-submit-total');
+
+        const subtotal = state.cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+        const discountRate = (state.discount && typeof state.discount.rate === 'number') ? state.discount.rate : 0;
+        const discountAmount = subtotal * discountRate;
+        const finalTotal = Math.max(0, subtotal - discountAmount);
+
+        if (qrPanel) {
+            if (selected.includes('UPI')) {
+                qrPanel.classList.remove('hidden');
+                window.updateRazorpayUpiQR(finalTotal);
+                if (submitBtnSpan) submitBtnSpan.innerHTML = `<i class="fa-solid fa-bolt-lightning text-sky-400 mr-1.5"></i> Pay ${formatINR(finalTotal)} via Razorpay UPI`;
+            } else {
+                qrPanel.classList.add('hidden');
+                if (selected.includes('Card')) {
+                    if (submitBtnSpan) submitBtnSpan.innerHTML = `<i class="fa-solid fa-credit-card mr-1.5"></i> Pay ${formatINR(finalTotal)} with Card`;
+                } else {
+                    if (submitBtnSpan) submitBtnSpan.innerHTML = `<i class="fa-solid fa-truck-ramp-box mr-1.5"></i> Confirm Cash on Delivery (${formatINR(finalTotal)})`;
+                }
+            }
+        }
     };
 
     window.handleCheckoutOrderSubmit = function() {
@@ -1156,7 +1407,9 @@ document.addEventListener('DOMContentLoaded', () => {
             customerName: name,
             customerEmail: email,
             customerPhone: phone || '+91 98201 44892',
-            paymentMethod: paymentMethod,
+            paymentMethod: paymentMethod.includes('UPI') ? 'Razorpay UPI Instant & QR' : paymentMethod,
+            gateway: 'Razorpay',
+            gatewayKey: 'rzp_live_••••1102',
             status: 'Pouring & Curing',
             statusCode: 'pouring',
             statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control'

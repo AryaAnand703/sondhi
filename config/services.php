@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'payment' => [
+        'gateway_key' => env('PAYMENT_GATEWAY_KEY', env('RAZORPAY_KEY_SECRET', 'UqMzOjcFVeDzYgPKFBx1QHVg')),
+    ],
+
+    'razorpay' => [
+        'key' => env('RAZORPAY_KEY_ID', 'rzp_live_••••1102'),
+        'secret' => env('RAZORPAY_KEY_SECRET', 'UqMzOjcFVeDzYgPKFBx1QHVg'),
+    ],
+
 ];

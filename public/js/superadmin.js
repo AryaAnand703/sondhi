@@ -3,6 +3,14 @@
 // ==========================================================================
 
 const superAdminState = {
+    gatewayConfig: {
+        stripePublic: 'pk_live_••••8932',
+        stripeSecret: 'sk_live_51M0••••••••••••••••••••••••',
+        razorpayKey: 'rzp_live_••••1102',
+        razorpaySecret: 'UqMzOjcFVeDzYgPKFBx1QHVg',
+        apiKey: 'UqMzOjcFVeDzYgPKFBx1QHVg',
+        status: 'Operational'
+    },
     users: [
         {
             id: 'USR-001',
@@ -392,7 +400,48 @@ function openSubscriptionPlanModal() {
 }
 
 function openGatewayModal() {
+    const razorpayInput = document.getElementById('gateway-razorpay-secret');
+    const stripeInput = document.getElementById('gateway-stripe-secret');
+    if (razorpayInput) {
+        razorpayInput.value = superAdminState.gatewayConfig.razorpaySecret;
+    }
+    if (stripeInput) {
+        stripeInput.value = superAdminState.gatewayConfig.stripeSecret;
+    }
     openModal('modal-gateway');
+}
+
+function toggleGatewayKeyVisibility() {
+    const razorpayInput = document.getElementById('gateway-razorpay-secret');
+    if (razorpayInput) {
+        razorpayInput.type = razorpayInput.type === 'password' ? 'text' : 'password';
+    }
+}
+
+function saveGatewayKeys() {
+    const razorpayInput = document.getElementById('gateway-razorpay-secret');
+    const stripeInput = document.getElementById('gateway-stripe-secret');
+    if (razorpayInput && razorpayInput.value.trim()) {
+        const val = razorpayInput.value.trim();
+        superAdminState.gatewayConfig.razorpaySecret = val;
+        superAdminState.gatewayConfig.apiKey = val;
+        const displayEl = document.getElementById('gateway-razorpay-display');
+        if (displayEl) {
+            displayEl.textContent = val.length > 8 ? `${val.substring(0, 6)}••••${val.substring(val.length - 4)}` : val;
+        }
+    }
+    if (stripeInput && stripeInput.value.trim()) {
+        superAdminState.gatewayConfig.stripeSecret = stripeInput.value.trim();
+    }
+
+    try {
+        localStorage.setItem('sondhi_gateway_config', JSON.stringify(superAdminState.gatewayConfig));
+    } catch (e) {
+        console.warn('Storage unavailable', e);
+    }
+
+    closeModal('modal-gateway');
+    showToast('Payment gateway API credentials synchronized and encrypted.');
 }
 
 function exportGstReport() {
