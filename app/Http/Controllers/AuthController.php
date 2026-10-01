@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -222,6 +223,32 @@ class AuthController extends Controller
         $request->session()->put($cacheKey, $otp);
 
         Log::info("SMS OTP dispatched for {$phone} ({$cleanPhone}): {$otp}");
+
+        // If Twilio SMS credentials are provided, dispatch real SMS
+        $twilioSid = config('services.twilio.sid');
+        $twilioToken = config('services.twilio.token');
+        $twilioFrom = config('services.twilio.from');
+
+        if ($twilioSid && $twilioToken && $twilioFrom) {
+            try {
+                $targetPhone = str_starts_with($phone, '+') ? $phone : ('+91' . ltrim($cleanPhone, '0'));
+                $response = Http::withBasicAuth($twilioSid, $twilioToken)
+                    ->asForm()
+                    ->post("https://api.twilio.com/2010-04-01/Accounts/{$twilioSid}/Messages.json", [
+                        'From' => $twilioFrom,
+                        'To' => $targetPhone,
+                        'Body' => "Your Sondhi Atelier verification code is {$otp}. Valid for 10 minutes.",
+                    ]);
+
+                if ($response->successful()) {
+                    Log::info("Twilio SMS successfully dispatched to {$targetPhone}");
+                } else {
+                    Log::warning("Twilio SMS dispatch failed: " . $response->body());
+                }
+            } catch (\Throwable $e) {
+                Log::error("Twilio SMS dispatch exception: " . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'success' => true,

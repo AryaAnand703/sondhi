@@ -44,4 +44,11 @@ return [
         'secret' => env('RAZORPAY_KEY_SECRET', 'UqMzOjcFVeDzYgPKFBx1QHVg'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_NUMBER'),
+        'verify_sid' => env('TWILIO_VERIFY_SID'),
+    ],
+
 ];

@@ -18,6 +18,10 @@ services:
       SESSION_DRIVER: file
       CACHE_STORE: file
       QUEUE_CONNECTION: sync
+      TWILIO_SID: "${TWILIO_SID:-}"
+      TWILIO_AUTH_TOKEN: "${TWILIO_AUTH_TOKEN:-}"
+      TWILIO_NUMBER: "${TWILIO_NUMBER:-}"
+      TWILIO_VERIFY_SID: "${TWILIO_VERIFY_SID:-}"
     volumes:
       - ./storage:/var/www/html/storage
       - ./database:/var/www/html/database
