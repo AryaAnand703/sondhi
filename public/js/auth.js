@@ -1526,12 +1526,9 @@
                             }
                             return portalsHtml;
                         })()}
-                        <div class="mt-1 pt-1.5 border-t border-white/10 flex items-center justify-between px-2">
-                            <button onclick="window.sondhiAuth.openAuthModal('signin', 'Switching to another patron account')" class="text-[11px] text-atelier-muted hover:text-luxe-gold transition py-1">
-                                <i class="fa-solid fa-arrow-right-arrow-left text-[10px] mr-1"></i> Switch Account
-                            </button>
-                            <button onclick="window.sondhiAuth.logout(); window.sondhiAuth.showToast('Signed out of sanctuary');" class="text-[11px] text-red-400 hover:underline py-1">
-                                Sign Out
+                        <div class="mt-1 pt-1.5 border-t border-white/10 flex items-center justify-end px-2">
+                            <button onclick="window.sondhiAuth.logout(); window.sondhiAuth.showToast('Signed out of sanctuary');" class="text-[11px] text-red-400 hover:underline py-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i> Sign Out
                             </button>
                         </div>
                     `;

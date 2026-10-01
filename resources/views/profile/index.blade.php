@@ -325,9 +325,6 @@
                         <i class="fa-solid fa-moon text-xs theme-moon-icon text-amber-700"></i>
                         <i class="fa-solid fa-sun text-xs theme-sun-icon text-amber-400 hidden"></i>
                     </button>
-                    <button onclick="window.sondhiAuth.openAuthModal('signin', 'Switch to another patron account')" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-atelier-muted hover:text-luxe-gold text-xs transition" title="Switch Account">
-                        <i class="fa-solid fa-arrow-right-arrow-left"></i>
-                    </button>
                     <button onclick="window.sondhiAuth.logout(); window.location.reload();" class="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/10 text-atelier-muted hover:text-red-400 text-xs transition" title="Sign Out">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </button>
