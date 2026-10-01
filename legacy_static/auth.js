@@ -1446,17 +1446,19 @@
             if (accountBtn) {
                 if (user) {
                     accountBtn.innerHTML = `
-                        <div class="w-5 h-5 rounded-full bg-luxe-gold/20 text-luxe-gold border border-luxe-gold/50 flex items-center justify-center text-[9px] font-bold">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#fdf4e7] border border-[#dfa662] text-[#b27429] font-bold text-xs shadow-sm">
                             ${(user.fullName[0] || 'U').toUpperCase()}
-                        </div>
-                        <span class="hidden md:inline text-atelier-cream font-medium">Hi, ${user.fullName.split(' ')[0]}</span>
-                        <i class="fa-solid fa-chevron-down text-[8px] text-atelier-dim group-hover:text-luxe-gold transition"></i>
+                        </span>
+                        <span class="hidden sm:inline font-medium text-gray-800">Hi, ${user.fullName.split(' ')[0]}</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-gray-500 group-hover:text-[#9e1a1a] transition"></i>
                     `;
                 } else {
                     accountBtn.innerHTML = `
-                        <i class="fa-regular fa-user text-xs text-luxe-gold"></i>
-                        <span class="hidden md:inline">Sign In</span>
-                        <i class="fa-solid fa-chevron-down text-[8px] text-atelier-dim group-hover:text-luxe-gold transition"></i>
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#fdf4e7] border border-[#dfa662] text-[#b27429] font-bold text-xs shadow-sm">
+                            <i class="fa-regular fa-user text-[11px]"></i>
+                        </span>
+                        <span class="hidden sm:inline font-medium text-gray-800">Account</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-gray-500 group-hover:text-[#9e1a1a] transition"></i>
                     `;
                 }
             }

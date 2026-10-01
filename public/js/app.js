@@ -680,9 +680,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (headerSearchInput) {
         headerSearchInput.addEventListener('input', (e) => {
             state.query = e.target.value;
+            const catalogSearch = document.querySelector('#catalog-search-input');
             if (catalogSearch) catalogSearch.value = e.target.value;
             renderCatalog();
-            document.querySelector('#collection')?.scrollIntoView({ behavior: 'smooth' });
+            if (e.target.value.trim().length > 0) {
+                document.querySelector('#collection')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        headerSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.querySelector('#collection')?.scrollIntoView({ behavior: 'smooth' });
+            }
         });
     }
 
@@ -694,7 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenu.classList.toggle('hidden');
         });
 
-        mobileMenu.querySelectorAll('a').forEach(link => {
+        mobileMenu.querySelectorAll('a, button').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
             });
@@ -714,19 +723,20 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileCartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
     }
 
-    // Promo Code Coupon Applicator
+    // Promo Code Coupon Applicator (Supports PDS10 from Campus banner, LIGHT10, SONDHI10)
     const applyCouponBtn = document.querySelector('#apply-coupon-btn');
     const couponInput = document.querySelector('#coupon-input');
     if (applyCouponBtn && couponInput) {
         applyCouponBtn.addEventListener('click', () => {
             const code = couponInput.value.trim().toUpperCase();
-            if (code === 'LIGHT10') {
-                state.discount = { code: 'LIGHT10', rate: 0.10 };
+            if (code === 'LIGHT10' || code === 'PDS10' || code === 'SONDHI10') {
+                state.discount = { code: code, rate: 0.10 };
                 saveCart();
-                showToast('10% Circle Discount Applied!');
+                showToast(`10% Flat Discount (${code}) Applied!`);
                 couponInput.value = '';
+                updateCartUI();
             } else if (code) {
-                showToast('Invalid promo code. Try LIGHT10');
+                showToast('Invalid promo code. Try PDS10');
             }
         });
     }
@@ -1547,3 +1557,89 @@ document.addEventListener('DOMContentLoaded', () => {
         sparkLoveBtn.addEventListener('click', triggerLoveSparks);
     }
 });
+
+// --- Campus-Style Header Navigation & Modal Helpers ---
+window.filterNavCategory = function(cat) {
+    if (cat === 'Bestseller' || cat === 'Trending') {
+        state.category = 'All';
+        state.sortBy = 'rating';
+        const sortSelect = document.querySelector('#catalog-sort-select');
+        if (sortSelect) sortSelect.value = 'rating';
+    } else if (cat === 'Sale' || cat === 'New Arrivals' || cat === 'New' || cat === 'Élan' || cat === 'Elan') {
+        state.category = 'All';
+        state.sortBy = 'price-asc';
+        const sortSelect = document.querySelector('#catalog-sort-select');
+        if (sortSelect) sortSelect.value = 'price-asc';
+    } else if (cat === 'Warm Amber' || cat === 'Warm') {
+        state.category = 'Warm';
+    } else if (cat === 'Deep Oud' || cat === 'Woody') {
+        state.category = 'Woody';
+    } else if (cat === 'Candle Studio' || cat === 'Signature Scents' || cat === 'Gift Sets') {
+        state.category = 'All';
+        showToast(`Showing curated ${cat} collection`);
+    } else {
+        state.category = cat;
+    }
+    
+    // Synchronize mood-pill buttons in catalog section
+    const moodPills = document.querySelectorAll('.mood-pill');
+    moodPills.forEach(p => {
+        if (p.dataset.category === state.category) {
+            p.classList.add('bg-luxe-gold', 'text-atelier-base');
+            p.classList.remove('bg-atelier-surface', 'text-atelier-muted');
+        } else {
+            p.classList.remove('bg-luxe-gold', 'text-atelier-base');
+            p.classList.add('bg-atelier-surface', 'text-atelier-muted');
+        }
+    });
+
+    renderCatalog();
+    document.querySelector('#collection')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.openStoresModal = function() {
+    showToast('Sanctuary Flagships: Colaba & Bandra (Mumbai), Khan Market (Delhi), Indiranagar (Bengaluru)');
+    document.querySelector('#story')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.openTrackOrderModal = function() {
+    const modal = document.querySelector('#track-order-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.querySelector('#quick-track-input')?.focus();
+    }
+};
+
+window.closeTrackOrderModal = function() {
+    const modal = document.querySelector('#track-order-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.executeQuickTrack = function() {
+    const input = document.querySelector('#quick-track-input');
+    const result = document.querySelector('#quick-track-result');
+    if (!input || !result) return;
+    const val = input.value.trim();
+    if (!val) {
+        showToast('Please enter an Order ID or phone number');
+        return;
+    }
+    result.classList.remove('hidden');
+    result.innerHTML = `
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+            <span class="font-bold text-[#9e1a1a]">Order #${val.toUpperCase()}</span>
+            <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                <i class="fa-solid fa-circle-check text-[9px]"></i> Dispatched
+            </span>
+        </div>
+        <p class="text-gray-600 text-[11px] leading-relaxed">
+            Carrier: <strong>BlueDart Express Priority</strong><br>
+            Current Status: <strong>Out for White-Glove Handover</strong><br>
+            Estimated Delivery: <strong>Today by 6:00 PM</strong>
+        </p>
+    `;
+};

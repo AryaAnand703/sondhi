@@ -177,9 +177,51 @@
             background: var(--card-hover-bg);
         }
 
-        /* Announcement and Newsletter Banners */
-        .announcement-banner {
-            background: var(--announcement-bg);
+        /* Campus-Style E-Commerce Header Theme */
+
+        #main-header {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #e5e7eb !important;
+            color: #111827 !important;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        #main-header a, #main-header button, #main-header span, #main-header input {
+            color: inherit;
+        }
+
+        .campus-category-link {
+            position: relative;
+            transition: color 180ms ease;
+            color: #1f2937;
+        }
+
+        .campus-category-link:hover {
+            color: #9e1a1a !important;
+        }
+
+        .campus-category-link::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #9e1a1a;
+            transition: width 180ms ease, left 180ms ease;
+        }
+
+        .campus-category-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         .newsletter-banner {
@@ -398,21 +440,12 @@
                 overflow-x: hidden;
             }
 
-            .announcement-banner {
-                display: none;
-            }
-
             main,
             header,
             footer,
             section {
                 width: 100%;
                 max-width: none;
-            }
-
-            .announcement-banner {
-                line-height: 1.5;
-                letter-spacing: 0.08em;
             }
 
             #main-header > div:first-child {
@@ -575,175 +608,191 @@
         })();
     </script>
 
-    <!-- Announcement Bar -->
-    <div
-        class="announcement-banner relative z-40 border-b border-white/5 py-2 px-4 text-center text-[11px] font-medium tracking-[0.18em] text-atelier-muted">
-        <span class="inline-flex items-center gap-2">
-            <span class="h-1.5 w-1.5 rounded-full bg-flame-glow animate-ping"></span>
-            <span>COMPLIMENTARY ARTISAN MATCHES & GIFT BOX ON ALL ORDERS OVER ₹999 · HAND-CRAFTED IN INDIA</span>
-        </span>
-    </div>
+    <!-- Sticky Main Header Bar (Campus Crisp White Tier) -->
+    <header id="main-header" class="sticky top-0 z-40 bg-white border-b border-gray-200 transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10 py-3.5">
+            <!-- Left: Search Box (clean, borderless, matching Campus style) -->
+            <div class="flex items-center gap-3 sm:gap-4">
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn"
+                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:text-[#9e1a1a] hover:border-[#9e1a1a] lg:hidden transition"
+                    aria-label="Toggle navigation">
+                    <i class="fa-solid fa-bars text-sm"></i>
+                </button>
 
-    <!-- Sticky Glassmorphic Header -->
-    <header id="main-header" class="glass-header sticky top-0 z-40 transition-all duration-300">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
-            <!-- Brand Logo -->
-            <a href="#top" class="group flex items-center gap-3">
-                <span class="flame-anim text-flame-glow text-xl">
-                    <i class="fa-solid fa-fire-flame-curved"></i>
-                </span>
-                <span
-                    class="font-display text-2xl font-bold tracking-[0.25em] text-atelier-cream group-hover:text-luxe-gold transition duration-300">
+                <!-- Clean Borderless Search -->
+                <div class="flex items-center gap-2.5 text-gray-800 py-1">
+                    <i class="fa-solid fa-magnifying-glass text-sm sm:text-base text-gray-800"></i>
+                    <input id="header-search-input" type="search" placeholder="Search"
+                        class="bg-transparent border-none outline-none text-xs sm:text-sm text-gray-900 placeholder:text-gray-600 w-24 sm:w-36 md:w-48 font-sans focus:placeholder-transparent transition-all" />
+                </div>
+            </div>
+
+            <!-- Center: Brand Logo (SONDHI Luxury Serif Wordmark) -->
+            <a href="#top" class="group flex items-center justify-center transition-opacity duration-200 hover:opacity-80">
+                <span class="font-display font-semibold text-2xl sm:text-3xl tracking-[0.36em] text-gray-950 uppercase leading-none pl-[0.36em] select-none">
                     SONDHI
                 </span>
             </a>
 
-            <!-- Desktop Navigation Links -->
-            <nav
-                class="hidden items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-atelier-muted lg:flex">
-                <a href="#collection" class="atelier-nav-link hover:text-atelier-cream">Signature Scents</a>
-                <a href="#rituals" class="atelier-nav-link hover:text-atelier-cream">Candle Rituals</a>
-                <a href="#story" class="atelier-nav-link hover:text-atelier-cream">Our Atelier</a>
-                <a href="#reviews" class="atelier-nav-link hover:text-atelier-cream">Collector Notes</a>
-            </nav>
-
-            <!-- Actions: Theme Toggle, Search, Account & Cart Drawer Toggle -->
-            <div class="flex items-center gap-3 sm:gap-4">
-                <!-- Theme Toggle Button -->
-                <button id="theme-toggle-btn" onclick="toggleAtelierTheme()"
-                    class="theme-toggle-btn hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
-                    title="Switch to Dark Theme" aria-label="Toggle Theme">
-                    <i class="fa-solid fa-moon text-xs theme-moon-icon text-amber-700"></i>
-                    <i class="fa-solid fa-sun text-xs theme-sun-icon text-amber-400 hidden"></i>
-                </button>
-
-                <!-- Search Button -->
-                <button id="search-toggle-btn"
-                    class="hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
-                    aria-label="Search Fragrances">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                </button>
-
-                <!-- Atelier Portals & Account Menu -->
+            <!-- Right: Action Links (Account, Cart, Track Order - Stores Removed) -->
+            <div class="flex items-center gap-5 sm:gap-7 lg:gap-8 text-xs sm:text-sm font-medium text-gray-800">
+                <!-- 1. Account / Client Greeting -->
                 <div class="relative group">
                     <button id="account-dropdown-btn"
-                        class="flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-3.5 text-[11px] font-semibold uppercase tracking-wider text-atelier-muted hover:border-luxe-gold hover:text-atelier-cream transition duration-200"
-                        aria-label="Atelier Portals & Account">
-                        <i class="fa-regular fa-user text-xs text-luxe-gold"></i>
-                        <span class="hidden md:inline">Portals</span>
-                        <i
-                            class="fa-solid fa-chevron-down text-[8px] text-atelier-dim group-hover:text-luxe-gold transition"></i>
+                        class="flex items-center gap-1.5 sm:gap-2 hover:text-[#9e1a1a] transition duration-150 py-1"
+                        aria-label="Account">
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#fdf4e7] border border-[#dfa662] text-[#b27429] font-bold text-xs shadow-sm">
+                            <i class="fa-regular fa-user text-[11px]"></i>
+                        </span>
+                        <span class="hidden sm:inline font-medium text-gray-800">Account</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-gray-500 group-hover:text-[#9e1a1a] transition"></i>
                     </button>
-                    <!-- Dropdown Content -->
+                    <!-- Account Dropdown Menu -->
                     <div id="account-dropdown-content"
-                        class="absolute right-0 mt-2 w-64 rounded-2xl bg-atelier-surface border border-white/15 p-2.5 shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition duration-200 z-50">
-                        <div
-                            class="px-3 py-1.5 border-b border-white/10 text-[9px] uppercase tracking-widest text-atelier-dim font-bold">
-                            Atelier Workspaces & Billing
+                        class="absolute right-0 mt-2 w-56 rounded-xl bg-white border border-gray-200 p-2 shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition duration-200 z-50">
+                        <div class="px-3 py-1.5 border-b border-gray-100 text-[10px] uppercase tracking-wider text-gray-400 font-bold">
+                            Sanctuary Account
                         </div>
                         <a href="{{ route('profile.index') }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-atelier-cream hover:bg-luxe-gold/10 hover:text-luxe-gold transition">
-                            <div
-                                class="w-7 h-7 rounded-lg bg-luxe-gold/10 flex items-center justify-center text-luxe-gold">
-                                <i class="fa-solid fa-user text-[11px]"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Client Profile & Billing</div>
-                                <div class="text-[10px] text-atelier-muted">Orders, Formulas & Cards</div>
-                            </div>
+                            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-gray-700 hover:bg-red-50 hover:text-[#9e1a1a] transition">
+                            <i class="fa-solid fa-user text-[11px] text-gray-500"></i>
+                            <span class="font-medium">Client Profile</span>
                         </a>
                         <a href="{{ route('profile.index') }}#orders"
-                            class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-atelier-cream hover:bg-white/5 hover:text-luxe-gold transition">
-                            <div
-                                class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-atelier-muted">
-                                <i class="fa-solid fa-box-archive text-[11px]"></i>
-                            </div>
-                            <div>
-                                <div class="font-semibold">Order History & Tracking</div>
-                                <div class="text-[10px] text-atelier-muted">Curing & delivery timeline</div>
-                            </div>
+                            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-gray-700 hover:bg-red-50 hover:text-[#9e1a1a] transition">
+                            <i class="fa-solid fa-box-archive text-[11px] text-gray-500"></i>
+                            <span class="font-medium">My Orders</span>
                         </a>
-                        <div class="mt-1 pt-1.5 border-t border-white/10">
-                            <a href="{{ route('profile.index') }}#billing"
-                                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-luxe-gold hover:bg-white/5 transition">
-                                <i class="fa-solid fa-wallet text-[10px]"></i> Open Saved Cards & Invoices
-                            </a>
+                        <a href="{{ route('profile.index') }}#billing"
+                            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-gray-700 hover:bg-red-50 hover:text-[#9e1a1a] transition">
+                            <i class="fa-solid fa-wallet text-[11px] text-gray-500"></i>
+                            <span class="font-medium">Saved Cards & Billing</span>
+                        </a>
+                        <div class="mt-1 pt-1 border-t border-gray-100">
+                            <button onclick="window.sondhiAuth.openAuthModal('signin')"
+                                class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#9e1a1a] hover:bg-red-50 transition">
+                                <i class="fa-solid fa-right-to-bracket text-[11px]"></i>
+                                <span>Sign In / Register</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Cart Drawer Trigger with Badge -->
+                <!-- 2. Cart -->
                 <button id="cart-toggle-btn"
-                    class="relative hidden lg:flex items-center gap-2.5 rounded-full border border-luxe-gold/40 bg-flame-soft px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-luxe-gold hover:bg-luxe-gold hover:text-atelier-base transition duration-300"
-                    aria-label="Open Shopping Bag">
-                    <i class="fa-solid fa-bag-shopping text-xs"></i>
-                    <span class="hidden sm:inline">Bag</span>
-                    <span id="cart-count-badge"
-                        class="flex h-5 w-5 items-center justify-center rounded-full bg-flame-glow text-[10px] font-bold text-atelier-base">
-                        0
-                    </span>
+                    class="group flex items-center gap-1.5 hover:text-[#9e1a1a] transition duration-150 py-1"
+                    aria-label="Open Cart">
+                    <span class="font-medium text-gray-800 group-hover:text-[#9e1a1a] transition">Cart</span>
+                    <svg class="w-5 h-5 shrink-0 text-gray-800 group-hover:text-[#9e1a1a] transition-colors" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 10h18l-2 10H5L3 10z" />
+                        <path d="M8 10L10.5 4h3L16 10" />
+                    </svg>
+                    <span id="cart-count-badge" class="hidden">0</span>
                 </button>
 
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn"
-                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-atelier-muted hover:text-white lg:hidden"
-                    aria-label="Toggle navigation">
-                    <i class="fa-solid fa-bars text-sm"></i>
+                <!-- 3. Track Order (Delivery Truck with Map Pin on Roof) -->
+                <button onclick="openTrackOrderModal()" id="nav-track-order-btn"
+                    class="group flex items-center gap-2 hover:text-[#9e1a1a] transition duration-150 py-1"
+                    title="Track Order Delivery Status">
+                    <span class="font-medium text-gray-800 whitespace-nowrap group-hover:text-[#9e1a1a] transition">Track Order</span>
+                    <svg class="h-5 w-5 text-gray-900 group-hover:text-[#9e1a1a] transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Pin marker on top of cargo box -->
+                        <path d="M7.5 1.5a2.5 2.5 0 0 0-2.5 2.5c0 1.8 2.5 4.5 2.5 4.5s2.5-2.7 2.5-4.5A2.5 2.5 0 0 0 7.5 1.5z" fill="currentColor" stroke="none" />
+                        <circle cx="7.5" cy="4" r="0.9" fill="white" stroke="none" />
+                        <!-- Truck cargo body -->
+                        <rect x="1.5" y="9.5" width="11" height="7" rx="0.5" />
+                        <!-- Truck cab -->
+                        <path d="M12.5 12h4l2.5 2.5v2h-6.5v-4.5z" />
+                        <!-- Wheels -->
+                        <circle cx="5" cy="18" r="1.8" fill="currentColor" stroke="none" />
+                        <circle cx="16.5" cy="18" r="1.8" fill="currentColor" stroke="none" />
+                    </svg>
                 </button>
+            </div>
+        </div>
+
+        <!-- Secondary Navigation Bar (Sondhi Atelier Theme with Reference Layout) -->
+        <div class="border-t border-gray-100 bg-white shadow-sm">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+                <nav class="flex items-center justify-center gap-5 sm:gap-7 lg:gap-8 py-2.5 overflow-x-auto whitespace-nowrap no-scrollbar text-[11px] sm:text-xs font-semibold tracking-wider text-gray-700">
+                    <a href="#collection" onclick="filterNavCategory('Sale')" class="campus-category-link">SALE</a>
+                    <a href="#collection" onclick="filterNavCategory('New Arrivals')" class="campus-category-link">NEW ARRIVALS</a>
+                    <a href="#collection" onclick="filterNavCategory('Candle Studio')" class="campus-category-link">CANDLE STUDIO</a>
+                    <a href="#collection" onclick="filterNavCategory('Signature Scents')" class="campus-category-link">SIGNATURE SCENTS</a>
+                    <a href="#collection" onclick="filterNavCategory('Warm Amber')" class="campus-category-link">WARM AMBER</a>
+                    <a href="#collection" onclick="filterNavCategory('Deep Oud')" class="campus-category-link">DEEP OUD</a>
+                    <a href="#collection" onclick="filterNavCategory('Élan')" class="campus-category-link flex items-center gap-1">
+                        <span>ÉLAN</span>
+                        <i class="fa-solid fa-star text-amber-500 text-[10px]"></i>
+                    </a>
+                    <a href="#collection" onclick="filterNavCategory('Gift Sets')" class="campus-category-link">GIFT SETS</a>
+                    <a href="#rituals" class="campus-category-link">CARE RITUALS</a>
+                    <a href="#collection" onclick="filterNavCategory('Trending')" class="campus-category-link">TRENDING</a>
+                </nav>
             </div>
         </div>
 
         <!-- Mobile Navigation Dropdown -->
         <div id="mobile-menu"
-            class="hidden border-t border-white/10 bg-atelier-surface px-6 py-5 text-xs font-semibold uppercase tracking-[0.2em] text-atelier-muted lg:hidden space-y-4">
-            <a class="block py-2 hover:text-atelier-cream" href="#collection">Signature Scents</a>
-            <a class="block py-2 hover:text-atelier-cream" href="#rituals">Candle Rituals</a>
-            <a class="block py-2 hover:text-atelier-cream" href="#story">Our Atelier</a>
-            <a class="block py-2 hover:text-atelier-cream" href="#reviews">Collector Notes</a>
-            <div class="pt-3 border-t border-white/10 space-y-2">
-                <div class="text-[10px] font-bold uppercase tracking-wider text-atelier-dim">Account & Sanctuary</div>
-                <button id="mobile-search-btn" type="button" class="w-full text-left py-1 text-atelier-cream hover:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-magnifying-glass text-xs text-luxe-gold"></i> Search Fragrances
+            class="hidden border-t border-gray-200 bg-white px-6 py-5 text-xs font-semibold uppercase tracking-wider text-gray-800 lg:hidden space-y-3.5 shadow-xl">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 pb-1 border-b border-gray-100">Sondhi Collections</div>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Sale')">Sale</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('New Arrivals')">New Arrivals</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Candle Studio')">Candle Studio</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Signature Scents')">Signature Scents</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Warm Amber')">Warm Amber</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Deep Oud')">Deep Oud</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Élan')">Élan ⭐</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Gift Sets')">Gift Sets</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#rituals">Care Rituals</a>
+            <a class="block py-1.5 hover:text-[#9e1a1a]" href="#collection" onclick="filterNavCategory('Trending')">Trending</a>
+            <div class="pt-3 border-t border-gray-100 space-y-2.5">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Services & Account</div>
+                <button onclick="openTrackOrderModal()" class="w-full text-left py-1 text-gray-700 hover:text-[#9e1a1a] flex items-center gap-2">
+                    <i class="fa-solid fa-truck-fast text-xs text-gray-500"></i> Track Order
                 </button>
-                <button id="mobile-cart-btn" type="button" class="w-full text-left py-1 text-luxe-gold hover:text-white flex items-center justify-between">
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-xs"></i> Shopping Bag</span>
-                    <span id="mobile-cart-count" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-flame-glow px-1 text-[10px] font-bold text-atelier-base">0</span>
-                </button>
-                <button onclick="toggleAtelierTheme()" class="w-full text-left py-1 text-atelier-cream hover:text-white flex items-center justify-between">
-                    <span class="flex items-center gap-2">
-                        <i class="fa-solid fa-circle-half-stroke text-xs text-luxe-gold"></i>
-                        <span>Theme Mode</span>
-                    </span>
-                    <span id="mobile-theme-label" class="text-[10px] font-bold uppercase tracking-wider text-luxe-gold">Light</span>
-                </button>
-                <button onclick="window.sondhiAuth.openAuthModal('signin')" class="w-full text-left py-1 text-luxe-gold hover:text-white flex items-center gap-2">
+                <button onclick="window.sondhiAuth.openAuthModal('signin')" class="w-full text-left py-1 text-[#9e1a1a] font-semibold hover:underline flex items-center gap-2">
                     <i class="fa-solid fa-right-to-bracket text-xs"></i> Sign In / Create Account
                 </button>
-                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="{{ route('profile.index') }}#orders">
-                    <i class="fa-solid fa-box-archive text-xs"></i> My Order History
+                <a class="block py-1 text-gray-700 hover:text-[#9e1a1a] flex items-center gap-2" href="{{ route('profile.index') }}">
+                    <i class="fa-solid fa-user text-xs text-gray-500"></i> Client Profile & Billing
                 </a>
-                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="{{ route('profile.index') }}">
-                    <i class="fa-solid fa-user text-xs"></i> Client Profile & Billing
-                </a>
-                <a class="block py-1 text-atelier-cream hover:text-white flex items-center gap-2" href="{{ route('profile.index') }}#billing">
-                    <i class="fa-solid fa-crown text-xs text-luxe-gold"></i> Flame Circle Membership
-                </a>
-            </div>
-        </div>
-
-        <!-- Expandable Search Overlay -->
-        <div id="search-overlay" class="hidden border-t border-white/10 bg-atelier-surface/95 px-6 py-4">
-            <div class="mx-auto flex max-w-2xl items-center gap-3 border-b border-luxe-gold/40 pb-2">
-                <i class="fa-solid fa-magnifying-glass text-luxe-gold"></i>
-                <input id="header-search-input"
-                    class="w-full bg-transparent text-sm text-atelier-cream placeholder:text-atelier-dim outline-none font-sans"
-                    placeholder="Search by fragrance note (e.g. Lavender, Sandalwood, Vanilla, Oud)..." type="search">
-                <button id="search-close-btn" class="text-xs text-atelier-muted hover:text-white">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
             </div>
         </div>
     </header>
+
+    <!-- Quick Track Order Modal -->
+    <div id="track-order-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-gray-200 text-gray-900">
+            <button onclick="closeTrackOrderModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-base">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-[#9e1a1a]">
+                    <i class="fa-solid fa-truck-fast text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-gray-900">Track Sanctuary Order</h3>
+                    <p class="text-xs text-gray-500">Real-time status of your bespoke botanical courier</p>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1.5">Order Tracking Number or Mobile</label>
+                    <input id="quick-track-input" type="text" placeholder="e.g. SONDHI-8291 or 9876543210"
+                        class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#9e1a1a] focus:ring-1 focus:ring-[#9e1a1a]/20 transition">
+                </div>
+                <button onclick="executeQuickTrack()"
+                    class="w-full rounded-xl bg-[#9e1a1a] py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-red-800 transition duration-200 shadow-md shadow-red-900/20">
+                    Track Dispatch Status
+                </button>
+                <div id="quick-track-result" class="hidden rounded-xl bg-gray-50 p-3.5 border border-gray-200 text-xs space-y-2">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <main id="top">
         <!-- Hero Section: Atelier Atmosphere -->
