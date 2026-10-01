@@ -54,6 +54,27 @@ export default async function handler(req, res) {
 
         const hasTwilio = Boolean(twilioSid && twilioToken && (twilioFrom || twilioVerifySid));
 
+        // If Twilio keys are not on Vercel, forward to Render backend where keys are set
+        if (!hasTwilio) {
+            const backendUrl = (process.env.BACKEND_URL || 'https://sondhi-1.onrender.com').replace(/\/+$/, '');
+            try {
+                const renderRes = await fetch(`${backendUrl}/api/auth/send-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ phone: e164Phone })
+                });
+                const renderData = await renderRes.json();
+                if (renderRes.ok && renderData && renderData.success) {
+                    return res.status(200).json(renderData);
+                }
+            } catch (err) {
+                console.warn('Render proxy error:', err.message);
+            }
+        }
+
         if (hasTwilio) {
             if (twilioVerifySid) {
                 // Twilio Verify API v2

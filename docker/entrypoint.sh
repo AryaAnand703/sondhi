@@ -15,18 +15,23 @@ mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/bootstrap/cache
 mkdir -p /var/www/html/database
 
-# Auto-provision SQLite database if sqlite connection is active
+# Ensure correct database directory and file permissions
+mkdir -p /var/www/html/database
+DB_FILE="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
 if [ "$DB_CONNECTION" = "sqlite" ] || [ -z "$DB_CONNECTION" ]; then
-    DB_FILE="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
     if [ ! -f "$DB_FILE" ]; then
         echo "Initializing SQLite database file at ${DB_FILE}..."
         touch "$DB_FILE"
     fi
 fi
 
-# Ensure correct file permissions for web server
+# Ensure full write permissions for web server on storage, cache, and database
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 777 /var/www/html/database
+if [ -f "$DB_FILE" ]; then
+    chmod 666 "$DB_FILE"
+fi
 
 # Generate APP_KEY if missing
 if [ -z "$APP_KEY" ]; then
@@ -34,11 +39,9 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force || true
 fi
 
-# Optional database migration on startup
-if [ "$RUN_MIGRATIONS" = "true" ]; then
-    echo "Running database migrations..."
-    php artisan migrate --force || true
-fi
+# Run database migrations so sessions, users, and audit tables exist
+echo "Running database migrations..."
+php artisan migrate --force || true
 
 # Production cache optimization
 if [ "$APP_ENV" = "production" ]; then

@@ -48,6 +48,25 @@ export default async function handler(req, res) {
 
         let isValid = false;
 
+        // Try Render backend first if Twilio keys are configured there
+        const backendUrl = (process.env.BACKEND_URL || 'https://sondhi-1.onrender.com').replace(/\/+$/, '');
+        try {
+            const renderRes = await fetch(`${backendUrl}/api/auth/verify-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ phone: e164Phone, otp: inputOtp })
+            });
+            const renderData = await renderRes.json();
+            if (renderRes.ok && renderData && renderData.success) {
+                return res.status(200).json(renderData);
+            }
+        } catch (err) {
+            console.warn('Render verify proxy error:', err.message);
+        }
+
         if (hasTwilio && twilioVerifySid) {
             // Verify via Twilio Verify API
             const checkUrl = `https://verify.twilio.com/v2/Services/${twilioVerifySid}/VerificationCheck`;
