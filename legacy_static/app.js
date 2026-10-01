@@ -572,96 +572,11 @@ window.closeQuickView = function() {
     }
 };
 
-// --- 8. Custom Candle Studio Interactive Configurator ---
-function initCustomCandleStudio() {
-    const vesselButtons = document.querySelectorAll('.vessel-option');
-    const scentSelect = document.querySelector('#custom-scent-select');
-    const labelInput = document.querySelector('#custom-label-input');
-    const addBtn = document.querySelector('#add-custom-candle-btn');
-
-    const vesselSelectedLabel = document.querySelector('#vessel-selected-label');
-    const scentSelectedNotes = document.querySelector('#scent-selected-notes');
-    const priceDisplay = document.querySelector('#custom-price-display');
-
-    const mockupVessel = document.querySelector('#mockup-vessel');
-    const mockupTitle = document.querySelector('#mockup-label-title');
-    const mockupScent = document.querySelector('#mockup-label-scent');
-
-    // Step 1: Vessel Selection
-    vesselButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            vesselButtons.forEach(b => {
-                b.classList.remove('border-luxe-gold', 'bg-atelier-hover', 'active');
-                b.classList.add('border-white/10', 'bg-atelier-surface');
-            });
-            btn.classList.add('border-luxe-gold', 'bg-atelier-hover', 'active');
-            btn.classList.remove('border-white/10', 'bg-atelier-surface');
-
-            state.customCandle.vessel = btn.dataset.vessel;
-            state.customCandle.vesselColor = btn.dataset.color;
-            state.customCandle.vesselBorder = btn.dataset.border;
-            state.customCandle.price = parseInt(btn.dataset.price, 10);
-
-            if (vesselSelectedLabel) vesselSelectedLabel.textContent = state.customCandle.vessel;
-            if (priceDisplay) priceDisplay.textContent = formatINR(state.customCandle.price);
-
-            // Update Mockup
-            if (mockupVessel) {
-                mockupVessel.style.backgroundColor = state.customCandle.vesselColor;
-                mockupVessel.style.borderColor = state.customCandle.vesselBorder;
-            }
-        });
-    });
-
-    // Step 2: Scent Selection
-    if (scentSelect) {
-        scentSelect.addEventListener('change', () => {
-            const opt = scentSelect.options[scentSelect.selectedIndex];
-            state.customCandle.scent = scentSelect.value;
-            const notes = opt.dataset.notes || '';
-            if (scentSelectedNotes) scentSelectedNotes.textContent = notes;
-            if (mockupScent) mockupScent.textContent = state.customCandle.scent;
-        });
-    }
-
-    // Step 3: Personalized Dedication Text
-    if (labelInput) {
-        labelInput.addEventListener('input', (e) => {
-            const text = e.target.value.trim();
-            state.customCandle.label = text || 'For Slow Evenings';
-            if (mockupTitle) mockupTitle.textContent = state.customCandle.label;
-        });
-    }
-
-    // Add Custom Candle To Bag
-    if (addBtn) {
-        addBtn.addEventListener('click', () => {
-            const customItem = {
-                id: `custom_${Date.now()}`,
-                name: `Bespoke Candle (${state.customCandle.vessel})`,
-                vessel: state.customCandle.vessel,
-                scent: state.customCandle.scent,
-                customLabel: state.customCandle.label,
-                price: state.customCandle.price,
-                image: 'https://images.unsplash.com/photo-1608181831718-c9e7d8a2a3a5?auto=format&fit=crop&w=600&q=85',
-                quantity: 1,
-                isCustom: true
-            };
-
-            state.cart.push(customItem);
-            saveCart();
-            showToast('Custom candle added to your sanctuary bag');
-            openCart();
-        });
-    }
-}
-
 // --- 9. Event Listeners & Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     // Initial Renderings
     renderCatalog();
     updateCartUI();
-    initCustomCandleStudio();
 
     // Close welcome overlay on Escape key
     document.addEventListener('keydown', (event) => {

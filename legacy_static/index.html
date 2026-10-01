@@ -462,13 +462,11 @@
             }
 
             #top > section:first-child .reveal-node.mt-10,
-            #custom-studio .mt-10,
             #newsletter-form {
                 width: 100%;
             }
 
-            #top > section:first-child .reveal-node.mt-10 > *,
-            #custom-studio .mt-10 > * {
+            #top > section:first-child .reveal-node.mt-10 > * {
                 width: 100%;
                 justify-content: center;
             }
@@ -497,13 +495,8 @@
                 padding-bottom: 5rem;
             }
 
-            #custom-studio .glass-card,
             #reviews .glass-card {
                 padding: 1.25rem;
-            }
-
-            #custom-studio .grid {
-                gap: 2rem;
             }
 
             .mood-pill {
@@ -608,10 +601,6 @@
             <nav
                 class="hidden items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-atelier-muted lg:flex">
                 <a href="#collection" class="atelier-nav-link hover:text-atelier-cream">Signature Scents</a>
-                <a href="#custom-studio"
-                    class="atelier-nav-link hover:text-atelier-cream flex items-center gap-1.5 text-luxe-gold">
-                    <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Custom Studio
-                </a>
                 <a href="#rituals" class="atelier-nav-link hover:text-atelier-cream">Candle Rituals</a>
                 <a href="#story" class="atelier-nav-link hover:text-atelier-cream">Our Atelier</a>
                 <a href="#reviews" class="atelier-nav-link hover:text-atelier-cream">Collector Notes</a>
@@ -707,7 +696,6 @@
         <div id="mobile-menu"
             class="hidden border-t border-white/10 bg-atelier-surface px-6 py-5 text-xs font-semibold uppercase tracking-[0.2em] text-atelier-muted lg:hidden space-y-4">
             <a class="block py-2 hover:text-atelier-cream" href="#collection">Signature Scents</a>
-            <a class="block py-2 text-luxe-gold hover:text-white" href="#custom-studio">Custom Candle Studio</a>
             <a class="block py-2 hover:text-atelier-cream" href="#rituals">Candle Rituals</a>
             <a class="block py-2 hover:text-atelier-cream" href="#story">Our Atelier</a>
             <a class="block py-2 hover:text-atelier-cream" href="#reviews">Collector Notes</a>
@@ -802,11 +790,6 @@
                         <i
                             class="fa-solid fa-arrow-right text-[11px] transition-transform duration-300 group-hover:translate-x-1"></i>
                     </a>
-                    <a href="#custom-studio"
-                        class="flex items-center gap-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-cream transition-all duration-300 hover:border-luxe-gold hover:bg-white/10 hover:scale-105">
-                        <i class="fa-solid fa-sparkles text-luxe-gold"></i>
-                        <span>Custom Candle Studio</span>
-                    </a>
                 </div>
 
                 <!-- Trust Metrics Bar -->
@@ -880,10 +863,10 @@
                         <i class="fa-solid fa-heart text-white group-hover:scale-125 transition-transform text-xs"></i>
                         <span>Send Love Sparks</span>
                     </button>
-                    <a href="#custom-studio"
+                    <a href="#collection"
                         class="flex items-center gap-2.5 rounded-full border border-rose-400/30 bg-white/5 backdrop-blur-md px-7 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-atelier-cream transition-all duration-300 hover:border-luxe-gold hover:bg-white/10 hover:scale-105">
-                        <i class="fa-solid fa-wand-magic-sparkles text-luxe-gold"></i>
-                        <span>Pour Bespoke Candle</span>
+                        <i class="fa-solid fa-sparkles text-luxe-gold"></i>
+                        <span>Explore Scents</span>
                     </a>
                 </div>
 
@@ -978,195 +961,6 @@
                 <!-- Product Grid (Dynamically Rendered by app.js) -->
                 <div id="product-grid" class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     <!-- Populated dynamically -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Custom Candle Studio (Interactive Builder) -->
-        <section id="custom-studio"
-            class="relative overflow-hidden bg-gradient-to-b from-atelier-surface via-atelier-base to-atelier-surface px-6 py-24 lg:px-10 lg:py-32 border-b border-white/10">
-            <!-- Background Glow -->
-            <div
-                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-flame-glow/10 blur-[100px]">
-            </div>
-
-            <div class="mx-auto max-w-7xl">
-                <div class="text-center max-w-2xl mx-auto mb-16">
-                    <span
-                        class="inline-flex items-center gap-2 rounded-full border border-luxe-gold/30 bg-luxe-gold/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-luxe-gold mb-4">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Atelier Bespoke Service
-                    </span>
-                    <h2 class="font-display text-4xl sm:text-6xl font-semibold text-atelier-cream leading-tight">
-                        The Custom <span class="italic font-normal text-luxe-gold">Candle Studio</span>
-                    </h2>
-                    <p class="mt-4 text-sm text-atelier-muted">
-                        Design your own bespoke botanical candle. Select your handcrafted vessel, choose an exclusive
-                        aromatic formulation, and dedicate it with personalized laser-embossed label text.
-                    </p>
-                </div>
-
-                <div class="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
-                    <!-- Left: Step-by-Step Configurator -->
-                    <div class="space-y-8 glass-card rounded-2xl p-6 sm:p-10">
-                        <!-- Step 1: Vessel Choice -->
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-luxe-gold">
-                                    Step 1 · Choose Vessel
-                                </h3>
-                                <span id="vessel-selected-label" class="text-xs font-semibold text-atelier-cream">Smoked
-                                    Obsidian</span>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="vessel-selector">
-                                <button
-                                    class="vessel-option active group rounded-xl border-2 border-luxe-gold bg-atelier-hover p-3 text-center transition duration-200"
-                                    data-vessel="Smoked Obsidian" data-color="#1A1817" data-border="#332D29"
-                                    data-price="1399">
-                                    <div
-                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-stone-900 to-stone-700 shadow-inner border border-white/10">
-                                    </div>
-                                    <span class="block text-xs font-semibold text-atelier-cream">Obsidian</span>
-                                    <span class="text-[10px] text-atelier-muted">₹1,399</span>
-                                </button>
-                                <button
-                                    class="vessel-option group rounded-xl border-2 border-white/10 bg-atelier-surface p-3 text-center transition duration-200"
-                                    data-vessel="Amber Apothecary" data-color="#78350F" data-border="#B45309"
-                                    data-price="1299">
-                                    <div
-                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-amber-900 to-amber-600 shadow-inner border border-white/10">
-                                    </div>
-                                    <span class="block text-xs font-semibold text-atelier-cream">Amber Glass</span>
-                                    <span class="text-[10px] text-atelier-muted">₹1,299</span>
-                                </button>
-                                <button
-                                    class="vessel-option group rounded-xl border-2 border-white/10 bg-atelier-surface p-3 text-center transition duration-200"
-                                    data-vessel="Matte Alabaster" data-color="#E7E2D8" data-border="#D6CEBF"
-                                    data-price="1449">
-                                    <div
-                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-stone-300 to-stone-100 shadow-inner border border-black/10">
-                                    </div>
-                                    <span class="block text-xs font-semibold text-atelier-cream">Alabaster</span>
-                                    <span class="text-[10px] text-atelier-muted">₹1,449</span>
-                                </button>
-                                <button
-                                    class="vessel-option group rounded-xl border-2 border-white/10 bg-atelier-surface p-3 text-center transition duration-200"
-                                    data-vessel="Raw Terracotta" data-color="#9A5038" data-border="#BD6B50"
-                                    data-price="1499">
-                                    <div
-                                        class="mx-auto mb-2 h-10 w-10 rounded-full bg-gradient-to-tr from-orange-900 to-stone-600 shadow-inner border border-white/10">
-                                    </div>
-                                    <span class="block text-xs font-semibold text-atelier-cream">Terracotta</span>
-                                    <span class="text-[10px] text-atelier-muted">₹1,499</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Scent Formulation -->
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-luxe-gold">
-                                    Step 2 · Select Fragrance Blend
-                                </h3>
-                                <span id="scent-selected-notes" class="text-xs font-medium text-atelier-dim">Oud ·
-                                    Saffron · Dark Wood</span>
-                            </div>
-                            <select id="custom-scent-select"
-                                class="w-full rounded-xl border border-white/15 bg-atelier-surface px-4 py-3 text-sm text-atelier-cream outline-none focus:border-luxe-gold transition cursor-pointer">
-                                <option value="Sandalwood & Velvet Oud" data-notes="Oud · Saffron · Dark Wood">
-                                    Sandalwood & Velvet Oud (Warm, grounding & meditative)</option>
-                                <option value="Midnight Jasmine & Cardamom"
-                                    data-notes="Indian Jasmine · Green Cardamom · Amber">Midnight Jasmine & Cardamom
-                                    (Floral, opulent & luminous)</option>
-                                <option value="Smoked Tonka & Madagascar Vanilla"
-                                    data-notes="Smoked Tonka · Bourbon Vanilla · Cedar">Smoked Tonka & Madagascar
-                                    Vanilla (Enveloping & velvety)</option>
-                                <option value="Monsoon Petrichor & Wild Vetiver"
-                                    data-notes="Wet Earth · Fresh Vetiver · Rain Accord">Monsoon Petrichor & Wild
-                                    Vetiver (Earthy, crisp & rejuvenating)</option>
-                            </select>
-                        </div>
-
-                        <!-- Step 3: Personalized Dedication Text -->
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-luxe-gold">
-                                    Step 3 · Custom Label Dedication
-                                </h3>
-                                <span class="text-[10px] text-atelier-dim">Max 32 chars</span>
-                            </div>
-                            <input id="custom-label-input" type="text" maxlength="32"
-                                placeholder="e.g. For Slow Evenings / Arya's Atelier"
-                                class="w-full rounded-xl border border-white/15 bg-atelier-surface px-4 py-3 text-sm text-atelier-cream placeholder:text-atelier-dim outline-none focus:border-luxe-gold transition">
-                            <p class="mt-2 text-[11px] text-atelier-dim">This text will be printed in gold foil on the
-                                candle's artisanal linen label.</p>
-                        </div>
-
-                        <!-- Custom Creation Total & CTA -->
-                        <div
-                            class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-6">
-                            <div>
-                                <span class="text-[10px] uppercase tracking-widest text-atelier-muted">Custom Atelier
-                                    Piece</span>
-                                <div id="custom-price-display" class="font-display text-3xl font-bold text-luxe-gold">
-                                    ₹1,399</div>
-                            </div>
-                            <button id="add-custom-candle-btn"
-                                class="w-full sm:w-auto flex items-center justify-center gap-3 rounded-full bg-luxe-gold px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-base hover:bg-white transition duration-300 shadow-xl shadow-amber-900/30">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Add Custom Candle To Bag</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Right: Live Visual Candle Mockup Preview -->
-                    <div
-                        class="relative flex flex-col items-center justify-center p-8 glass-card rounded-2xl border border-luxe-gold/30">
-                        <span
-                            class="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest text-luxe-gold bg-luxe-gold/10 px-3 py-1 rounded-full">
-                            Live Atelier Preview
-                        </span>
-
-                        <!-- Interactive Candle Mockup -->
-                        <div class="relative mt-8 mb-6 flex flex-col items-center">
-                            <!-- Animated Candle Flame -->
-                            <div class="relative flex flex-col items-center">
-                                <div
-                                    class="flame-anim h-10 w-4 rounded-full bg-gradient-to-t from-flame-amber via-flame-glow to-yellow-100 shadow-[0_0_24px_rgba(245,158,11,0.85)]">
-                                </div>
-                                <div class="h-2 w-0.5 bg-stone-900"></div>
-                            </div>
-
-                            <!-- Candle Vessel Container -->
-                            <div id="mockup-vessel"
-                                class="relative flex h-64 w-52 flex-col items-center justify-center rounded-2xl p-4 shadow-2xl transition-all duration-500"
-                                style="background-color: #1A1817; border: 2px solid #332D29;">
-                                <!-- Linen Label -->
-                                <div
-                                    class="flex h-36 w-40 flex-col items-center justify-between rounded-lg bg-[#FAF7F2] p-3 text-center text-[#1C1815] shadow-md border border-stone-300">
-                                    <div class="text-[8px] font-bold uppercase tracking-[0.25em] text-stone-500">
-                                        SONDHI · BESPOKE
-                                    </div>
-                                    <div>
-                                        <div id="mockup-label-title"
-                                            class="font-display text-base font-semibold leading-tight text-stone-900">
-                                            For Slow Evenings
-                                        </div>
-                                        <div id="mockup-label-scent"
-                                            class="mt-1 text-[9px] uppercase tracking-wider text-amber-800 font-medium">
-                                            Sandalwood & Oud
-                                        </div>
-                                    </div>
-                                    <div class="text-[7px] uppercase tracking-widest text-stone-400">
-                                        100% SOY · 50H BURN
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p class="text-center text-xs text-atelier-muted max-w-xs">
-                            Hand-poured into a 280g weighted glass vessel with dual natural cotton wicks.
-                        </p>
-                    </div>
                 </div>
             </div>
         </section>
@@ -1531,8 +1325,6 @@
                         <li><a href="#collection" class="hover:text-atelier-cream transition">Warm Spiced Amber</a></li>
                         <li><a href="#collection" class="hover:text-atelier-cream transition">Woody & Smoked Oud</a>
                         </li>
-                        <li><a href="#custom-studio" class="text-luxe-gold hover:text-white transition">Custom Atelier
-                                Studio</a></li>
                     </ul>
                 </div>
 
