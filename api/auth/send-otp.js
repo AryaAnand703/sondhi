@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
     try {
         const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-        const rawPhone = String(body.phone || '').trim();
+        const rawPhone = String(body.phone || body.mobile || body.phoneNumber || '').trim();
         const e164Phone = formatE164Phone(rawPhone);
         const cleanDigits = e164Phone.replace(/\D/g, '');
 
@@ -73,8 +73,9 @@ export default async function handler(req, res) {
 
                 const twilioData = await twilioRes.json();
                 if (!twilioRes.ok) {
+                    const code = twilioData.code ? ` (Code ${twilioData.code})` : '';
                     const errMsg = twilioData.message || 'Twilio Verify service error';
-                    return res.status(422).json({ success: false, message: `Twilio error: ${errMsg}` });
+                    return res.status(422).json({ success: false, message: `Twilio error${code}: ${errMsg}` });
                 }
 
                 return res.status(200).json({
@@ -105,8 +106,9 @@ export default async function handler(req, res) {
 
                 const twilioData = await twilioRes.json();
                 if (!twilioRes.ok) {
+                    const code = twilioData.code ? ` (Code ${twilioData.code})` : '';
                     const errMsg = twilioData.message || 'Twilio SMS failed to dispatch';
-                    return res.status(422).json({ success: false, message: `Twilio error: ${errMsg}` });
+                    return res.status(422).json({ success: false, message: `Twilio error${code}: ${errMsg}` });
                 }
 
                 return res.status(200).json({

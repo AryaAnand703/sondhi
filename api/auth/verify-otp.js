@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
     try {
         const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-        const rawPhone = String(body.phone || '').trim();
+        const rawPhone = String(body.phone || body.mobile || body.phoneNumber || '').trim();
         const inputOtp = String(body.otp || '').trim();
         const token = String(body.verification_token || '').trim();
         const e164Phone = formatE164Phone(rawPhone);
