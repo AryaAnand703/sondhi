@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+vendor
+
+# Production outputs & caches
+dist
+public/hot
+public/storage
+storage/*.key
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Environment & local credentials
+.env
+.env.*
+!.env.example
+
+# Git & CI/CD
+.git
+.github
+.gitignore
+
+# IDE & Editor caches
+.vscode
+.idea
+.editorconfig
+.phpunit.result.cache
+
+# Testing & Dev
+tests
+phpunit.xml
+
+# Docker artifacts
+docker-compose*.yml
+Dockerfile*
+README.md
