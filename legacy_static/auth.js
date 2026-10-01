@@ -188,7 +188,8 @@
 
     const Auth = {
         _phoneVerified: false,
-        _generatedOTP: '8421',
+        _generatedOTP: null,
+        _isDemo: false,
 
         // --- Initialization ---
         init: function () {
@@ -752,18 +753,18 @@
                                 <span class="text-atelier-cream flex items-center gap-1.5 font-medium">
                                     <i class="fa-solid fa-mobile-screen-button text-luxe-gold"></i> Enter SMS Verification Code
                                 </span>
-                                <span class="text-[10px] text-luxe-gold font-mono bg-luxe-gold/15 px-2 py-0.5 rounded border border-luxe-gold/30">
-                                    Demo Code: <strong id="signup-demo-otp-code" class="tracking-widest">8421</strong>
+                                <span id="signup-demo-otp-badge" class="hidden text-[10px] text-luxe-gold font-mono bg-luxe-gold/15 px-2 py-0.5 rounded border border-luxe-gold/30">
+                                    Demo Code: <strong id="signup-demo-otp-code" class="tracking-widest"></strong>
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="text" id="signup-otp" maxlength="6" placeholder="8421" class="flex-1 bg-atelier-card border border-white/15 rounded-xl px-3.5 py-2 text-center text-sm font-mono tracking-widest text-atelier-cream focus:border-luxe-gold outline-none transition">
+                                <input type="text" id="signup-otp" maxlength="6" placeholder="Enter 6-digit OTP" class="flex-1 bg-atelier-card border border-white/15 rounded-xl px-3.5 py-2 text-center text-sm font-mono tracking-widest text-atelier-cream focus:border-luxe-gold outline-none transition">
                                 <button type="button" id="signup-verify-otp-btn" onclick="window.sondhiAuth.verifyPhoneOTP()" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-gradient-to-r from-luxe-gold via-amber-300 to-luxe-gold text-atelier-base hover:opacity-95 transition shadow-sm">
                                     Verify Code
                                 </button>
                             </div>
                             <div class="flex items-center justify-between text-[11px] text-atelier-muted">
-                                <span id="signup-otp-helper-msg">SMS code dispatched to your phone</span>
+                                <span id="signup-otp-helper-msg">Enter the 6-digit code sent via SMS</span>
                                 <button type="button" onclick="window.sondhiAuth.sendPhoneOTP(true)" class="text-luxe-gold hover:underline text-[11px]">
                                     Resend Code
                                 </button>
@@ -1102,13 +1103,14 @@
             const sendBtn = document.getElementById('signup-send-otp-btn');
             const helperMsg = document.getElementById('signup-otp-helper-msg');
             const demoCodeEl = document.getElementById('signup-demo-otp-code');
+            const demoBadge = document.getElementById('signup-demo-otp-badge');
 
             const phone = phoneInput ? phoneInput.value.trim() : '';
             const cleanDigits = phone.replace(/\D/g, '');
 
-            if (!phone || cleanDigits.length < 7) {
+            if (!phone || cleanDigits.length < 10) {
                 if (errorDiv && errorMsg) {
-                    errorMsg.textContent = 'Please enter a valid mobile number (e.g. +91 98765 43210).';
+                    errorMsg.textContent = 'Please enter a valid 10-digit mobile number (e.g. 7970476426 or +91 7970476426).';
                     errorDiv.classList.remove('hidden');
                 }
                 if (phoneInput) phoneInput.focus();
@@ -1122,7 +1124,9 @@
                 sendBtn.textContent = 'Sending...';
             }
 
-            let generatedOtp = '8421';
+            let isDemo = false;
+            let demoOtp = null;
+            let serverError = null;
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -1139,19 +1143,52 @@
                 });
 
                 const data = await res.json();
-                if (data && data.otp) {
-                    generatedOtp = String(data.otp);
+                if (!res.ok || (data && data.success === false)) {
+                    serverError = (data && data.message) ? data.message : 'Failed to dispatch verification code.';
+                } else if (data && data.success) {
+                    isDemo = !!data.is_demo;
+                    demoOtp = data.otp ? String(data.otp) : null;
                 }
             } catch (err) {
-                console.warn('API send-otp fallback to local simulator:', err);
+                console.warn('API send-otp error:', err);
+                serverError = 'Connection error while communicating with authentication service.';
             }
 
-            this._generatedOTP = generatedOtp;
-            if (demoCodeEl) demoCodeEl.textContent = generatedOtp;
+            if (serverError) {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send OTP';
+                }
+                if (errorDiv && errorMsg) {
+                    errorMsg.textContent = serverError;
+                    errorDiv.classList.remove('hidden');
+                }
+                this.showToast(serverError);
+                return;
+            }
+
+            this._isDemo = isDemo;
+            this._generatedOTP = demoOtp;
+
+            if (demoBadge) {
+                if (isDemo && demoOtp) {
+                    demoBadge.classList.remove('hidden');
+                    if (demoCodeEl) demoCodeEl.textContent = demoOtp;
+                } else {
+                    demoBadge.classList.add('hidden');
+                }
+            }
+
             if (otpContainer) otpContainer.classList.remove('hidden');
-            if (helperMsg) helperMsg.textContent = `Code ${generatedOtp} dispatched via SMS API to ${phone}`;
+            if (helperMsg) {
+                helperMsg.textContent = isDemo
+                    ? `Demo code (${demoOtp}) generated for testing`
+                    : `6-digit verification code sent via SMS to ${phone}`;
+            }
+
             if (otpInput) {
                 otpInput.value = '';
+                otpInput.placeholder = 'Enter 6-digit OTP';
                 otpInput.focus();
             }
 
@@ -1167,7 +1204,11 @@
                 }, 3000);
             }
 
-            this.showToast(`SMS Verification code dispatched to ${phone}. (Code: ${generatedOtp})`);
+            if (isDemo && demoOtp) {
+                this.showToast(`Demo OTP: ${demoOtp} (Add Twilio credentials in .env for real SMS)`);
+            } else {
+                this.showToast(`6-digit verification code sent via SMS to ${phone}`);
+            }
         },
 
         verifyPhoneOTP: async function () {
@@ -1182,23 +1223,23 @@
             const verifyBtn = document.getElementById('signup-verify-otp-btn');
 
             const phone = phoneInput ? phoneInput.value.trim() : '';
-            const expected = this._generatedOTP || '8421';
 
-            if (!code) {
+            if (!code || code.length < 4) {
                 if (errorDiv && errorMsg) {
-                    errorMsg.textContent = 'Please enter the verification code.';
+                    errorMsg.textContent = 'Please enter the 6-digit verification code received on your phone.';
                     errorDiv.classList.remove('hidden');
                 }
                 if (otpInput) otpInput.focus();
                 return;
             }
 
-            let isValid = (code === expected || code === '8421' || code === '1234');
-
             if (verifyBtn) {
                 verifyBtn.disabled = true;
                 verifyBtn.textContent = 'Verifying...';
             }
+
+            let isValid = false;
+            let verifyError = null;
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -1215,13 +1256,19 @@
                 });
 
                 const data = await res.json();
-                if (data && data.success) {
+                if (res.ok && data && data.success) {
                     isValid = true;
-                } else if (res.status === 422 && !isValid) {
+                } else {
                     isValid = false;
+                    verifyError = (data && data.message) ? data.message : 'Incorrect verification code. Please check and try again.';
                 }
             } catch (err) {
-                console.warn('API verify-otp fallback to local check:', err);
+                console.warn('API verify-otp error:', err);
+                if (this._isDemo && this._generatedOTP && code === this._generatedOTP) {
+                    isValid = true;
+                } else {
+                    verifyError = 'Connection error while verifying code.';
+                }
             }
 
             if (verifyBtn) verifyBtn.disabled = false;
@@ -1257,7 +1304,9 @@
                 this.showToast('Mobile number verified successfully!');
             } else {
                 if (errorDiv && errorMsg) {
-                    errorMsg.textContent = 'Invalid verification code. Please enter the code sent to your phone (Demo: ' + (this._generatedOTP || '8421') + ').';
+                    errorMsg.textContent = verifyError || (this._isDemo
+                        ? 'Invalid verification code. Please enter the demo code (' + (this._generatedOTP || '842100') + ').'
+                        : 'Invalid verification code. Please enter the 6-digit code received on your phone.');
                     errorDiv.classList.remove('hidden');
                 }
                 if (otpInput) {
@@ -1292,7 +1341,9 @@
                 if (otpContainer && otpContainer.classList.contains('hidden')) {
                     this.sendPhoneOTP();
                 }
-                errorMsg.textContent = 'Please verify your mobile number with the SMS code (Demo: 8421).';
+                errorMsg.textContent = this._isDemo
+                    ? 'Please verify your mobile number with the SMS code (Demo: ' + (this._generatedOTP || '842100') + ').'
+                    : 'Please verify your mobile number with the 6-digit code sent to your phone.';
                 errorDiv.classList.remove('hidden');
                 const otpInput = document.getElementById('signup-otp');
                 if (otpInput) otpInput.focus();

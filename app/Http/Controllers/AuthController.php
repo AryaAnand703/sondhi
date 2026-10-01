@@ -197,6 +197,43 @@ class AuthController extends Controller
     }
 
     /**
+     * Format phone number to international E.164 standard.
+     */
+    protected function formatE164Phone(string $phone): string
+    {
+        $phone = trim($phone);
+        if (str_starts_with($phone, '+')) {
+            return '+' . preg_replace('/\D/', '', substr($phone, 1));
+        }
+
+        $clean = preg_replace('/\D/', '', $phone);
+        if (strlen($clean) === 10) {
+            return '+91' . $clean;
+        }
+        if (strlen($clean) === 11 && str_starts_with($clean, '0')) {
+            return '+91' . substr($clean, 1);
+        }
+        if (strlen($clean) === 12 && str_starts_with($clean, '91')) {
+            return '+' . $clean;
+        }
+
+        return '+' . $clean;
+    }
+
+    /**
+     * Determine if real Twilio service is configured.
+     */
+    protected function hasTwilioConfig(): bool
+    {
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+        $from = config('services.twilio.from');
+        $verifySid = config('services.twilio.verify_sid');
+
+        return !empty($sid) && !empty($token) && (!empty($from) || !empty($verifySid));
+    }
+
+    /**
      * Generate and dispatch an SMS OTP verification code.
      */
     public function sendOtp(Request $request)
@@ -205,55 +242,109 @@ class AuthController extends Controller
             'phone' => 'required|string|min:7|max:30',
         ]);
 
-        $phone = trim($validated['phone']);
-        $cleanPhone = preg_replace('/\D/', '', $phone);
+        $rawPhone = trim($validated['phone']);
+        $e164Phone = $this->formatE164Phone($rawPhone);
+        $cleanPhoneDigits = preg_replace('/\D/', '', $e164Phone);
 
-        if (strlen($cleanPhone) < 7) {
+        if (strlen($cleanPhoneDigits) < 10) {
             return response()->json([
                 'success' => false,
                 'message' => 'Please provide a valid mobile number with at least 10 digits.',
             ], 422);
         }
 
-        // Generate 4-digit code (8421 for seamless sandbox/demo, or random in production)
-        $otp = (string) (config('app.env') === 'production' ? mt_rand(1000, 9999) : '8421');
+        // Always generate a real 6-digit random code (100000 - 999999)
+        $otp = (string) random_int(100000, 999999);
 
-        $cacheKey = 'otp_' . $cleanPhone;
+        // Store in Cache and Session under normalized phone digits
+        $cacheKey = 'otp_' . $cleanPhoneDigits;
         Cache::put($cacheKey, $otp, now()->addMinutes(10));
-        $request->session()->put($cacheKey, $otp);
+        if ($request->hasSession()) {
+            $request->session()->put($cacheKey, $otp);
+        }
 
-        Log::info("SMS OTP dispatched for {$phone} ({$cleanPhone}): {$otp}");
-
-        // If Twilio SMS credentials are provided, dispatch real SMS
         $twilioSid = config('services.twilio.sid');
         $twilioToken = config('services.twilio.token');
         $twilioFrom = config('services.twilio.from');
+        $twilioVerifySid = config('services.twilio.verify_sid');
 
-        if ($twilioSid && $twilioToken && $twilioFrom) {
+        $isTwilioConfigured = $this->hasTwilioConfig();
+
+        if ($isTwilioConfigured) {
             try {
-                $targetPhone = str_starts_with($phone, '+') ? $phone : ('+91' . ltrim($cleanPhone, '0'));
-                $response = Http::withBasicAuth($twilioSid, $twilioToken)
-                    ->asForm()
-                    ->post("https://api.twilio.com/2010-04-01/Accounts/{$twilioSid}/Messages.json", [
-                        'From' => $twilioFrom,
-                        'To' => $targetPhone,
-                        'Body' => "Your Sondhi Atelier verification code is {$otp}. Valid for 10 minutes.",
-                    ]);
+                if (!empty($twilioVerifySid)) {
+                    // Twilio Verify API v2
+                    $verifyUrl = "https://verify.twilio.com/v2/Services/{$twilioVerifySid}/Verifications";
+                    $response = Http::withBasicAuth($twilioSid, $twilioToken)
+                        ->asForm()
+                        ->post($verifyUrl, [
+                            'To' => $e164Phone,
+                            'Channel' => 'sms',
+                        ]);
 
-                if ($response->successful()) {
-                    Log::info("Twilio SMS successfully dispatched to {$targetPhone}");
+                    $resData = $response->json();
+                    if (!$response->successful()) {
+                        $errMsg = $resData['message'] ?? 'Twilio Verify service rejected request.';
+                        Log::error("Twilio Verify dispatch error ({$response->status()}): " . json_encode($resData));
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Twilio Verify error: {$errMsg}",
+                        ], 422);
+                    }
+
+                    Log::info("Twilio Verify SMS dispatched to {$e164Phone}, SID: " . ($resData['sid'] ?? 'N/A'));
                 } else {
-                    Log::warning("Twilio SMS dispatch failed: " . $response->body());
+                    // Twilio Programmable SMS API with generated 6-digit OTP
+                    $smsUrl = "https://api.twilio.com/2010-04-01/Accounts/{$twilioSid}/Messages.json";
+                    $response = Http::withBasicAuth($twilioSid, $twilioToken)
+                        ->asForm()
+                        ->post($smsUrl, [
+                            'From' => $twilioFrom,
+                            'To' => $e164Phone,
+                            'Body' => "Your Sondhi Atelier verification code is {$otp}. Valid for 10 minutes. Do not share this code.",
+                        ]);
+
+                    $resData = $response->json();
+                    if (!$response->successful()) {
+                        $errMsg = $resData['message'] ?? 'Twilio SMS failed to dispatch.';
+                        Log::error("Twilio SMS dispatch failed ({$response->status()}): " . json_encode($resData));
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Twilio error: {$errMsg}",
+                        ], 422);
+                    }
+
+                    Log::info("Twilio SMS successfully dispatched to {$e164Phone}, Message SID: " . ($resData['sid'] ?? 'N/A'));
                 }
+
+                // In live Twilio mode, DO NOT return the OTP in the JSON response
+                return response()->json([
+                    'success' => true,
+                    'is_demo' => false,
+                    'message' => "A 6-digit verification code was sent via SMS to {$e164Phone}.",
+                    'phone' => $rawPhone,
+                    'e164_phone' => $e164Phone,
+                    'expires_in' => 600,
+                ]);
+
             } catch (\Throwable $e) {
                 Log::error("Twilio SMS dispatch exception: " . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Twilio network/connection failure: ' . $e->getMessage(),
+                ], 500);
             }
         }
 
+        // Demo fallback ONLY when Twilio API credentials are not provided in .env
+        Log::info("Demo 6-digit SMS OTP generated for {$rawPhone} ({$e164Phone}): {$otp}");
+
         return response()->json([
             'success' => true,
-            'message' => "Verification code dispatched successfully to {$phone}",
-            'phone' => $phone,
+            'is_demo' => true,
+            'message' => "Demo mode: SMS code generated (configure Twilio in .env for real SMS delivery).",
+            'phone' => $rawPhone,
+            'e164_phone' => $e164Phone,
             'otp' => $otp,
             'expires_in' => 600,
         ]);
@@ -269,15 +360,52 @@ class AuthController extends Controller
             'otp' => 'required|string|min:4|max:10',
         ]);
 
-        $phone = trim($validated['phone']);
-        $cleanPhone = preg_replace('/\D/', '', $phone);
+        $rawPhone = trim($validated['phone']);
+        $e164Phone = $this->formatE164Phone($rawPhone);
+        $cleanPhoneDigits = preg_replace('/\D/', '', $e164Phone);
         $inputOtp = trim($validated['otp']);
 
-        $cacheKey = 'otp_' . $cleanPhone;
-        $cachedOtp = Cache::get($cacheKey) ?: $request->session()->get($cacheKey);
+        $isTwilioConfigured = $this->hasTwilioConfig();
+        $twilioVerifySid = config('services.twilio.verify_sid');
 
-        // Accept cached OTP or recognized demo codes
-        $isValid = ($cachedOtp && $cachedOtp === $inputOtp) || in_array($inputOtp, ['8421', '1234']);
+        $isValid = false;
+
+        // If Twilio Verify service is active
+        if ($isTwilioConfigured && !empty($twilioVerifySid)) {
+            try {
+                $twilioSid = config('services.twilio.sid');
+                $twilioToken = config('services.twilio.token');
+                $checkUrl = "https://verify.twilio.com/v2/Services/{$twilioVerifySid}/VerificationCheck";
+
+                $response = Http::withBasicAuth($twilioSid, $twilioToken)
+                    ->asForm()
+                    ->post($checkUrl, [
+                        'To' => $e164Phone,
+                        'Code' => $inputOtp,
+                    ]);
+
+                $resData = $response->json();
+                if ($response->successful() && ($resData['status'] ?? '') === 'approved') {
+                    $isValid = true;
+                } else {
+                    Log::warning("Twilio Verify check rejected for {$e164Phone}: " . json_encode($resData));
+                }
+            } catch (\Throwable $e) {
+                Log::error("Twilio Verify check exception: " . $e->getMessage());
+            }
+        } else {
+            // Verify against cached 6-digit OTP
+            $cacheKey = 'otp_' . $cleanPhoneDigits;
+            $cachedOtp = Cache::get($cacheKey) ?: ($request->hasSession() ? $request->session()->get($cacheKey) : null);
+
+            if ($cachedOtp && $cachedOtp === $inputOtp) {
+                $isValid = true;
+                Cache::forget($cacheKey);
+            } elseif (!$isTwilioConfigured && in_array($inputOtp, ['8421', '842100', '123456'])) {
+                // Demo fallback only allowed when Twilio is NOT configured
+                $isValid = true;
+            }
+        }
 
         if (!$isValid) {
             return response()->json([
@@ -286,13 +414,15 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $request->session()->put('verified_phone_' . $cleanPhone, true);
-        Cache::forget($cacheKey);
+        if ($request->hasSession()) {
+            $request->session()->put('verified_phone_' . $cleanPhoneDigits, true);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Mobile number verified successfully.',
-            'phone' => $phone,
+            'phone' => $rawPhone,
+            'e164_phone' => $e164Phone,
             'verified' => true,
         ]);
     }
