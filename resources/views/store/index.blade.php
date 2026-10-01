@@ -609,10 +609,6 @@
             <nav
                 class="hidden items-center gap-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-atelier-muted lg:flex">
                 <a href="#collection" class="atelier-nav-link hover:text-atelier-cream">Signature Scents</a>
-                <a href="#custom-studio"
-                    class="atelier-nav-link hover:text-atelier-cream flex items-center gap-1.5 text-luxe-gold">
-                    <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Custom Studio
-                </a>
                 <a href="#rituals" class="atelier-nav-link hover:text-atelier-cream">Candle Rituals</a>
                 <a href="#story" class="atelier-nav-link hover:text-atelier-cream">Our Atelier</a>
                 <a href="#reviews" class="atelier-nav-link hover:text-atelier-cream">Collector Notes</a>
@@ -803,11 +799,6 @@
                         <i
                             class="fa-solid fa-arrow-right text-[11px] transition-transform duration-300 group-hover:translate-x-1"></i>
                     </a>
-                    <a href="#custom-studio"
-                        class="flex items-center gap-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-atelier-cream transition-all duration-300 hover:border-luxe-gold hover:bg-white/10 hover:scale-105">
-                        <i class="fa-solid fa-sparkles text-luxe-gold"></i>
-                        <span>Custom Candle Studio</span>
-                    </a>
                 </div>
 
                 <!-- Trust Metrics Bar -->
@@ -881,10 +872,10 @@
                         <i class="fa-solid fa-heart text-white group-hover:scale-125 transition-transform text-xs"></i>
                         <span>Send Love Sparks</span>
                     </button>
-                    <a href="#custom-studio"
+                    <a href="#collection"
                         class="flex items-center gap-2.5 rounded-full border border-rose-400/30 bg-white/5 backdrop-blur-md px-7 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-atelier-cream transition-all duration-300 hover:border-luxe-gold hover:bg-white/10 hover:scale-105">
-                        <i class="fa-solid fa-wand-magic-sparkles text-luxe-gold"></i>
-                        <span>Pour Bespoke Candle</span>
+                        <i class="fa-solid fa-sparkles text-luxe-gold"></i>
+                        <span>Explore Scents</span>
                     </a>
                 </div>
 
@@ -1532,8 +1523,6 @@
                         <li><a href="#collection" class="hover:text-atelier-cream transition">Warm Spiced Amber</a></li>
                         <li><a href="#collection" class="hover:text-atelier-cream transition">Woody & Smoked Oud</a>
                         </li>
-                        <li><a href="#custom-studio" class="text-luxe-gold hover:text-white transition">Custom Atelier
-                                Studio</a></li>
                     </ul>
                 </div>
 
@@ -1594,8 +1583,8 @@
     </button>
 
     <!-- Core Auth & App Logic -->
-    <script src="{{ asset('js/auth.js') }}"></script>
-    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/auth.js') }}?v={{ filemtime(public_path('js/auth.js')) }}"></script>
+    <script src="{{ asset('js/app.js') }}?v={{ filemtime(public_path('js/app.js')) }}"></script>
 </body>
 
 </html>
