@@ -36,12 +36,14 @@ return [
     ],
 
     'payment' => [
-        'gateway_key' => env('PAYMENT_GATEWAY_KEY', env('RAZORPAY_KEY_SECRET', 'UqMzOjcFVeDzYgPKFBx1QHVg')),
+        'gateway_key' => env('PAYMENT_GATEWAY_KEY', env('RAZORPAY_KEY_SECRET')),
     ],
 
     'razorpay' => [
-        'key' => env('RAZORPAY_KEY_ID', 'rzp_live_••••1102'),
-        'secret' => env('RAZORPAY_KEY_SECRET', 'UqMzOjcFVeDzYgPKFBx1QHVg'),
+        'key' => env('RAZORPAY_KEY_ID'),
+        'key_id' => env('RAZORPAY_KEY_ID'),
+        'secret' => env('RAZORPAY_KEY_SECRET'),
+        'key_secret' => env('RAZORPAY_KEY_SECRET'),
     ],
 
     'twilio' => [
