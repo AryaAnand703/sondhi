@@ -8,7 +8,7 @@ const profileState = {
         lastName: 'Anand',
         email: 'arya@example.com',
         phone: '+91 98765 43210',
-        tier: 'VIP Collector',
+        tier: 'Patron',
         points: 1450,
         membership: {
             tier: 'The Flame Circle',

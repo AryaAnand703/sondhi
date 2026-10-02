@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
                 'username' => 'arya',
                 'password' => Hash::make('arya123'),
                 'role' => 'customer',
-                'tier' => 'VIP Collector',
+                'tier' => 'Patron',
                 'points' => 1450,
                 'phone' => '+91 98765 43210',
             ]

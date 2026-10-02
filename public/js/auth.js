@@ -19,84 +19,16 @@
             email: 'arya@example.com',
             password: 'arya123',
             role: 'customer',
-            tier: 'VIP Collector',
-            points: 1450,
+            tier: 'Patron',
+            points: 0,
             phone: '+91 98765 43210',
             createdAt: '2024-10-15',
-            orders: [
-                {
-                    id: 'SND-9014',
-                    date: 'September 12, 2026',
-                    status: 'Pouring & Curing',
-                    statusCode: 'pouring',
-                    statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control',
-                    itemsCount: 3,
-                    total: 2647,
-                    estimatedDelivery: 'Sep 21, 2026',
-                    candles: [
-                        'Lavender & Golden Amber (280g) × 2',
-                        'Rain on Earth Mitti Attar (260g) × 1'
-                    ]
-                },
-                {
-                    id: 'SND-8890',
-                    date: 'August 15, 2026',
-                    status: 'Delivered',
-                    statusCode: 'delivered',
-                    statusDesc: 'Delivered via White-Glove Courier to Mumbai Sanctuary',
-                    itemsCount: 1,
-                    total: 2499,
-                    estimatedDelivery: 'Delivered Aug 18, 2026',
-                    candles: [
-                        'Flame Circle Q3 Reserve Box (Monsoon Vetiver)'
-                    ]
-                },
-                {
-                    id: 'SND-8412',
-                    date: 'June 10, 2026',
-                    status: 'Delivered',
-                    statusCode: 'delivered',
-                    statusDesc: 'Delivered with bespoke wax sealing',
-                    itemsCount: 2,
-                    total: 2248,
-                    estimatedDelivery: 'Delivered Jun 14, 2026',
-                    candles: [
-                        'Sandalwood & Velvet Oud (300g) × 1',
-                        'Neroli Blossom & Petitgrain (260g) × 1'
-                    ]
-                }
-            ],
-            addresses: [
-                {
-                    id: 'addr-1',
-                    label: 'Primary Sanctuary Residence',
-                    street: '7B, Sea Face Promenade, Worli',
-                    city: 'Mumbai',
-                    pincode: '400018',
-                    isDefault: true
-                },
-                {
-                    id: 'addr-2',
-                    label: 'Art & Design Studio',
-                    street: '402 The Loft, Industrial Estate, Lower Parel',
-                    city: 'Mumbai',
-                    pincode: '400013',
-                    isDefault: false
-                }
-            ],
-            formulas: [
-                {
-                    id: 'FORMULA-771',
-                    name: 'Midnight Monsoon & Oud',
-                    dateCreated: 'Aug 24, 2026',
-                    vessel: 'Matte Obsidian Ceramic',
-                    wick: 'Dual Crackling Cedar Wood',
-                    top: 'Mitti Attar Petrichor & Ozone',
-                    heart: 'Midnight Damask Rose & Nutmeg',
-                    base: 'Smoked Cambodian Oud & Sandalwood',
-                    notes: 'Intimate evening meditation candle with deep earthy petrichor throw.'
-                }
-            ]
+            orders: [],
+            addresses: [],
+            formulas: [],
+            paymentMethods: [],
+            invoices: [],
+            fragranceBio: ''
         },
         {
             id: 'USR-002',
@@ -243,7 +175,11 @@
                 // Sync current user with latest in all users
                 const all = this.getAllUsers();
                 const matched = all.find(u => u.id === user.id || u.username.toLowerCase() === user.username.toLowerCase());
-                return matched || user;
+                const res = matched || user;
+                if (res && res.tier === 'VIP Collector') {
+                    res.tier = 'Patron';
+                }
+                return res;
             } catch (e) {
                 return null;
             }
@@ -370,11 +306,14 @@
                 password: cleanPass,
                 role: role,
                 tier: 'Patron',
-                points: 100, // Welcome gift points
+                points: 0,
                 createdAt: new Date().toISOString().split('T')[0],
                 orders: [],
                 addresses: [],
-                formulas: []
+                formulas: [],
+                paymentMethods: [],
+                invoices: [],
+                fragranceBio: ''
             };
 
             users.push(newUser);

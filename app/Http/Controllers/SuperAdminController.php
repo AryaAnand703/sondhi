@@ -58,7 +58,7 @@ class SuperAdminController extends Controller
 
         $oldRole = $targetUser->role;
         $targetUser->role = $validated['role'];
-        if ($targetUser->role === 'admin' && $targetUser->tier === 'VIP Collector') {
+        if ($targetUser->role === 'admin' && ($targetUser->tier === 'VIP Collector' || $targetUser->tier === 'Patron')) {
             $targetUser->tier = 'Master Artisan & Manager';
         } elseif ($targetUser->role === 'superadmin') {
             $targetUser->tier = 'Super Admin';

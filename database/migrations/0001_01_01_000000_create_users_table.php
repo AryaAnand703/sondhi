@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('role')->default('customer'); // customer, admin, superadmin
-            $table->string('tier')->default('VIP Collector');
+            $table->string('tier')->default('Patron');
             $table->integer('points')->default(0);
             $table->string('phone')->nullable();
             $table->timestamp('email_verified_at')->nullable();

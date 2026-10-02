@@ -112,8 +112,8 @@ class AuthController extends Controller
             'username' => $username,
             'password' => Hash::make($validated['password']),
             'role' => 'customer',
-            'tier' => 'VIP Collector',
-            'points' => 100, // Welcome reward points
+            'tier' => 'Patron',
+            'points' => 0,
             'phone' => $phone,
         ]);
 

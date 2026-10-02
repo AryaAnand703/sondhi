@@ -4,164 +4,55 @@
 
 const profileState = {
     user: {
-        firstName: 'Arya',
-        lastName: 'Anand',
-        email: 'arya@example.com',
-        phone: '+91 98765 43210',
-        tier: 'VIP Collector',
-        points: 1450,
-        membership: {
-            tier: 'The Flame Circle',
-            quarterlyPrice: 2499,
-            nextBilling: 'November 15, 2026',
-            status: 'Active',
-            perks: [
-                'Complimentary bespoke wax sealing',
-                'Priority private pour reservations',
-                'Quarterly reserve fragrance gift box',
-                'Free temperature-controlled courier delivery'
-            ]
-        }
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        tier: 'Patron',
+        points: 0,
+        fragranceBio: '',
+        membership: null
     },
-    paymentMethods: [
-        {
-            id: 'pm-1',
-            type: 'visa',
-            brand: 'Visa Signature',
-            last4: '8842',
-            exp: '09/28',
-            holder: 'Arya Anand',
-            isDefault: true
-        },
-        {
-            id: 'pm-2',
-            type: 'mastercard',
-            brand: 'Mastercard World Elite',
-            last4: '3019',
-            exp: '04/27',
-            holder: 'Arya Anand',
-            isDefault: false
-        },
-        {
-            id: 'pm-3',
-            type: 'upi',
-            brand: 'UPI / Direct Mandate',
-            last4: 'arya@okhdfcbank',
-            exp: 'Autopay Verified',
-            holder: 'Arya Anand',
-            isDefault: false
-        }
-    ],
-    invoices: [
-        {
-            id: 'INV-2026-084',
-            date: 'Sep 12, 2026',
-            description: 'Order #SND-9014 · 2x Lavender & Golden Amber, 1x Rain on Earth',
-            amount: 2647,
-            status: 'Paid',
-            items: [
-                { name: 'Lavender & Golden Amber (280g)', qty: 2, price: 899 },
-                { name: 'Rain on Earth Mitti Attar (260g)', qty: 1, price: 849 }
-            ],
-            tax: 283.60,
-            subtotal: 2647
-        },
-        {
-            id: 'INV-2026-071',
-            date: 'Aug 15, 2026',
-            description: 'Flame Circle Quarterly Allocation — Q3 Reserve Edition',
-            amount: 2499,
-            status: 'Paid',
-            items: [
-                { name: 'Flame Circle Q3 Reserve Curated Atelier Box', qty: 1, price: 2499 }
-            ],
-            tax: 267.75,
-            subtotal: 2499
-        },
-        {
-            id: 'INV-2026-055',
-            date: 'Jul 28, 2026',
-            description: 'Bespoke Atelier commission: "Midnight Oud in Kashmir"',
-            amount: 1499,
-            status: 'Paid',
-            items: [
-                { name: 'Custom Studio Bespoke Formulation #F-402', qty: 1, price: 1499 }
-            ],
-            tax: 160.60,
-            subtotal: 1499
-        },
-        {
-            id: 'INV-2026-039',
-            date: 'Jun 10, 2026',
-            description: 'Order #SND-8412 · Sandalwood & Velvet Oud Signature',
-            amount: 1299,
-            status: 'Paid',
-            items: [
-                { name: 'Sandalwood & Velvet Oud (300g)', qty: 1, price: 1299 }
-            ],
-            tax: 139.18,
-            subtotal: 1299
-        }
-    ],
+    paymentMethods: [],
+    invoices: [],
     orders: [],
-    formulas: [
-        {
-            id: 'FORMULA-771',
-            name: 'Midnight Monsoon & Oud',
-            dateCreated: 'Aug 24, 2026',
-            vessel: 'Matte Obsidian Ceramic',
-            wick: 'Dual Crackling Cedar Wood',
-            top: 'Mitti Attar Petrichor & Ozone',
-            heart: 'Midnight Damask Rose & Nutmeg',
-            base: 'Smoked Cambodian Oud & Sandalwood',
-            notes: 'Intimate evening meditation candle with deep earthy petrichor throw.'
-        },
-        {
-            id: 'FORMULA-604',
-            name: 'Kashmiri Bergamot & Honeycomb',
-            dateCreated: 'Jul 11, 2026',
-            vessel: 'Smoked Amber Glass',
-            wick: 'Braided Egyptian Organic Cotton',
-            top: 'Sunlit Bergamot & Neroli Water',
-            heart: 'Wildflower Honey & Cardamom',
-            base: 'Creamy Tonka Bean & Cedar',
-            notes: 'Invigorating sunrise formulation for reading sanctuary.'
-        }
-    ],
-    addresses: [
-        {
-            id: 'addr-1',
-            label: 'Primary Sanctuary Residence',
-            street: '7B, Sea Face Promenade, Worli',
-            city: 'Mumbai',
-            pincode: '400018',
-            isDefault: true
-        },
-        {
-            id: 'addr-2',
-            label: 'Art & Design Studio',
-            street: '402 The Loft, Industrial Estate, Lower Parel',
-            city: 'Mumbai',
-            pincode: '400013',
-            isDefault: false
-        }
-    ]
+    formulas: [],
+    addresses: []
 };
 
 // --- Sync Profile With Central Auth State ---
 function syncProfileWithAuth() {
-    if (!window.sondhiAuth) return;
-    const user = window.sondhiAuth.getCurrentUser();
+    let user = null;
+    if (window.sondhiAuth && typeof window.sondhiAuth.getCurrentUser === 'function') {
+        user = window.sondhiAuth.getCurrentUser();
+    }
+    if (!user && window.serverUser) {
+        user = {
+            id: window.serverUser.id,
+            username: window.serverUser.username,
+            fullName: window.serverUser.name,
+            email: window.serverUser.email,
+            phone: window.serverUser.phone,
+            tier: window.serverUser.tier || 'Patron',
+            points: window.serverUser.points || 0
+        };
+    }
+
     if (user) {
-        const names = (user.fullName || 'Patron').split(' ');
-        profileState.user.firstName = names[0] || 'Patron';
+        const names = (user.fullName || user.name || '').trim().split(/\s+/);
+        profileState.user.firstName = names[0] || user.username || 'Patron';
         profileState.user.lastName = names.slice(1).join(' ') || '';
         profileState.user.email = user.email || '';
-        profileState.user.phone = user.phone || '+91 98765 43210';
-        profileState.user.tier = user.tier || 'Patron';
-        if (user.orders && user.orders.length) {
+        profileState.user.phone = user.phone || '';
+        profileState.user.tier = (user.tier === 'VIP Collector' ? 'Patron' : (user.tier || 'Patron'));
+        profileState.user.points = typeof user.points === 'number' ? user.points : 0;
+        profileState.user.fragranceBio = user.fragranceBio || '';
+        profileState.user.membership = user.membership || null;
+
+        // Sync orders: only real user orders or server orders (no fake demo orders)
+        if (Array.isArray(user.orders) && user.orders.length) {
             profileState.orders = user.orders;
-        } else if (window.serverOrders && window.serverOrders.length) {
+        } else if (Array.isArray(window.serverOrders) && window.serverOrders.length) {
             profileState.orders = window.serverOrders.map(so => ({
                 id: so.order_number || ('SND-' + so.id),
                 date: new Date(so.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -171,82 +62,50 @@ function syncProfileWithAuth() {
                 itemsCount: so.items_count || 1,
                 total: parseFloat(so.total || 0),
                 subtotal: parseFloat(so.subtotal || so.total || 0),
-                shippingAddress: so.shipping_address || 'Primary Sanctuary Residence, Mumbai',
+                shippingAddress: so.shipping_address || '',
                 paymentMethod: so.payment_method || 'Prepaid Card / UPI',
                 estimatedDelivery: so.estimated_delivery || '7-9 Business Days',
                 items: so.items || []
             }));
-        } else if (!profileState.orders || profileState.orders.length === 0) {
-            profileState.orders = [
-                {
-                    id: 'SND-9014',
-                    date: 'Sep 12, 2026',
-                    status: 'Pouring & Curing',
-                    statusCode: 'pouring',
-                    statusDesc: 'Botanical soy wax setting in ceramic vessels under ambient temperature control',
-                    itemsCount: 3,
-                    total: 2647,
-                    subtotal: 2647,
-                    estimatedDelivery: 'Sep 21, 2026',
-                    shippingAddress: '7B, Sea Face Promenade, Worli, Mumbai - 400018',
-                    paymentMethod: 'UPI Direct / HDFC Bank',
-                    candles: [
-                        'Lavender & Golden Amber (280g) × 2',
-                        'Rain on Earth Mitti Attar (260g) × 1'
-                    ]
-                },
-                {
-                    id: 'SND-8890',
-                    date: 'Aug 15, 2026',
-                    status: 'Delivered',
-                    statusCode: 'delivered',
-                    statusDesc: 'Delivered via White-Glove Courier to Mumbai Sanctuary',
-                    itemsCount: 1,
-                    total: 2499,
-                    subtotal: 2499,
-                    estimatedDelivery: 'Delivered Aug 18, 2026',
-                    shippingAddress: '7B, Sea Face Promenade, Worli, Mumbai - 400018',
-                    paymentMethod: 'Visa Signature •••• 8842',
-                    candles: [
-                        'Flame Circle Q3 Reserve Box (Monsoon Vetiver) × 1'
-                    ]
-                },
-                {
-                    id: 'SND-8412',
-                    date: 'Jun 10, 2026',
-                    status: 'Delivered',
-                    statusCode: 'delivered',
-                    statusDesc: 'Delivered with bespoke wax sealing and wooden wick care kit',
-                    itemsCount: 2,
-                    total: 2098,
-                    subtotal: 2248,
-                    estimatedDelivery: 'Delivered Jun 14, 2026',
-                    shippingAddress: '402 The Loft, Industrial Estate, Lower Parel, Mumbai - 400013',
-                    paymentMethod: 'Mastercard World Elite •••• 3019',
-                    candles: [
-                        'Sandalwood & Velvet Oud (300g) × 1',
-                        'Neroli Blossom & Petitgrain (260g) × 1'
-                    ]
-                }
-            ];
+        } else {
+            profileState.orders = [];
         }
 
-        if (user.addresses && user.addresses.length) {
+        // Sync addresses: only user or server addresses
+        if (Array.isArray(user.addresses) && user.addresses.length) {
             profileState.addresses = user.addresses;
+        } else if (Array.isArray(window.serverAddresses) && window.serverAddresses.length) {
+            profileState.addresses = window.serverAddresses;
+        } else {
+            profileState.addresses = [];
         }
-        if (user.formulas && user.formulas.length) {
+
+        // Sync formulas: only user or server custom blends
+        if (Array.isArray(user.formulas) && user.formulas.length) {
             profileState.formulas = user.formulas;
+        } else if (Array.isArray(window.serverFormulas) && window.serverFormulas.length) {
+            profileState.formulas = window.serverFormulas;
+        } else {
+            profileState.formulas = [];
         }
+
+        // Sync payment methods
+        profileState.paymentMethods = Array.isArray(user.paymentMethods) ? user.paymentMethods : [];
+
+        // Sync invoices
+        profileState.invoices = Array.isArray(user.invoices) ? user.invoices : [];
 
         // Populate form inputs
         const inputFirst = document.getElementById('input-first-name');
         const inputLast = document.getElementById('input-last-name');
         const inputEmail = document.getElementById('input-email');
         const inputPhone = document.getElementById('input-phone');
+        const inputBio = document.getElementById('input-fragrance-bio');
         if (inputFirst) inputFirst.value = profileState.user.firstName;
         if (inputLast) inputLast.value = profileState.user.lastName;
         if (inputEmail) inputEmail.value = profileState.user.email;
         if (inputPhone) inputPhone.value = profileState.user.phone;
+        if (inputBio) inputBio.value = profileState.user.fragranceBio;
 
         // Toggle admin/superadmin workspace pills based on role
         const adminPill = document.getElementById('pill-admin-link');
@@ -257,7 +116,14 @@ function syncProfileWithAuth() {
         if (superPill) {
             superPill.style.display = (user && user.role === 'superadmin') ? 'inline-flex' : 'none';
         }
+    } else {
+        profileState.orders = [];
+        profileState.addresses = [];
+        profileState.formulas = [];
+        profileState.paymentMethods = [];
+        profileState.invoices = [];
     }
+}
 }
 
 // --- DOM Loaded Initialization ---
@@ -326,7 +192,60 @@ function switchProfileTab(tabId) {
 // --- Render Payment Methods (Billing Section) ---
 function renderPaymentMethods() {
     const container = document.getElementById('payment-methods-grid');
+    const primaryIcon = document.getElementById('primary-card-icon');
+    const primaryNumber = document.getElementById('primary-card-number');
+    const primaryHolder = document.getElementById('primary-card-holder');
+    const primaryExp = document.getElementById('primary-card-exp');
+    const primaryStatus = document.getElementById('primary-card-status');
+    const patronageTotal = document.getElementById('billing-patronage-total');
+
+    // Calculate real patronage total from user orders
+    const totalSpent = (profileState.orders || []).reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+    if (patronageTotal) patronageTotal.textContent = `₹${totalSpent.toLocaleString()}`;
+
+    // Update primary card widget
+    const primary = (profileState.paymentMethods || []).find(pm => pm.isDefault) || (profileState.paymentMethods || [])[0];
+    if (primary) {
+        if (primaryIcon) {
+            primaryIcon.className = primary.type === 'visa' 
+                ? 'fa-brands fa-cc-visa text-xl text-blue-400' 
+                : (primary.type === 'mastercard' ? 'fa-brands fa-cc-mastercard text-xl text-amber-500' : 'fa-solid fa-building-columns text-xl text-emerald-400');
+        }
+        if (primaryNumber) primaryNumber.textContent = primary.type === 'upi' ? primary.last4 : `•••• •••• •••• ${primary.last4}`;
+        if (primaryHolder) primaryHolder.textContent = primary.holder || 'Primary Cardholder';
+        if (primaryExp) primaryExp.textContent = primary.exp ? `Exp: ${primary.exp}` : '';
+        if (primaryStatus) {
+            primaryStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-luxe-sage"></span> Verified & Secure';
+            primaryStatus.className = 'inline-flex items-center gap-1.5 text-xs text-luxe-sage';
+        }
+    } else {
+        if (primaryIcon) primaryIcon.className = 'fa-regular fa-credit-card text-xl text-atelier-muted';
+        if (primaryNumber) primaryNumber.textContent = 'No Card On File';
+        if (primaryHolder) primaryHolder.textContent = 'Add a card for 1-click checkout';
+        if (primaryExp) primaryExp.textContent = '';
+        if (primaryStatus) {
+            primaryStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-atelier-muted"></span> 256-bit Encrypted';
+            primaryStatus.className = 'inline-flex items-center gap-1.5 text-xs text-atelier-muted';
+        }
+    }
+
     if (!container) return;
+
+    if (!profileState.paymentMethods || profileState.paymentMethods.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-10 px-4 rounded-xl border border-white/5 bg-atelier-card/30">
+                <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-atelier-muted text-lg mx-auto mb-3">
+                    <i class="fa-solid fa-credit-card"></i>
+                </div>
+                <h4 class="font-display text-base font-semibold text-atelier-cream">No Payment Methods on File</h4>
+                <p class="text-xs text-atelier-muted max-w-sm mx-auto mt-1 mb-4">Add your credit/debit card or UPI handle for faster one-tap checkout.</p>
+                <button onclick="openAddCardModal()" class="px-4 py-2 rounded-xl bg-luxe-gold/20 border border-luxe-gold/40 text-luxe-gold text-xs font-semibold uppercase tracking-wider hover:bg-luxe-gold hover:text-atelier-base transition">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Payment Method
+                </button>
+            </div>
+        `;
+        return;
+    }
 
     container.innerHTML = profileState.paymentMethods.map(pm => {
         const iconClass = pm.type === 'visa' 
@@ -787,6 +706,22 @@ function renderFormulas() {
     const container = document.getElementById('formulas-grid');
     if (!container) return;
 
+    if (!profileState.formulas || profileState.formulas.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12 px-4 rounded-2xl border border-white/5 bg-atelier-card/30">
+                <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-atelier-muted text-lg mx-auto mb-3">
+                    <i class="fa-solid fa-flask-vial"></i>
+                </div>
+                <h4 class="font-display text-base font-semibold text-atelier-cream">No Bespoke Blends Formulated</h4>
+                <p class="text-xs text-atelier-muted max-w-sm mx-auto mt-1 mb-4">Commission custom atelier candle blends curated with your chosen top, heart, and base notes.</p>
+                <button onclick="openFormulaModal()" class="px-4 py-2 rounded-xl bg-luxe-gold/20 border border-luxe-gold/40 text-luxe-gold text-xs font-semibold uppercase tracking-wider hover:bg-luxe-gold hover:text-atelier-base transition">
+                    <i class="fa-solid fa-plus mr-1"></i> Commission New Blend
+                </button>
+            </div>
+        `;
+        return;
+    }
+
     container.innerHTML = profileState.formulas.map(f => `
         <div class="rounded-xl border border-white/10 bg-atelier-surface p-5 flex flex-col justify-between hover:border-luxe-gold/40 transition">
             <div>
@@ -823,6 +758,22 @@ function renderFormulas() {
 function renderAddresses() {
     const container = document.getElementById('addresses-grid');
     if (!container) return;
+
+    if (!profileState.addresses || profileState.addresses.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12 px-4 rounded-2xl border border-white/5 bg-atelier-card/30">
+                <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-atelier-muted text-lg mx-auto mb-3">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <h4 class="font-display text-base font-semibold text-atelier-cream">No Sanctuary Addresses Saved</h4>
+                <p class="text-xs text-atelier-muted max-w-sm mx-auto mt-1 mb-4">Add your residence or studio address for seamless white-glove candle delivery.</p>
+                <button onclick="openAddressModal()" class="px-4 py-2 rounded-xl bg-luxe-gold/20 border border-luxe-gold/40 text-luxe-gold text-xs font-semibold uppercase tracking-wider hover:bg-luxe-gold hover:text-atelier-base transition">
+                    <i class="fa-solid fa-plus mr-1"></i> Add New Address
+                </button>
+            </div>
+        `;
+        return;
+    }
 
     container.innerHTML = profileState.addresses.map(addr => `
         <div class="rounded-xl border ${addr.isDefault ? 'border-luxe-gold/40 bg-flame-soft/10' : 'border-white/10 bg-atelier-surface'} p-5 flex flex-col justify-between">
@@ -1013,32 +964,48 @@ function setDefaultAddress(id) {
 }
 
 function deleteAddress(id) {
-    if (profileState.addresses.length <= 1) {
-        showToast('You must keep at least one address.', true);
-        return;
-    }
     profileState.addresses = profileState.addresses.filter(a => a.id !== id);
     renderAddresses();
     showToast('Address removed.');
 }
 
 function saveProfileDetails() {
-    const first = document.getElementById('input-first-name').value;
-    const last = document.getElementById('input-last-name').value;
-    const email = document.getElementById('input-email').value;
-    const phone = document.getElementById('input-phone') ? document.getElementById('input-phone').value : '';
+    const first = (document.getElementById('input-first-name')?.value || '').trim();
+    const last = (document.getElementById('input-last-name')?.value || '').trim();
+    const email = (document.getElementById('input-email')?.value || '').trim();
+    const phone = (document.getElementById('input-phone')?.value || '').trim();
+    const bio = (document.getElementById('input-fragrance-bio')?.value || '').trim();
 
     profileState.user.firstName = first;
     profileState.user.lastName = last;
     profileState.user.email = email;
     profileState.user.phone = phone;
+    profileState.user.fragranceBio = bio;
 
     if (window.sondhiAuth) {
         window.sondhiAuth.updateUser({
             fullName: `${first} ${last}`.trim(),
             email: email,
-            phone: phone
+            phone: phone,
+            fragranceBio: bio
         });
+    }
+
+    // Persist to server if session exists
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (csrfToken) {
+        fetch('/profile/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                name: `${first} ${last}`.trim(),
+                phone: phone
+            })
+        }).catch(() => {});
     }
 
     updateIdentityHeader();
@@ -1046,8 +1013,8 @@ function saveProfileDetails() {
 }
 
 function updateIdentityHeader() {
-    const fullName = `${profileState.user.firstName} ${profileState.user.lastName}`.trim() || 'Patron';
-    const initials = `${(profileState.user.firstName[0] || 'P')}${(profileState.user.lastName[0] || '')}`.toUpperCase();
+    const fullName = `${profileState.user.firstName || ''} ${profileState.user.lastName || ''}`.trim() || 'Patron';
+    const initials = `${(profileState.user.firstName[0] || fullName[0] || 'P')}${(profileState.user.lastName[0] || '')}`.toUpperCase();
 
     const heroName = document.getElementById('hero-user-name');
     const headerName = document.getElementById('header-user-name');
@@ -1057,19 +1024,25 @@ function updateIdentityHeader() {
     const tierEl = document.getElementById('header-user-tier');
     const statRewards = document.getElementById('stat-rewards-points');
     const statBespoke = document.getElementById('stat-bespoke-formulas');
+    const statOrders = document.getElementById('stat-total-orders');
 
     if (heroName) heroName.textContent = fullName;
     if (headerName) headerName.textContent = fullName;
-    if (heroEmail) heroEmail.textContent = `${profileState.user.email} · Client since 2026`;
+    if (heroEmail) heroEmail.textContent = profileState.user.email ? `${profileState.user.email} · Client since 2026` : 'Client since 2026';
     if (initialsEl) initialsEl.textContent = initials;
     if (avatarEl) avatarEl.textContent = initials;
     if (tierEl) tierEl.textContent = profileState.user.tier || 'Patron';
     if (statRewards) statRewards.textContent = (profileState.user.points || 0).toLocaleString();
     if (statBespoke) statBespoke.textContent = (profileState.formulas || []).length;
+    if (statOrders) statOrders.textContent = (profileState.orders || []).length;
 }
 
 function manageMembershipModal() {
-    showToast('Flame Circle membership is active until November 15, 2026.');
+    if (profileState.user.membership && profileState.user.membership.status === 'Active') {
+        showToast('Flame Circle membership is active.');
+    } else {
+        showToast('Flame Circle tier registration will open for the upcoming artisan reserve.');
+    }
 }
 
 function reorderBatch(orderId) {

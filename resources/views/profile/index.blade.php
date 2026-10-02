@@ -314,11 +314,11 @@
             <!-- User Quick Badge & Actions -->
             <div class="flex items-center gap-3">
                 <div class="text-right hidden sm:block">
-                    <div id="header-user-name" class="text-xs font-semibold text-atelier-cream">Arya Anand</div>
-                    <div class="text-[10px] text-luxe-gold uppercase tracking-wider" id="header-user-tier">Flame Circle Patron</div>
+                    <div id="header-user-name" class="text-xs font-semibold text-atelier-cream">{{ $user->name ?? 'Patron' }}</div>
+                    <div class="text-[10px] text-luxe-gold uppercase tracking-wider" id="header-user-tier">{{ $user->tier ?? 'Patron' }}</div>
                 </div>
                 <div id="header-user-avatar" class="h-10 w-10 rounded-full border border-luxe-gold/40 bg-flame-soft flex items-center justify-center text-luxe-gold font-bold text-sm">
-                    AA
+                    {{ $user ? strtoupper(substr($user->name, 0, 1)) : 'P' }}
                 </div>
                 <div class="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-3">
                     <button id="theme-toggle-btn" onclick="toggleAtelierTheme()" class="theme-toggle-btn p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-atelier-muted hover:text-luxe-gold text-xs transition" title="Switch to Dark Theme" aria-label="Toggle Theme">
@@ -344,7 +344,7 @@
                 <div class="flex items-center gap-5">
                     <div class="relative group cursor-pointer" onclick="openAvatarModal()">
                         <div class="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border-2 border-luxe-gold/50 bg-gradient-to-br from-atelier-card to-atelier-hover flex items-center justify-center text-3xl font-display text-luxe-gold shadow-xl">
-                            <span id="profile-avatar-initials">AA</span>
+                            <span id="profile-avatar-initials">{{ $user ? strtoupper(substr($user->name, 0, 1)) : 'P' }}</span>
                         </div>
                         <div class="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs">
                             <i class="fa-solid fa-camera mr-1"></i> Change
@@ -352,28 +352,24 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-3 flex-wrap">
-                            <h1 id="hero-user-name" class="font-display text-2xl sm:text-3xl font-semibold text-atelier-cream">Arya Anand</h1>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-luxe-gold/15 text-luxe-gold border border-luxe-gold/30">
-                                <i class="fa-solid fa-gem text-[9px]"></i> VIP Collector
-                            </span>
+                            <h1 id="hero-user-name" class="font-display text-2xl sm:text-3xl font-semibold text-atelier-cream">{{ $user->name ?? 'Patron' }}</h1>
                         </div>
-                        <p id="hero-user-email" class="text-xs text-atelier-muted mt-1 font-sans">arya@example.com · Client since October 2024</p>
-                        <p class="text-xs text-atelier-dim mt-1.5 italic font-display">"Smoked Oud & Damask Rose form the sacred atmosphere of my evening meditation."</p>
+                        <p id="hero-user-email" class="text-xs text-atelier-muted mt-1 font-sans">{{ $user->email ?? '' }} · Client since {{ $user && $user->created_at ? $user->created_at->format('Y') : date('Y') }}</p>
                     </div>
                 </div>
 
                 <!-- Quick Metric Counters -->
                 <div class="grid grid-cols-3 gap-4 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-8">
                     <div class="text-center md:text-left">
-                        <div class="font-display text-2xl font-bold text-luxe-gold" id="stat-total-orders">8</div>
+                        <div class="font-display text-2xl font-bold text-luxe-gold" id="stat-total-orders">{{ $orders ? $orders->count() : 0 }}</div>
                         <div class="text-[10px] uppercase tracking-wider text-atelier-muted">Orders Poured</div>
                     </div>
                     <div class="text-center md:text-left">
-                        <div class="font-display text-2xl font-bold text-flame-glow" id="stat-bespoke-formulas">3</div>
+                        <div class="font-display text-2xl font-bold text-flame-glow" id="stat-bespoke-formulas">{{ $formulas ? $formulas->count() : 0 }}</div>
                         <div class="text-[10px] uppercase tracking-wider text-atelier-muted">Custom Blends</div>
                     </div>
                     <div class="text-center md:text-left">
-                        <div class="font-display text-2xl font-bold text-atelier-cream" id="stat-rewards-points">1,450</div>
+                        <div class="font-display text-2xl font-bold text-atelier-cream" id="stat-rewards-points">{{ $user->points ?? 0 }}</div>
                         <div class="text-[10px] uppercase tracking-wider text-atelier-muted">Flame Points</div>
                     </div>
                 </div>
@@ -418,28 +414,28 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">First Name</label>
-                                <input type="text" id="input-first-name" value="Arya" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                                <input type="text" id="input-first-name" value="{{ $user ? explode(' ', $user->name)[0] : '' }}" placeholder="First name" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Last Name</label>
-                                <input type="text" id="input-last-name" value="Anand" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                                <input type="text" id="input-last-name" value="{{ $user && count(explode(' ', $user->name)) > 1 ? implode(' ', array_slice(explode(' ', $user->name), 1)) : '' }}" placeholder="Last name" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Email Address</label>
-                                <input type="email" id="input-email" value="arya@example.com" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                                <input type="email" id="input-email" value="{{ $user->email ?? '' }}" placeholder="your@email.com" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Phone (Direct / WhatsApp)</label>
-                                <input type="tel" id="input-phone" value="+91 98765 43210" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
+                                <input type="tel" id="input-phone" value="{{ $user->phone ?? '' }}" placeholder="+91..." class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-semibold uppercase tracking-wider text-atelier-muted mb-1.5">Atelier Fragrance Philosophy / Sensory Notes</label>
-                            <textarea id="input-fragrance-bio" rows="3" class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition">Smoked Oud & Damask Rose form the sacred atmosphere of my evening meditation. Prefer wooden wicks and slow cold throws.</textarea>
+                            <textarea id="input-fragrance-bio" rows="3" placeholder="Share your fragrance philosophy, sensory notes, or atmosphere preferences..." class="w-full bg-atelier-surface border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-atelier-cream focus:border-luxe-gold outline-none transition"></textarea>
                         </div>
                     </form>
                 </div>
@@ -519,17 +515,17 @@
                     <div>
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs font-semibold uppercase tracking-wider text-atelier-muted">Primary Payment Card</span>
-                            <i class="fa-brands fa-cc-visa text-xl text-blue-400"></i>
+                            <i id="primary-card-icon" class="fa-regular fa-credit-card text-xl text-atelier-muted"></i>
                         </div>
-                        <div class="font-mono text-base text-atelier-cream tracking-wider mt-2">•••• •••• •••• 8842</div>
+                        <div id="primary-card-number" class="font-mono text-base text-atelier-cream tracking-wider mt-2">No Card On File</div>
                         <div class="flex justify-between text-xs text-atelier-muted mt-2">
-                            <span>Arya Anand</span>
-                            <span>Exp: 09/28</span>
+                            <span id="primary-card-holder">Add a card for 1-click checkout</span>
+                            <span id="primary-card-exp"></span>
                         </div>
                     </div>
                     <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                        <span class="inline-flex items-center gap-1.5 text-xs text-luxe-sage">
-                            <span class="w-1.5 h-1.5 rounded-full bg-luxe-sage"></span> Verified & Secure
+                        <span id="primary-card-status" class="inline-flex items-center gap-1.5 text-xs text-atelier-muted">
+                            <span class="w-1.5 h-1.5 rounded-full bg-atelier-muted"></span> 256-bit Encrypted
                         </span>
                         <button onclick="openAddCardModal()" class="text-xs text-luxe-gold hover:underline font-semibold">
                             + Add New Method
@@ -543,10 +539,10 @@
                         <span class="text-xs font-semibold uppercase tracking-wider text-atelier-muted">Atelier Financial Summary</span>
                         <div class="mt-3">
                             <div class="text-[11px] text-atelier-dim uppercase tracking-wider">Total Atelier Patronage</div>
-                            <div class="font-display text-2xl font-bold text-atelier-cream mt-0.5">₹19,840</div>
+                            <div id="billing-patronage-total" class="font-display text-2xl font-bold text-atelier-cream mt-0.5">₹{{ number_format($orders ? $orders->sum('total') : 0) }}</div>
                         </div>
                         <div class="mt-3 text-xs text-atelier-muted">
-                            <span class="text-atelier-dim">GSTIN / Tax ID:</span> 27AADCS9982Q1Z3 (Registered)
+                            <span class="text-atelier-dim">Client Status:</span> Verified Atelier Account
                         </div>
                     </div>
                     <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
@@ -626,17 +622,17 @@
                     <div class="flex items-center gap-2 flex-wrap">
                         <div class="px-3.5 py-1.5 rounded-xl bg-atelier-surface/90 border border-white/10 flex items-center gap-2 text-xs">
                             <span class="text-atelier-dim text-[11px] uppercase tracking-wider font-semibold">Total:</span>
-                            <span id="order-stat-total" class="font-bold text-atelier-cream">3</span>
+                            <span id="order-stat-total" class="font-bold text-atelier-cream">{{ $orders ? $orders->count() : 0 }}</span>
                         </div>
                         <div class="px-3.5 py-1.5 rounded-xl bg-flame-soft/30 border border-flame-glow/30 flex items-center gap-2 text-xs">
                             <span class="w-1.5 h-1.5 rounded-full bg-flame-glow animate-pulse"></span>
                             <span class="text-atelier-dim text-[11px] uppercase tracking-wider font-semibold">In Progress:</span>
-                            <span id="order-stat-active" class="font-bold text-flame-glow">1</span>
+                            <span id="order-stat-active" class="font-bold text-flame-glow">0</span>
                         </div>
                         <div class="px-3.5 py-1.5 rounded-xl bg-luxe-sage/15 border border-luxe-sage/30 flex items-center gap-2 text-xs">
                             <i class="fa-solid fa-check text-[10px] text-luxe-sage"></i>
                             <span class="text-atelier-dim text-[11px] uppercase tracking-wider font-semibold">Delivered:</span>
-                            <span id="order-stat-delivered" class="font-bold text-luxe-sage">2</span>
+                            <span id="order-stat-delivered" class="font-bold text-luxe-sage">0</span>
                         </div>
                     </div>
                 </div>
@@ -646,13 +642,13 @@
                     <!-- Status Filter Tabs (Segmented control) -->
                     <div class="inline-flex p-1 rounded-xl bg-atelier-surface border border-white/10 text-xs overflow-x-auto no-scrollbar gap-1" id="order-filter-tabs">
                         <button type="button" onclick="setOrderFilter('all')" id="order-filter-all" class="order-filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition">
-                            All (<span id="count-filter-all">3</span>)
+                            All (<span id="count-filter-all">{{ $orders ? $orders->count() : 0 }}</span>)
                         </button>
                         <button type="button" onclick="setOrderFilter('active')" id="order-filter-active" class="order-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition">
-                            In Progress (<span id="count-filter-active">1</span>)
+                            In Progress (<span id="count-filter-active">0</span>)
                         </button>
                         <button type="button" onclick="setOrderFilter('delivered')" id="order-filter-delivered" class="order-filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wider uppercase transition">
-                            Delivered (<span id="count-filter-delivered">2</span>)
+                            Delivered (<span id="count-filter-delivered">0</span>)
                         </button>
                     </div>
 
@@ -887,7 +883,10 @@
 
     <!-- Server Provided Initial Data -->
     <script>
+        window.serverUser = @json($user);
         window.serverOrders = @json($orders ?? []);
+        window.serverAddresses = @json($addresses ?? []);
+        window.serverFormulas = @json($formulas ?? []);
     </script>
 
     <!-- Core Auth & Client Logic -->

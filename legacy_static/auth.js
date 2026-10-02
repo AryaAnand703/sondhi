@@ -19,7 +19,7 @@
             email: 'arya@example.com',
             password: 'arya123',
             role: 'customer',
-            tier: 'VIP Collector',
+            tier: 'Patron',
             points: 1450,
             phone: '+91 98765 43210',
             createdAt: '2024-10-15',

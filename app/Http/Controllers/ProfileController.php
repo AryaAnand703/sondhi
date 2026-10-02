@@ -17,9 +17,6 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if (!$user) {
-            $user = \App\Models\User::first();
-        }
         $orders = $user ? $user->orders()->with('items')->latest()->get() : collect();
         $addresses = $user ? $user->addresses()->get() : collect();
         $formulas = $user ? $user->formulas()->get() : collect();

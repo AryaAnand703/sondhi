@@ -140,4 +140,49 @@ class ExampleTest extends TestCase
             'redirect' => route('superadmin.index'),
         ]);
     }
+
+    /**
+     * Test new user registration creates clean patron profile with zero points.
+     */
+    public function test_new_user_registration_creates_clean_patron(): void
+    {
+        $response = $this->postJson('/auth/register', [
+            'name' => 'New Patron',
+            'email' => 'newpatron@example.com',
+            'phone' => '+91 99999 88888',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $user = User::where('email', 'newpatron@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertEquals('Patron', $user->tier);
+        $this->assertEquals(0, $user->points);
+    }
+
+    /**
+     * Test profile page does not contain VIP Collector tag or demo fragrance bio quote.
+     */
+    public function test_profile_page_has_no_vip_collector_tag_or_demo_quote(): void
+    {
+        $newUser = User::create([
+            'name' => 'Test User',
+            'email' => 'testuser@example.com',
+            'password' => bcrypt('password123'),
+            'role' => 'customer',
+            'tier' => 'Patron',
+            'points' => 0,
+        ]);
+
+        $response = $this->actingAs($newUser)->get('/profile');
+        $response->assertStatus(200);
+        $response->assertDontSee('VIP Collector');
+        $response->assertDontSee('Smoked Oud & Damask Rose form the sacred atmosphere of my evening meditation.');
+    }
 }
+

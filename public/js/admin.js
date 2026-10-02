@@ -17,7 +17,7 @@ const adminState = {
         {
             id: 'SND-9014',
             customer: 'Arya Anand',
-            tier: 'VIP Collector',
+            tier: 'Patron',
             commission: 'Lavender & Golden Amber (280g) × 2, Rain on Earth × 1',
             total: 2647,
             status: 'Pouring & Curing',
@@ -44,7 +44,7 @@ const adminState = {
         {
             id: 'SND-9010',
             customer: 'Pooja Singhania',
-            tier: 'VIP Collector',
+            tier: 'Patron',
             commission: 'Vanilla Tonka & Bourbon × 1, Neroli Blossom × 1',
             total: 1748,
             status: 'Dispatched',
