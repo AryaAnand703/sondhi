@@ -37,7 +37,7 @@ return [
     ],
 
     'payment' => [
-        'gateway_key' => env('PAYMENT_GATEWAY_KEY', env('RAZORPAY_KEY_SECRET')),
+        'gateway_key' => env('PAYMENt`_GATEWAY_KEY', env('RAZORPAY_KEY_SECRET')),
     ],
 
     'razorpay' => [

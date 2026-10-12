@@ -25,7 +25,7 @@ function distBundlerPlugin() {
             if (fs.existsSync(publicDir)) {
                 const items = fs.readdirSync(publicDir);
                 for (const item of items) {
-                    if (item === 'index.php' || item === '.htaccess') continue;
+                    if (item === 'index.php' || item === '.htaccess' || item === 'storage' || item === 'hot') continue;
                     fs.cpSync(path.join(publicDir, item), path.join(distDir, item), { recursive: true });
                 }
             }
